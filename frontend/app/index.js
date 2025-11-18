@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Redirect } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import ImmersiveMode from "react-native-immersive-mode";
+import { GoogleSignin } from "@react-native-google-signin/google-signin";
 
 export default function Index() {
   const [loading, setLoading] = useState(true);
@@ -10,6 +11,10 @@ export default function Index() {
   useEffect(() => {
     ImmersiveMode.fullLayout(true);
     ImmersiveMode.setBarMode("BottomSticky");
+    GoogleSignin.configure({
+      webClientId: process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID,
+      offlineAccess: true,
+    });
     const check = async () => {
       const v = await AsyncStorage.getItem("onboardingSeen");
       setSeen(v === "true");

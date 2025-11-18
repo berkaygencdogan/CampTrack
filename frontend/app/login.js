@@ -1,68 +1,44 @@
-import * as Google from "expo-auth-session/providers/google";
-import { signInWithCredential, GoogleAuthProvider } from "firebase/auth";
-import { auth, db } from "../src/firebase/firebaseConfig";
-import { doc, setDoc, getDoc } from "firebase/firestore";
-import { useEffect, useState } from "react";
+import { useRouter } from "expo-router";
+import { useState } from "react";
 import {
-  View,
+  KeyboardAvoidingView,
+  Platform,
+  StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
-  Image,
-  StyleSheet,
-  KeyboardAvoidingView,
-  Platform,
 } from "react-native";
-import { useRouter } from "expo-router";
+import { GoogleSignin } from "@react-native-google-signin/google-signin";
 
 export default function Login() {
-  const [request, response, promptAsync] = Google.useAuthRequest({
-    expoClientId: process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID,
-    iosClientId: process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID,
-    androidClientId: process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID,
-    webClientId: process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID,
-  });
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [pass, setPass] = useState("");
   const [error, setError] = useState("");
 
-  useEffect(() => {
-    if (response?.type === "success") {
-      const { id_token } = response.authentication;
-      const credential = GoogleAuthProvider.credential(id_token);
-      console.log("GOOGLE RESPONSE:", response);
+  const loginWithGoogle = async () => {
+    try {
+      await GoogleSignin.hasPlayServices();
+      const user = await GoogleSignin.signIn();
+      console.log("Google User:", user);
 
-      signInWithCredential(auth, credential).then(async (result) => {
-        // Firestore user kaydı yoksa oluştur
-        const ref = doc(db, "users", result.user.uid);
-        const snap = await getDoc(ref);
-
-        if (!snap.exists()) {
-          await setDoc(ref, {
-            name: result.user.displayName,
-            email: result.user.email,
-            image: result.user.photoURL,
-            createdAt: Date.now(),
-          });
-        }
-
-        router.replace("/home");
-      });
+      // Başarılı giriş -> Home'a yönlendir
+      router.replace("/home");
+    } catch (err) {
+      console.log("Google Error:", err);
+      setError("Google sign-in failed.");
     }
-  }, [response]);
+  };
 
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : undefined}
       style={styles.container}
     >
-      {/* Logo */}
       <Text style={styles.logo}>
         C<Text style={styles.logoTent}>△</Text>MPING
       </Text>
 
-      {/* Email */}
       <Text style={styles.label}>Email</Text>
       <TextInput
         value={email}
@@ -72,7 +48,6 @@ export default function Login() {
         style={[styles.input, email.length > 0 && { borderColor: "#7CC540" }]}
       />
 
-      {/* Password */}
       <Text style={styles.label}>Password</Text>
       <TextInput
         value={pass}
@@ -87,15 +62,8 @@ export default function Login() {
         ]}
       />
 
-      {/* Error */}
       {error ? <Text style={styles.errorText}>! {error}</Text> : null}
 
-      {/* Forgot Password */}
-      <TouchableOpacity onPress={() => router.push("/forgot-password")}>
-        <Text style={styles.forgot}>Forgot Password?</Text>
-      </TouchableOpacity>
-
-      {/* Login button */}
       <TouchableOpacity
         style={{
           backgroundColor: "#4285F4",
@@ -103,14 +71,13 @@ export default function Login() {
           borderRadius: 10,
           marginTop: 15,
         }}
-        onPress={() => promptAsync()}
+        onPress={loginWithGoogle}
       >
         <Text style={{ color: "#fff", textAlign: "center", fontWeight: "600" }}>
           Continue with Google
         </Text>
       </TouchableOpacity>
 
-      {/* Register */}
       <TouchableOpacity onPress={() => router.push("/register")}>
         <Text style={styles.registerText}>
           Don’t have an Account?{" "}
