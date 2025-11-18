@@ -1,6 +1,7 @@
 import { Tabs } from "expo-router";
 import Ionicons from "@expo/vector-icons/Ionicons";
-import Feather from "@expo/vector-icons/Feather";
+import MaterialIcons from "@expo/vector-icons/MaterialIcons";
+import AntDesign from "@expo/vector-icons/AntDesign";
 
 export default function Layout() {
   return (
@@ -10,10 +11,10 @@ export default function Layout() {
         tabBarStyle: {
           height: 65,
           backgroundColor: "#84CC16",
-          borderTopColor: "#eee",
+          borderTopColor: "#fff",
         },
-        tabBarActiveTintColor: "#7CC540",
-        tabBarInactiveTintColor: "#999",
+        tabBarActiveTintColor: "#000",
+        tabBarInactiveTintColor: "#fff",
       }}
     >
       <Tabs.Screen
@@ -37,21 +38,21 @@ export default function Layout() {
       />
 
       <Tabs.Screen
-        name="search"
+        name="backpack"
         options={{
-          title: "Search",
+          title: "Backpack",
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="search-outline" size={26} color={color} />
+            <MaterialIcons name="backpack" size={26} color={color} />
           ),
         }}
       />
 
       <Tabs.Screen
-        name="search"
+        name="teammates"
         options={{
-          title: "Search",
+          title: "Teammates",
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="search-outline" size={26} color={color} />
+            <AntDesign name="team" size={26} color={color} />
           ),
         }}
       />
