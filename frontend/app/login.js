@@ -1,4 +1,8 @@
-import { useState } from "react";
+import * as Google from "expo-auth-session/providers/google";
+import { signInWithCredential, GoogleAuthProvider } from "firebase/auth";
+import { auth, db } from "../src/firebase/firebaseConfig";
+import { doc, setDoc, getDoc } from "firebase/firestore";
+import { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -12,19 +16,41 @@ import {
 import { useRouter } from "expo-router";
 
 export default function Login() {
+  const [request, response, promptAsync] = Google.useAuthRequest({
+    expoClientId: process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID,
+    iosClientId: process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID,
+    androidClientId: process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID,
+    webClientId: process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID,
+  });
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [pass, setPass] = useState("");
   const [error, setError] = useState("");
 
-  const login = () => {
-    if (pass !== "1234") {
-      setError("Wrong password please try again.");
-      return;
+  useEffect(() => {
+    if (response?.type === "success") {
+      const { id_token } = response.authentication;
+      const credential = GoogleAuthProvider.credential(id_token);
+      console.log("GOOGLE RESPONSE:", response);
+
+      signInWithCredential(auth, credential).then(async (result) => {
+        // Firestore user kaydı yoksa oluştur
+        const ref = doc(db, "users", result.user.uid);
+        const snap = await getDoc(ref);
+
+        if (!snap.exists()) {
+          await setDoc(ref, {
+            name: result.user.displayName,
+            email: result.user.email,
+            image: result.user.photoURL,
+            createdAt: Date.now(),
+          });
+        }
+
+        router.replace("/home");
+      });
     }
-    setError("");
-    router.replace("/home");
-  };
+  }, [response]);
 
   return (
     <KeyboardAvoidingView
@@ -70,8 +96,18 @@ export default function Login() {
       </TouchableOpacity>
 
       {/* Login button */}
-      <TouchableOpacity style={styles.loginBtn} onPress={login}>
-        <Text style={styles.loginText}>Log in</Text>
+      <TouchableOpacity
+        style={{
+          backgroundColor: "#4285F4",
+          padding: 15,
+          borderRadius: 10,
+          marginTop: 15,
+        }}
+        onPress={() => promptAsync()}
+      >
+        <Text style={{ color: "#fff", textAlign: "center", fontWeight: "600" }}>
+          Continue with Google
+        </Text>
       </TouchableOpacity>
 
       {/* Register */}

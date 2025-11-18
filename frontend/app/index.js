@@ -1,12 +1,15 @@
 import { useEffect, useState } from "react";
 import { Redirect } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import ImmersiveMode from "react-native-immersive-mode";
 
 export default function Index() {
   const [loading, setLoading] = useState(true);
   const [seen, setSeen] = useState(false);
 
   useEffect(() => {
+    ImmersiveMode.fullLayout(true);
+    ImmersiveMode.setBarMode("BottomSticky");
     const check = async () => {
       const v = await AsyncStorage.getItem("onboardingSeen");
       setSeen(v === "true");
