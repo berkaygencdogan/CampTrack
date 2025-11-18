@@ -11,7 +11,6 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 import { useState, useEffect } from "react";
 import { useRouter } from "expo-router";
 
-// Firestore
 import { db } from "../../src/firebase/firebaseConfig";
 import { collection, getDocs, query, where } from "firebase/firestore";
 
@@ -22,9 +21,9 @@ export default function Search() {
   const [searchTerm, setSearchTerm] = useState("");
   const [results, setResults] = useState([]);
 
-  // ---------------------------------------------------
-  // 1) POPULAR PLACES (yatay scroll)
-  // ---------------------------------------------------
+  // -------------------------------------
+  // Popüler yerleri çek
+  // -------------------------------------
   useEffect(() => {
     const fetchPopular = async () => {
       try {
@@ -32,8 +31,8 @@ export default function Search() {
           collection(db, "places"),
           where("isPopular", "==", true)
         );
-
         const snap = await getDocs(q);
+
         const list = snap.docs.map((doc) => ({
           id: doc.id,
           ...doc.data(),
@@ -48,9 +47,9 @@ export default function Search() {
     fetchPopular();
   }, []);
 
-  // ---------------------------------------------------
-  // 2) SEARCH QUERY
-  // ---------------------------------------------------
+  // -------------------------------------
+  // Arama (searchKeywords)
+  // -------------------------------------
   const handleSearch = async (text) => {
     setSearchTerm(text);
 
@@ -59,11 +58,12 @@ export default function Search() {
       return;
     }
 
+    const lower = text.toLowerCase();
+
     try {
       const q = query(
         collection(db, "places"),
-        where("name", ">=", text),
-        where("name", "<=", text + "\uf8ff")
+        where("searchKeywords", "array-contains", lower)
       );
 
       const snap = await getDocs(q);
@@ -81,9 +81,7 @@ export default function Search() {
 
   return (
     <View style={styles.container}>
-      {/* ------------------------------------------- */}
       {/* SEARCH BAR */}
-      {/* ------------------------------------------- */}
       <View style={styles.searchBox}>
         <TextInput
           style={styles.searchInput}
@@ -92,17 +90,10 @@ export default function Search() {
           onChangeText={handleSearch}
           value={searchTerm}
         />
-        <Ionicons
-          name="search-outline"
-          size={22}
-          color="#7CC540"
-          style={{ marginLeft: 8 }}
-        />
+        <Ionicons name="search-outline" size={22} color="#7CC540" />
       </View>
 
-      {/* ------------------------------------------------------ */}
-      {/* NO SEARCH → SHOW POPULAR */}
-      {/* ------------------------------------------------------ */}
+      {/* POPULAR LIST */}
       {searchTerm.trim() === "" ? (
         <View>
           <Text style={styles.sectionTitle}>Popular Camps</Text>
@@ -130,11 +121,15 @@ export default function Search() {
           </ScrollView>
         </View>
       ) : (
-        /* ------------------------------------------------------ */
-        /* SEARCH RESULTS (SMALL LIST) */
-        /* ------------------------------------------------------ */
+        // SEARCH RESULTS
         <ScrollView showsVerticalScrollIndicator={false}>
           <Text style={styles.sectionTitle}>Search Results</Text>
+
+          {results.length === 0 && (
+            <Text style={{ marginTop: 15, color: "#777" }}>
+              No results found.
+            </Text>
+          )}
 
           {results.map((item) => (
             <TouchableOpacity
@@ -156,6 +151,8 @@ export default function Search() {
   );
 }
 
+/* -------------------- STYLES ---------------------- */
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -163,8 +160,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingTop: 20,
   },
-
-  /* SEARCH BAR */
   searchBox: {
     flexDirection: "row",
     alignItems: "center",
@@ -177,15 +172,11 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 16,
   },
-
-  /* TITLES */
   sectionTitle: {
     fontSize: 18,
     fontWeight: "bold",
     marginTop: 25,
   },
-
-  /* POPULAR CARDS (horizontal) */
   popularCard: {
     width: 160,
     backgroundColor: "#F8F8F8",
@@ -209,8 +200,6 @@ const styles = StyleSheet.create({
     color: "#777",
     marginLeft: 10,
   },
-
-  /* SEARCH RESULT (small row) */
   resultRow: {
     flexDirection: "row",
     alignItems: "center",

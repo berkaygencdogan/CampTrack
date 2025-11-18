@@ -9,7 +9,7 @@ export default function Layout() {
         headerShown: false,
         tabBarStyle: {
           height: 65,
-          backgroundColor: "#fff",
+          backgroundColor: "#84CC16",
           borderTopColor: "#eee",
         },
         tabBarActiveTintColor: "#7CC540",
@@ -22,6 +22,26 @@ export default function Layout() {
           title: "Home",
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="home-outline" size={26} color={color} />
+          ),
+        }}
+      />
+
+      <Tabs.Screen
+        name="search"
+        options={{
+          title: "Search",
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="search-outline" size={26} color={color} />
+          ),
+        }}
+      />
+
+      <Tabs.Screen
+        name="search"
+        options={{
+          title: "Search",
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="search-outline" size={26} color={color} />
           ),
         }}
       />
