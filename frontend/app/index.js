@@ -1,28 +1,23 @@
-import { View, Text, StyleSheet } from "react-native";
+import { useEffect, useState } from "react";
+import { Redirect } from "expo-router";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
-export default function Home() {
-  return (
-    <View style={styles.container}>
-      <Text style={styles.title}>CampTrack</Text>
-      <Text style={styles.subtitle}>Home ekranı hazır ✔</Text>
-    </View>
-  );
+export default function Index() {
+  const [loading, setLoading] = useState(true);
+  const [seen, setSeen] = useState(false);
+
+  useEffect(() => {
+    const check = async () => {
+      const v = await AsyncStorage.getItem("onboardingSeen");
+      setSeen(v === "true");
+      setLoading(false);
+    };
+    check();
+  }, []);
+
+  if (loading) return null;
+
+  if (!seen) return <Redirect href="/onboarding" />;
+
+  return <Redirect href="/home" />;
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "#fff",
-  },
-  title: {
-    fontSize: 32,
-    fontWeight: "bold",
-  },
-  subtitle: {
-    marginTop: 10,
-    fontSize: 16,
-    color: "#555",
-  },
-});
