@@ -19,7 +19,7 @@ export default function Search() {
   const [results, setResults] = useState([]);
 
   // -------------------------------------
-  // Popüler yerleri backend'den çek
+  // POPULAR
   // -------------------------------------
   useEffect(() => {
     const fetchPopular = async () => {
@@ -39,7 +39,7 @@ export default function Search() {
   }, []);
 
   // -------------------------------------
-  // Search
+  // SEARCH
   // -------------------------------------
   const handleSearch = async (text) => {
     setSearchTerm(text);
@@ -76,7 +76,7 @@ export default function Search() {
         <Ionicons name="search-outline" size={22} color="#7CC540" />
       </View>
 
-      {/* POPULAR LIST OR SEARCH RESULTS */}
+      {/* POPULAR OR SEARCH RESULTS */}
       {searchTerm.trim() === "" ? (
         <View>
           <Text style={styles.sectionTitle}>Popular Camps</Text>
@@ -89,11 +89,11 @@ export default function Search() {
             {popular.map((item) => (
               <TouchableOpacity
                 key={item.id}
-                onPress={() => router.push(`/location/${item.id}`)}
+                onPress={() => router.push(`/LocationDetail?id=${item.id}`)}
               >
                 <View style={styles.popularCard}>
                   <Image
-                    source={{ uri: item.image }}
+                    source={{ uri: item.photos?.[0] }}
                     style={styles.popularImage}
                   />
                   <Text style={styles.popularName}>{item.name}</Text>
@@ -104,7 +104,6 @@ export default function Search() {
           </ScrollView>
         </View>
       ) : (
-        // SEARCH RESULTS
         <ScrollView showsVerticalScrollIndicator={false}>
           <Text style={styles.sectionTitle}>Search Results</Text>
 
@@ -117,10 +116,13 @@ export default function Search() {
           {results.map((item) => (
             <TouchableOpacity
               key={item.id}
-              onPress={() => router.push(`/location/${item.id}`)}
+              onPress={() => router.push(`/LocationDetail?id=${item.id}`)}
             >
               <View style={styles.resultRow}>
-                <Image source={{ uri: item.image }} style={styles.resultImg} />
+                <Image
+                  source={{ uri: item.photos?.[0] }}
+                  style={styles.resultImg}
+                />
                 <View>
                   <Text style={styles.resultName}>{item.name}</Text>
                   <Text style={styles.resultCity}>{item.city}</Text>
