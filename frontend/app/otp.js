@@ -12,9 +12,12 @@ import {
 
 export default function OTP() {
   const router = useRouter();
-  const { type } = useLocalSearchParams(); // login / register
+  const { type, phone } = useLocalSearchParams(); // type=reset / register
 
   const [otp, setOtp] = useState(["", "", "", ""]);
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+
   const refs = [useRef(null), useRef(null), useRef(null), useRef(null)];
 
   const onChange = (value, i) => {
@@ -28,24 +31,58 @@ export default function OTP() {
     }
   };
 
-  const submit = () => {
+  const submit = async () => {
     const code = otp.join("");
-    if (code.length !== 4) return;
+    if (code.length !== 4) {
+      setError("Enter 4 digit code");
+      return;
+    }
 
-    if (type === "register") {
-      router.replace("/password-success?type=register");
-    } else {
-      router.replace("/new-password");
+    if (!phone) {
+      setError("Missing phone info");
+      return;
+    }
+
+    try {
+      setLoading(true);
+      setError("");
+
+      const res = await fetch(
+        `${process.env.EXPO_PUBLIC_API_URL}/auth/verify-otp`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ phone, otp: code }),
+        }
+      );
+
+      const data = await res.json();
+      setLoading(false);
+
+      if (!res.ok) {
+        setError(data.error || "Invalid OTP");
+        return;
+      }
+
+      // For register flow
+      if (type === "register") {
+        router.replace("/password-success?type=register");
+      } else {
+        // For password reset flow
+        router.replace(`/new-password?phone=${phone}`);
+      }
+    } catch (err) {
+      setError("Network error");
+      setLoading(false);
     }
   };
 
-  // ---------- UI TEXT ----------
   const heading = "Confirm OTP";
 
   const text =
     type === "register"
-      ? "Please confirm your 4 digit OTP. which is sent on your email or phone number."
-      : "Please confirm your 4 digit OTP. which is sent on this number +1202-555-0174 Or example@mail.com";
+      ? "Please confirm your 4 digit OTP sent to your phone."
+      : `Enter the 4 digit code sent to ${phone}`;
 
   return (
     <KeyboardAvoidingView
@@ -73,8 +110,10 @@ export default function OTP() {
         ))}
       </View>
 
-      <TouchableOpacity style={styles.btn} onPress={submit}>
-        <Text style={styles.btnText}>Send</Text>
+      {error ? <Text style={styles.error}>{error}</Text> : null}
+
+      <TouchableOpacity style={styles.btn} onPress={submit} disabled={loading}>
+        <Text style={styles.btnText}>{loading ? "Checking..." : "Verify"}</Text>
       </TouchableOpacity>
     </KeyboardAvoidingView>
   );
@@ -106,6 +145,12 @@ const styles = StyleSheet.create({
     fontSize: 22,
     borderWidth: 1,
     borderColor: "#eee",
+  },
+  error: {
+    color: "red",
+    textAlign: "center",
+    marginBottom: 15,
+    fontSize: 14,
   },
   btn: { backgroundColor: "#7CC540", paddingVertical: 15, borderRadius: 10 },
   btnText: {

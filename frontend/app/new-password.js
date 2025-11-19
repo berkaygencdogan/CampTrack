@@ -8,15 +8,58 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from "react-native";
-import { useRouter } from "expo-router";
+import { useRouter, useLocalSearchParams } from "expo-router";
 
 export default function NewPassword() {
   const router = useRouter();
-  const [password, setPassword] = useState("");
+  const { phone } = useLocalSearchParams(); // OTP’den gelen telefon numarası
 
-  const handleSend = () => {
-    if (!password.trim()) return;
-    router.replace("/password-success?type=login");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const handleSend = async () => {
+    if (!password.trim()) {
+      setError("Password required");
+      return;
+    }
+
+    if (password.length < 6) {
+      setError("Password must be at least 6 characters");
+      return;
+    }
+
+    if (!phone) {
+      setError("Missing phone information");
+      return;
+    }
+
+    try {
+      setLoading(true);
+      setError("");
+
+      const res = await fetch(
+        `${process.env.EXPO_PUBLIC_API_URL}/auth/reset-password`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ phone, password }),
+        }
+      );
+
+      const data = await res.json();
+      setLoading(false);
+
+      if (!res.ok) {
+        setError(data.error || "Something went wrong");
+        return;
+      }
+
+      router.replace("/password-success?type=reset");
+    } catch (err) {
+      setLoading(false);
+      setError("Network error");
+    }
   };
 
   return (
@@ -24,28 +67,25 @@ export default function NewPassword() {
       behavior={Platform.OS === "ios" ? "padding" : undefined}
       style={styles.container}
     >
-      {/* Back button */}
       <TouchableOpacity style={styles.backBtn} onPress={() => router.back()}>
         <Text style={styles.backArrow}>←</Text>
       </TouchableOpacity>
 
-      {/* Title */}
       <Text style={styles.title}>New Password</Text>
 
-      {/* Description */}
       <Text style={styles.desc}>
-        Enter your new password below and please{"\n"}
-        don’t forget it now. it’s important to you to{"\n"}
-        remember your password.
+        Enter your new password below and please {"\n"}
+        don’t forget it. Make sure to remember it.
       </Text>
 
-      {/* Label */}
       <Text style={styles.label}>Set Password</Text>
 
-      {/* Password Input */}
       <TextInput
         value={password}
-        onChangeText={setPassword}
+        onChangeText={(v) => {
+          setPassword(v);
+          setError("");
+        }}
         secureTextEntry
         placeholder="********"
         placeholderTextColor="#aaa"
@@ -55,9 +95,14 @@ export default function NewPassword() {
         ]}
       />
 
-      {/* Send Button */}
-      <TouchableOpacity style={styles.sendBtn} onPress={handleSend}>
-        <Text style={styles.sendText}>Send</Text>
+      {error ? <Text style={styles.error}>{error}</Text> : null}
+
+      <TouchableOpacity
+        style={styles.sendBtn}
+        onPress={handleSend}
+        disabled={loading}
+      >
+        <Text style={styles.sendText}>{loading ? "Saving..." : "Send"}</Text>
       </TouchableOpacity>
     </KeyboardAvoidingView>
   );
@@ -101,6 +146,11 @@ const styles = StyleSheet.create({
     padding: 14,
     borderWidth: 1,
     borderColor: "#eee",
+  },
+  error: {
+    color: "red",
+    marginTop: 8,
+    marginBottom: 12,
   },
   sendBtn: {
     backgroundColor: "#7CC540",

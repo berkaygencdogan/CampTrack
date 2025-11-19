@@ -1,19 +1,46 @@
 import { View, Text, StyleSheet, Image, TouchableOpacity } from "react-native";
-import { auth } from "../../src/firebase/firebaseConfig";
-import { signOut } from "firebase/auth";
 import Ionicons from "@expo/vector-icons/Ionicons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
+import { useEffect, useState } from "react";
+import { useSelector } from "react-redux";
 
 export default function Profile() {
   const router = useRouter();
 
-  const handleLogout = async () => {
-    try {
-      await signOut(auth);
-      router.replace("/login"); // kullanıcıyı login'e at
-    } catch (err) {
-      console.log("Logout error:", err);
+  // REDUX USER → DOĞRU!
+  const user = useSelector((state) => state.user);
+
+  const [userData, setUserData] = useState(null);
+
+  useEffect(() => {
+    if (!user.isLoggedIn) {
+      router.replace("/login");
+      return;
     }
+
+    const fetchUser = async () => {
+      try {
+        const res = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/auth/me`, {
+          headers: {
+            Authorization: `Bearer ${user.token}`,
+          },
+        });
+
+        const data = await res.json();
+        setUserData(data.user);
+      } catch (err) {
+        console.log("Profile fetch error:", err);
+        router.replace("/login");
+      }
+    };
+
+    fetchUser();
+  }, []);
+
+  const handleLogout = async () => {
+    await AsyncStorage.removeItem("token");
+    router.replace("/login");
   };
 
   return (
@@ -22,15 +49,20 @@ export default function Profile() {
 
       <View style={styles.profileBox}>
         <Image
-          source={require("../../src/assets/images/success.png")} // kendi profil resmin olunca değiştireceğiz
+          source={{
+            uri: userData?.avatar || "https://i.imgur.com/0y8Ftya.png",
+          }}
           style={styles.avatar}
         />
 
-        <Text style={styles.name}>User Name</Text>
-        <Text style={styles.email}>user@example.com</Text>
+        <Text style={styles.name}>{userData?.name || "Loading..."}</Text>
+        <Text style={styles.email}>{userData?.email || ""}</Text>
       </View>
 
-      <TouchableOpacity style={styles.row}>
+      <TouchableOpacity
+        style={styles.row}
+        onPress={() => router.push("/favorites")}
+      >
         <Ionicons name="heart-outline" size={22} color="#7CC540" />
         <Text style={styles.rowText}>Favorites</Text>
       </TouchableOpacity>

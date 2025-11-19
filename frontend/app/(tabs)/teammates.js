@@ -9,34 +9,52 @@ import {
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useRouter } from "expo-router";
 import { useState, useEffect } from "react";
-import { db, auth } from "../../src/firebase/firebaseConfig";
-import { collection, getDocs } from "firebase/firestore";
+import axios from "axios";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function TeammatesScreen() {
   const router = useRouter();
   const [team, setTeam] = useState([]);
+  const [you, setYou] = useState(null);
 
   useEffect(() => {
-    fetchTeammates();
+    loadTeammates();
   }, []);
 
-  const fetchTeammates = async () => {
-    const uid = auth.currentUser?.uid;
-    if (!uid) return;
+  const loadTeammates = async () => {
+    const token = await AsyncStorage.getItem("token");
+    if (!token) return;
 
-    const ref = collection(db, "users", uid, "teammates");
-    const snap = await getDocs(ref);
+    try {
+      const res = await axios.get(
+        `${process.env.EXPO_PUBLIC_API_URL}/teammates`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
 
-    const list = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
-    setTeam(list);
+      setTeam(res.data.teammates);
+      setYou(res.data.you);
+    } catch (err) {
+      console.log("TEAMS ERROR:", err.response?.data || err);
+    }
   };
+
+  const renderItem = ({ item }) => (
+    <View style={styles.row}>
+      <Image source={{ uri: item.image }} style={styles.avatar} />
+
+      <View>
+        <Text style={styles.name}>{item.name}</Text>
+        <Text style={styles.role}>{item.role}</Text>
+      </View>
+    </View>
+  );
 
   return (
     <View style={styles.container}>
       <Text style={styles.header}>Teammates</Text>
 
       <FlatList
-        data={team}
+        data={[...team, { ...you, isYou: true }]}
         keyExtractor={(item) => item.id}
         contentContainerStyle={{ paddingVertical: 15 }}
         renderItem={({ item }) => (
@@ -44,7 +62,7 @@ export default function TeammatesScreen() {
             <Image source={{ uri: item.image }} style={styles.avatar} />
 
             <View>
-              <Text style={styles.name}>{item.name}</Text>
+              <Text style={styles.name}>{item.isYou ? "You" : item.name}</Text>
               <Text style={styles.role}>{item.role}</Text>
             </View>
           </View>

@@ -9,6 +9,7 @@ import {
   Platform,
 } from "react-native";
 import { useRouter } from "expo-router";
+import axios from "axios";
 
 export default function Register() {
   const router = useRouter();
@@ -18,21 +19,43 @@ export default function Register() {
   const [phone, setPhone] = useState("");
   const [pass, setPass] = useState("");
   const [emailError, setEmailError] = useState("");
+  const [generalError, setGeneralError] = useState("");
 
-  const validateEmail = (mail) => {
-    const regex = /\S+@\S+\.\S+/;
-    return regex.test(mail);
-  };
-
-  const handleRegister = () => {
-    if (!validateEmail(email)) {
-      setEmailError("Something is missing. please type a valid email");
-      return;
-    }
+  const handleRegister = async () => {
+    setGeneralError("");
     setEmailError("");
 
-    // OTP ekranına gönder
-    router.push("/otp?type=register");
+    if (!name || !email || !phone || !pass) {
+      setGeneralError("Please fill in all fields.");
+      return;
+    }
+
+    try {
+      const response = await axios.post(
+        `${process.env.EXPO_PUBLIC_API_URL}/register`,
+        {
+          name,
+          email,
+          phone,
+          password: pass,
+        }
+      );
+
+      if (response.data.success) {
+        router.replace("/login");
+        return;
+      }
+    } catch (err) {
+      const code = err.response?.data?.error;
+
+      if (code === "EMAIL_EXISTS") {
+        setEmailError("This email is already in use.");
+      } else if (code === "MISSING_FIELDS") {
+        setGeneralError("Please fill in all fields.");
+      } else {
+        setGeneralError("Registration failed. Try again.");
+      }
+    }
   };
 
   return (
@@ -40,12 +63,10 @@ export default function Register() {
       behavior={Platform.OS === "ios" ? "padding" : undefined}
       style={styles.container}
     >
-      {/* Logo */}
       <Text style={styles.logo}>
         C<Text style={styles.logoTent}>△</Text>MPING
       </Text>
 
-      {/* Name */}
       <TextInput
         placeholder="Name"
         placeholderTextColor="#bbb"
@@ -54,7 +75,6 @@ export default function Register() {
         style={[styles.input, name.length > 0 && { borderColor: "#7CC540" }]}
       />
 
-      {/* Email */}
       <TextInput
         placeholder="Email"
         placeholderTextColor="#bbb"
@@ -75,7 +95,6 @@ export default function Register() {
 
       {emailError ? <Text style={styles.errorText}>{emailError}</Text> : null}
 
-      {/* Phone */}
       <TextInput
         placeholder="Phone"
         placeholderTextColor="#bbb"
@@ -85,7 +104,6 @@ export default function Register() {
         style={[styles.input, phone.length > 0 && { borderColor: "#7CC540" }]}
       />
 
-      {/* Password */}
       <TextInput
         placeholder="Password"
         placeholderTextColor="#bbb"
@@ -95,12 +113,14 @@ export default function Register() {
         style={[styles.input, pass.length > 0 && { borderColor: "#7CC540" }]}
       />
 
-      {/* Register button */}
+      {generalError ? (
+        <Text style={[styles.errorText, { marginTop: 5 }]}>{generalError}</Text>
+      ) : null}
+
       <TouchableOpacity style={styles.registerBtn} onPress={handleRegister}>
         <Text style={styles.registerText}>Register</Text>
       </TouchableOpacity>
 
-      {/* Log In */}
       <TouchableOpacity onPress={() => router.replace("/login")}>
         <Text style={styles.loginLink}>Log In</Text>
       </TouchableOpacity>

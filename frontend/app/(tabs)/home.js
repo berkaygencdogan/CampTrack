@@ -1,166 +1,147 @@
 import {
   View,
   Text,
+  StyleSheet,
+  FlatList,
   Image,
   TouchableOpacity,
-  StyleSheet,
   ScrollView,
 } from "react-native";
-import Ionicons from "@expo/vector-icons/Ionicons";
-import Feather from "@expo/vector-icons/Feather";
-import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
-import { collection, getDocs, query, where } from "firebase/firestore";
-import { db } from "../../src/firebase/firebaseConfig";
+import { useRouter } from "expo-router";
 
 export default function Home() {
   const router = useRouter();
-  const [places, setPlaces] = useState([]);
+
+  const [popular, setPopular] = useState([]);
+  const [recent, setRecent] = useState([]);
+  const [allPlaces, setAllPlaces] = useState([]);
+
+  const API = process.env.EXPO_PUBLIC_API_URL;
+
+  // -----------------------------------------------------------
+  // FETCH POPULAR
+  // -----------------------------------------------------------
+  const fetchPopular = async () => {
+    try {
+      const res = await fetch(`${API}/places/popular`);
+      const data = await res.json();
+      setPopular(data.places || []);
+    } catch (err) {
+      console.log("Popular Fetch Err:", err);
+    }
+  };
+
+  // -----------------------------------------------------------
+  // FETCH NEW PLACES
+  // -----------------------------------------------------------
+  const fetchNew = async () => {
+    try {
+      const res = await fetch(`${API}/places/new`);
+      const data = await res.json();
+      setRecent(data.places || []);
+    } catch (err) {
+      console.log("New Fetch Err:", err);
+    }
+  };
+
+  // -----------------------------------------------------------
+  // FETCH ALL PLACES
+  // -----------------------------------------------------------
+  const fetchAll = async () => {
+    try {
+      const res = await fetch(`${API}/places`);
+      const data = await res.json();
+      setAllPlaces(data.places || []);
+    } catch (err) {
+      console.log("All Fetch Err:", err);
+    }
+  };
 
   useEffect(() => {
-    const fetchPopular = async () => {
-      try {
-        const q = query(
-          collection(db, "places"),
-          where("isPopular", "==", true)
-        );
-
-        const snap = await getDocs(q);
-        const list = snap.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
-
-        setPlaces(list);
-      } catch (err) {
-        console.log("Error fetching:", err);
-      }
-    };
-
     fetchPopular();
+    fetchNew();
+    fetchAll();
   }, []);
 
-  return (
-    <View style={styles.container}>
-      {/* -------- TOP BAR -------- */}
-      <View style={styles.topBar}>
-        <TouchableOpacity>
-          <Ionicons name="notifications-outline" size={26} color="#7CC540" />
-        </TouchableOpacity>
-
-        <TouchableOpacity>
-          <Feather name="plus" size={26} color="black" />
-        </TouchableOpacity>
-      </View>
-
-      {/* -------- TITLE -------- */}
-      <Text style={styles.title}>Welcome to CampTrack</Text>
-      <Text style={styles.subtitle}>
-        Find the best camping spots around you.
+  // -----------------------------------------------------------
+  // CARD COMPONENT
+  // -----------------------------------------------------------
+  const PlaceCard = ({ item, small }) => (
+    <TouchableOpacity
+      style={[styles.card, small && { width: 200 }]}
+      onPress={() => {
+        console.log("giden id:", item.id);
+        router.push(`../LocationDetail?id=${item.id}`);
+      }}
+    >
+      <Image source={{ uri: item.photos[0] }} style={styles.cardImg} />
+      <Text style={styles.cardTitle} numberOfLines={1}>
+        {item.name}
       </Text>
+      <Text style={styles.cardCity}>{item.city}</Text>
+    </TouchableOpacity>
+  );
 
-      {/* -------- CAMP LIST -------- */}
-      <ScrollView
-        style={{ marginTop: 20 }}
-        showsVerticalScrollIndicator={false}
-      >
-        {places.map((item) => (
-          <TouchableOpacity
-            key={item.id}
-            onPress={() => router.push(`/location/${item.id}`)}
-          >
-            <View style={styles.card}>
-              <Image source={{ uri: item.image }} style={styles.cardImage} />
-              <View style={styles.cardContent}>
-                <Text style={styles.cardTitle}>{item.name}</Text>
-                <Text style={styles.cardLocation}>{item.city}</Text>
-              </View>
-            </View>
-          </TouchableOpacity>
+  return (
+    <ScrollView contentContainerStyle={{ paddingBottom: 80 }}>
+      <Text style={styles.sectionTitle}>⭐ Popüler Kamp Yerleri</Text>
+
+      <FlatList
+        data={popular}
+        keyExtractor={(item) => item.id}
+        renderItem={({ item }) => <PlaceCard item={item} small />}
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={{ paddingLeft: 15 }}
+      />
+
+      <Text style={styles.sectionTitle}>🔥 Yeni Eklenenler</Text>
+
+      <FlatList
+        data={recent}
+        keyExtractor={(item) => item.id}
+        renderItem={({ item }) => <PlaceCard item={item} small />}
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={{ paddingLeft: 15 }}
+      />
+
+      <Text style={styles.sectionTitle}>📍 Tüm Kamp Alanları</Text>
+
+      <View style={{ paddingHorizontal: 15 }}>
+        {allPlaces.map((item) => (
+          <PlaceCard key={item.id} item={item} />
         ))}
-      </ScrollView>
-    </View>
+      </View>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#fff",
-    paddingHorizontal: 20,
-    paddingTop: 60,
-  },
-
-  /* --- TOP BAR --- */
-  topBar: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-
-  /* --- TITLES --- */
-  title: {
-    fontSize: 26,
+  sectionTitle: {
+    fontSize: 22,
     fontWeight: "bold",
-    marginTop: 20,
+    marginHorizontal: 15,
+    marginTop: 25,
+    marginBottom: 10,
   },
-  subtitle: {
-    color: "#777",
-    fontSize: 14,
-    marginTop: 5,
-  },
-
-  /* --- CARD --- */
   card: {
-    backgroundColor: "#F8F8F8",
-    borderRadius: 16,
-    marginBottom: 20,
-    overflow: "hidden",
-  },
-  cardImage: {
     width: "100%",
-    height: 170,
+    marginRight: 15,
   },
-  cardContent: {
-    padding: 15,
+  cardImg: {
+    width: "100%",
+    height: 130,
+    borderRadius: 12,
   },
   cardTitle: {
-    fontSize: 20,
-    fontWeight: "bold",
+    fontSize: 17,
+    fontWeight: "600",
+    marginTop: 6,
   },
-  cardLocation: {
+  cardCity: {
+    fontSize: 14,
     color: "#777",
-    marginTop: 4,
-  },
-
-  cardBottom: {
-    marginTop: 12,
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-
-  ratingBox: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#fff",
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: 8,
-  },
-  ratingText: {
-    marginLeft: 4,
-    fontWeight: "600",
-  },
-
-  detailsBtn: {
-    backgroundColor: "#7CC540",
-    paddingVertical: 8,
-    paddingHorizontal: 18,
-    borderRadius: 10,
-  },
-  detailsText: {
-    color: "#fff",
-    fontWeight: "600",
   },
 });

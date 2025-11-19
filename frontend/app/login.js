@@ -8,28 +8,67 @@ import {
   TextInput,
   TouchableOpacity,
 } from "react-native";
-import { GoogleSignin } from "@react-native-google-signin/google-signin";
+import axios from "axios";
+import { useDispatch } from "react-redux";
+import { setAuthData } from "../redux/userSlice";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function Login() {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [pass, setPass] = useState("");
   const [error, setError] = useState("");
+  const dispatch = useDispatch();
+  const loginWithEmail = async () => {
+    setError("");
 
-  const loginWithGoogle = async () => {
+    const cleanEmail = email.trim();
+    if (!cleanEmail || !pass) {
+      setError("Please fill all fields.");
+      return;
+    }
+
     try {
-      await GoogleSignin.hasPlayServices();
-      const user = await GoogleSignin.signIn();
-      console.log("Google User:", user);
+      const res = await axios.post(`${process.env.EXPO_PUBLIC_API_URL}/login`, {
+        email: cleanEmail,
+        password: pass,
+      });
 
-      // Başarılı giriş -> Home'a yönlendir
-      router.replace("/home");
+      if (res.data.success) {
+        const token = res.data.token;
+
+        // Kullanıcı bilgisi çek
+        const me = await axios.get(
+          `${process.env.EXPO_PUBLIC_API_URL}/auth/me`,
+          {
+            headers: { Authorization: "Bearer " + token },
+          }
+        );
+
+        dispatch(
+          setAuthData({
+            token,
+            user: {
+              id: me.data.user.id || me.data.user.uid, // ✔ Mutlaka uid alıyoruz
+              name: me.data.user.name,
+              email: me.data.user.email,
+            },
+            email: cleanEmail,
+          })
+        );
+
+        router.replace("/home");
+      }
     } catch (err) {
-      console.log("Google Error:", err);
-      setError("Google sign-in failed.");
+      console.log(err);
+
+      const code = err.response?.data?.error;
+
+      if (code === "INVALID_CREDENTIALS")
+        setError("Email or password incorrect");
+      else setError("Login failed");
     }
   };
-
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : undefined}
@@ -64,18 +103,8 @@ export default function Login() {
 
       {error ? <Text style={styles.errorText}>! {error}</Text> : null}
 
-      <TouchableOpacity
-        style={{
-          backgroundColor: "#4285F4",
-          padding: 15,
-          borderRadius: 10,
-          marginTop: 15,
-        }}
-        onPress={loginWithGoogle}
-      >
-        <Text style={{ color: "#fff", textAlign: "center", fontWeight: "600" }}>
-          Continue with Google
-        </Text>
+      <TouchableOpacity style={styles.loginBtn} onPress={loginWithEmail}>
+        <Text style={styles.loginText}>Log in</Text>
       </TouchableOpacity>
 
       <TouchableOpacity onPress={() => router.push("/register")}>

@@ -1,3 +1,5 @@
+import { useRouter } from "expo-router";
+import { useState } from "react";
 import {
   View,
   Text,
@@ -5,108 +7,121 @@ import {
   TextInput,
   TouchableOpacity,
   Image,
-  Alert,
+  FlatList,
 } from "react-native";
-import Ionicons from "@expo/vector-icons/Ionicons";
-import { useRouter } from "expo-router";
-import { useState } from "react";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
-import * as ImagePicker from "expo-image-picker";
+const API = process.env.EXPO_PUBLIC_API_URL;
 
-import { auth, db, storage } from "../src/firebase/firebaseConfig";
-import { doc, setDoc } from "firebase/firestore";
-import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
-
-export default function AddTeammate() {
+export default function AddTeammates() {
   const router = useRouter();
-  const [name, setName] = useState("");
-  const [role, setRole] = useState("");
-  const [localImage, setLocalImage] = useState(null);
-  const [loading, setLoading] = useState(false);
 
-  const pickPhoto = async () => {
-    let result = await ImagePicker.launchImageLibraryAsync({
-      allowsEditing: true,
-      quality: 0.7,
-    });
+  const [query, setQuery] = useState("");
+  const [results, setResults] = useState([]);
+  const [loadingSearch, setLoadingSearch] = useState(false);
 
-    if (!result.canceled) {
-      setLocalImage(result.assets[0].uri);
-    }
-  };
+  const [me, setMe] = useState({
+    name: "",
+    username: "",
+    photo: null,
+  });
 
-  const uploadImage = async (uri) => {
-    const blob = await (await fetch(uri)).blob();
-    const id = Date.now().toString();
-    const imageRef = ref(storage, `teammates/${id}.jpg`);
+  // Me bilgisi
+  useState(() => {
+    (async () => {
+      const token = await AsyncStorage.getItem("token");
+      const res = await fetch(`${API}/auth/me`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const data = await res.json();
+      setMe(data.user);
+    })();
+  }, []);
 
-    await uploadBytes(imageRef, blob);
-    return await getDownloadURL(imageRef);
-  };
-
-  const saveTeammate = async () => {
-    if (!name || !role || !localImage) {
-      Alert.alert("Missing Fields", "Please fill all fields.");
+  const searchUser = async (text) => {
+    setQuery(text);
+    if (text.length < 2) {
+      setResults([]);
       return;
     }
 
-    setLoading(true);
+    setLoadingSearch(true);
 
-    const uid = auth.currentUser.uid;
-    const teammateId = Date.now().toString();
+    const token = await AsyncStorage.getItem("token");
 
-    try {
-      const imageUrl = await uploadImage(localImage);
+    const res = await fetch(`${API}/users/search?query=${text}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
 
-      await setDoc(doc(db, "users", uid, "teammates", teammateId), {
-        name,
-        role,
-        image: imageUrl,
-      });
+    const data = await res.json();
+    setLoadingSearch(false);
 
-      Alert.alert("Success", "Teammate added!");
-      router.back();
-    } catch (err) {
-      console.log(err);
-      Alert.alert("Error", "Something went wrong.");
+    if (Array.isArray(data)) setResults(data);
+  };
+
+  const sendRequest = async (uid) => {
+    const token = await AsyncStorage.getItem("token");
+
+    const res = await fetch(`${API}/teammates/send-request`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ to: uid }),
+    });
+
+    const data = await res.json();
+
+    if (res.ok) {
+      alert("Request sent!");
+    } else {
+      alert(data.error || "Error");
     }
-
-    setLoading(false);
   };
 
   return (
     <View style={styles.container}>
-      <Text style={styles.header}>Add New Teammate</Text>
+      <Text style={styles.header}>Add Teammate</Text>
 
-      <TouchableOpacity style={styles.photoBox} onPress={pickPhoto}>
-        {localImage ? (
-          <Image source={{ uri: localImage }} style={styles.photo} />
-        ) : (
-          <Ionicons name="add" size={40} color="#7CC540" />
+      <TextInput
+        style={styles.search}
+        placeholder="Search by username"
+        value={query}
+        onChangeText={searchUser}
+      />
+
+      {loadingSearch && <Text style={{ marginTop: 10 }}>Searching...</Text>}
+
+      <FlatList
+        data={results}
+        keyExtractor={(item) => item.uid}
+        renderItem={({ item }) => (
+          <View style={styles.userBox}>
+            <Image source={{ uri: item.photo }} style={styles.photo} />
+            <View>
+              <Text style={styles.name}>{item.name}</Text>
+              <Text style={styles.username}>@{item.username}</Text>
+            </View>
+
+            <TouchableOpacity
+              style={styles.addBtn}
+              onPress={() => sendRequest(item.uid)}
+            >
+              <Text style={styles.addText}>Send</Text>
+            </TouchableOpacity>
+          </View>
         )}
-      </TouchableOpacity>
-
-      <TextInput
-        style={styles.input}
-        placeholder="Teammate Name"
-        value={name}
-        onChangeText={setName}
       />
 
-      <TextInput
-        style={styles.input}
-        placeholder="Role (Chef, Scout, etc.)"
-        value={role}
-        onChangeText={setRole}
-      />
-
-      <TouchableOpacity
-        style={styles.saveBtn}
-        onPress={saveTeammate}
-        disabled={loading}
-      >
-        <Text style={styles.saveText}>{loading ? "Saving..." : "Add"}</Text>
-      </TouchableOpacity>
+      {/* ALWAYS SHOW CURRENT USER */}
+      <View style={styles.meBox}>
+        <Image source={{ uri: me.photo }} style={styles.photo} />
+        <View>
+          <Text style={styles.name}>{me.name}</Text>
+          <Text style={styles.username}>@{me.username} (You)</Text>
+        </View>
+      </View>
     </View>
   );
 }
@@ -115,35 +130,46 @@ const styles = StyleSheet.create({
   container: { padding: 20, backgroundColor: "#fff", flex: 1 },
   header: { fontSize: 22, fontWeight: "700", marginBottom: 15 },
 
-  photoBox: {
-    width: 120,
-    height: 120,
-    backgroundColor: "#F2F2F2",
-    borderRadius: 14,
-    justifyContent: "center",
-    alignItems: "center",
+  search: {
+    backgroundColor: "#F3F3F3",
+    padding: 12,
+    borderRadius: 12,
     marginBottom: 20,
   },
-  photo: { width: 120, height: 120, borderRadius: 14 },
 
-  input: {
-    backgroundColor: "#F4F4F4",
-    padding: 15,
-    borderRadius: 14,
-    fontSize: 16,
-    marginBottom: 15,
-  },
-
-  saveBtn: {
-    backgroundColor: "#7CC540",
-    padding: 18,
-    borderRadius: 14,
+  userBox: {
+    flexDirection: "row",
     alignItems: "center",
-    marginTop: 10,
+    padding: 12,
+    backgroundColor: "#F7F7F7",
+    borderRadius: 12,
+    marginBottom: 10,
+    justifyContent: "space-between",
   },
-  saveText: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "600",
+
+  meBox: {
+    marginTop: 40,
+    flexDirection: "row",
+    alignItems: "center",
+    padding: 12,
+    backgroundColor: "#E9FFE1",
+    borderRadius: 12,
   },
+
+  photo: {
+    width: 45,
+    height: 45,
+    borderRadius: 25,
+    marginRight: 12,
+  },
+  name: { fontSize: 16, fontWeight: "600" },
+  username: { fontSize: 14, color: "#555" },
+
+  addBtn: {
+    backgroundColor: "#7CC540",
+    paddingHorizontal: 18,
+    paddingVertical: 8,
+    borderRadius: 10,
+  },
+  addText: { color: "#fff", fontWeight: "600" },
 });

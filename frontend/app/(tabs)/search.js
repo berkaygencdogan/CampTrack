@@ -11,9 +11,6 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 import { useState, useEffect } from "react";
 import { useRouter } from "expo-router";
 
-import { db } from "../../src/firebase/firebaseConfig";
-import { collection, getDocs, query, where } from "firebase/firestore";
-
 export default function Search() {
   const router = useRouter();
 
@@ -22,25 +19,19 @@ export default function Search() {
   const [results, setResults] = useState([]);
 
   // -------------------------------------
-  // Popüler yerleri çek
+  // Popüler yerleri backend'den çek
   // -------------------------------------
   useEffect(() => {
     const fetchPopular = async () => {
       try {
-        const q = query(
-          collection(db, "places"),
-          where("isPopular", "==", true)
+        const res = await fetch(
+          `${process.env.EXPO_PUBLIC_API_URL}/places/popular`
         );
-        const snap = await getDocs(q);
+        const data = await res.json();
 
-        const list = snap.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
-
-        setPopular(list);
+        if (res.ok) setPopular(data.places || []);
       } catch (err) {
-        console.log("Error fetching popular:", err);
+        console.log("Popular fetch error:", err);
       }
     };
 
@@ -48,7 +39,7 @@ export default function Search() {
   }, []);
 
   // -------------------------------------
-  // Arama (searchKeywords)
+  // Search
   // -------------------------------------
   const handleSearch = async (text) => {
     setSearchTerm(text);
@@ -58,24 +49,16 @@ export default function Search() {
       return;
     }
 
-    const lower = text.toLowerCase();
-
     try {
-      const q = query(
-        collection(db, "places"),
-        where("searchKeywords", "array-contains", lower)
+      const res = await fetch(
+        `${process.env.EXPO_PUBLIC_API_URL}/places/search?query=${text}`
       );
 
-      const snap = await getDocs(q);
+      const data = await res.json();
 
-      const list = snap.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-
-      setResults(list);
+      if (res.ok) setResults(data.places || []);
     } catch (err) {
-      console.log("Search error:", err);
+      console.log("Search API error:", err);
     }
   };
 
@@ -93,7 +76,7 @@ export default function Search() {
         <Ionicons name="search-outline" size={22} color="#7CC540" />
       </View>
 
-      {/* POPULAR LIST */}
+      {/* POPULAR LIST OR SEARCH RESULTS */}
       {searchTerm.trim() === "" ? (
         <View>
           <Text style={styles.sectionTitle}>Popular Camps</Text>
