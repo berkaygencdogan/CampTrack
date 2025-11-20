@@ -4,82 +4,143 @@ import {
   FlatList,
   TouchableOpacity,
   StyleSheet,
+  Modal,
 } from "react-native";
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
-import { useRouter } from "expo-router";
 
 export default function NotificationsScreen({ onClose }) {
-  const router = useRouter();
-  const userId = useSelector((s) => s.user.userId);
+  const userId = useSelector((state) => state.user.id);
   const [requests, setRequests] = useState([]);
 
+  const loadRequests = async () => {
+    try {
+      const res = await fetch(
+        `${process.env.EXPO_PUBLIC_API_URL}/teams/requests?userId=${userId}`
+      );
+      const data = await res.json();
+      setRequests(data.requests || []);
+    } catch (err) {
+      console.log("LOAD_REQUESTS_ERROR:", err);
+    }
+  };
+
   useEffect(() => {
-    loadNotifications();
+    loadRequests();
   }, []);
 
-  const loadNotifications = async () => {
+  const acceptRequest = async (requestId) => {
     const res = await fetch(
-      `${process.env.EXPO_PUBLIC_API_URL}/teams/requests/${userId}`
+      `${process.env.EXPO_PUBLIC_API_URL}/teams/request/accept`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ requestId }),
+      }
     );
+
     const data = await res.json();
-    setRequests(data.requests || []);
+    if (data.success) loadRequests();
   };
 
-  const accept = async (requestId, teamId) => {
-    await fetch(`${process.env.EXPO_PUBLIC_API_URL}/teams/requests/accept`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ requestId, teamId, userId }),
-    });
+  const rejectRequest = async (requestId) => {
+    const res = await fetch(
+      `${process.env.EXPO_PUBLIC_API_URL}/teams/request/reject`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ requestId }),
+      }
+    );
 
-    loadNotifications();
+    const data = await res.json();
+    if (data.success) loadRequests();
   };
+
+  const renderItem = ({ item }) => (
+    <View style={styles.card}>
+      <Text style={styles.title}>
+        {item.fromName} invited you to **{item.teamName}**
+      </Text>
+
+      <View style={styles.row}>
+        <TouchableOpacity
+          style={[styles.btn, styles.accept]}
+          onPress={() => acceptRequest(item.id)}
+        >
+          <Text style={styles.btnText}>Accept</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={[styles.btn, styles.reject]}
+          onPress={() => rejectRequest(item.id)}
+        >
+          <Text style={styles.btnText}>Reject</Text>
+        </TouchableOpacity>
+      </View>
+    </View>
+  );
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.header}>Notifications</Text>
-      <TouchableOpacity onPress={onClose} style={styles.closeBtn}>
-        <Text style={styles.closeText}>Close</Text>
-      </TouchableOpacity>
-      <FlatList
-        data={requests}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) => (
-          <View style={styles.card}>
-            <Text style={styles.text}>
-              <Text style={{ fontWeight: "700" }}>{item.fromName}</Text> invited
-              you to join
-              <Text style={{ fontWeight: "700" }}> {item.teamName}</Text>
-            </Text>
+    <Modal transparent animationType="slide">
+      <View style={styles.modalBg}>
+        <View style={styles.modalBox}>
+          <Text style={styles.header}>Notifications</Text>
 
-            <TouchableOpacity
-              style={styles.accept}
-              onPress={() => accept(item.id, item.teamId)}
-            >
-              <Text style={{ color: "#fff", fontWeight: "700" }}>Accept</Text>
-            </TouchableOpacity>
-          </View>
-        )}
-      />
-    </View>
+          <FlatList
+            data={requests}
+            keyExtractor={(i) => i.id}
+            renderItem={renderItem}
+          />
+
+          <TouchableOpacity style={styles.closeBtn} onPress={onClose}>
+            <Text style={styles.closeText}>Close</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    </Modal>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 20, paddingTop: 60, backgroundColor: "#fff" },
-  header: { fontSize: 28, fontWeight: "700", marginBottom: 20 },
+  modalBg: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.5)",
+    justifyContent: "flex-end",
+  },
+  modalBox: {
+    flex: 0.8,
+    backgroundColor: "#fff",
+    padding: 20,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+  },
+  header: { fontSize: 22, fontWeight: "700", marginBottom: 20 },
   card: {
-    padding: 15,
-    backgroundColor: "#F3F3F3",
+    backgroundColor: "#F7F7F7",
+    padding: 12,
     borderRadius: 10,
     marginBottom: 12,
   },
-  text: { fontSize: 16, marginBottom: 10 },
-  accept: {
-    backgroundColor: "#7CC540",
+  title: { fontSize: 16, fontWeight: "600", marginBottom: 10 },
+  row: { flexDirection: "row", gap: 10 },
+  btn: {
+    flex: 1,
     paddingVertical: 10,
-    borderRadius: 8,
+    borderRadius: 10,
     alignItems: "center",
   },
+  accept: { backgroundColor: "#7CC540" },
+  reject: { backgroundColor: "#FF5C5C" },
+  btnText: {
+    color: "#fff",
+    fontWeight: "700",
+  },
+  closeBtn: {
+    marginTop: 20,
+    paddingVertical: 12,
+    backgroundColor: "#ccc",
+    borderRadius: 10,
+  },
+  closeText: { textAlign: "center", fontWeight: "700" },
 });

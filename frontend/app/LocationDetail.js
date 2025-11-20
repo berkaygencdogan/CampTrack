@@ -21,7 +21,7 @@ export default function LocationDetail() {
   const [isFav, setIsFav] = useState(false);
 
   // Kullanıcı bilgisi (Redux’tan)
-  const user = useSelector((state) => state.user);
+  const user = useSelector((state) => state.user.userInfo);
 
   // ------------------------------------------------
   // FAVORİ EKLE / KALDIR
@@ -41,7 +41,7 @@ export default function LocationDetail() {
           Authorization: `Bearer ${user.token}`,
         },
         body: JSON.stringify({
-          userId: user.userId,
+          userId: user.id,
           placeId: id,
         }),
       });

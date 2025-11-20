@@ -8,20 +8,31 @@ import {
   StyleSheet,
 } from "react-native";
 import { useRouter, useLocalSearchParams } from "expo-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import BackArrow from "../../src/assets/images/arrow-left.png";
 import { useSelector } from "react-redux";
 
 export default function InviteScreen() {
   const router = useRouter();
   const { teamId } = useLocalSearchParams();
-  const myUserId = useSelector((state) => state.user.userId);
+  const myUserId = useSelector((state) => state.user.userInfo.id);
+  const [teamName, setTeamName] = useState("");
   const [query, setQuery] = useState("");
   const [results, setResults] = useState([]);
   const [message, setMessage] = useState("");
 
-  const addMember = async (toUserId) => {
+  const loadTeam = async () => {
+    const res = await fetch(
+      `${process.env.EXPO_PUBLIC_API_URL}/teams/${teamId}`
+    );
+    const data = await res.json();
+    setTeamName(data.team?.name || "");
+  };
+  const sendInvite = async (toUserId) => {
     try {
+      setMessage("");
+      await loadTeam();
+
       const res = await fetch(
         `${process.env.EXPO_PUBLIC_API_URL}/notifications/send`,
         {
@@ -31,7 +42,7 @@ export default function InviteScreen() {
             fromUserId: myUserId,
             toUserId,
             teamId,
-            teamName: "Team", // → istersen backend’den otomatik çekelim
+            teamName,
           }),
         }
       );
@@ -51,14 +62,18 @@ export default function InviteScreen() {
 
   const searchUsers = async () => {
     try {
-      if (!query.trim()) return;
+      if (!query.trim() || query.length < 3) return;
 
       const res = await fetch(
         `${process.env.EXPO_PUBLIC_API_URL}/users/search?username=${query}`
       );
 
       const data = await res.json();
-      setResults(data.users || []);
+
+      // Kendini listeden çıkar
+      const filtered = data.users.filter((u) => u.id !== myUserId);
+
+      setResults(filtered);
     } catch (err) {
       console.log("SEARCH ERROR:", err);
     }
@@ -70,6 +85,7 @@ export default function InviteScreen() {
         source={{ uri: item.avatar || "https://i.imgur.com/0y8Ftya.png" }}
         style={styles.avatar}
       />
+
       <View style={{ flex: 1 }}>
         <Text style={styles.name}>{item.name}</Text>
         <Text style={styles.email}>{item.email}</Text>
@@ -77,9 +93,9 @@ export default function InviteScreen() {
 
       <TouchableOpacity
         style={styles.addBtn}
-        onPress={() => addMember(item.id)}
+        onPress={() => sendInvite(item.id)}
       >
-        <Text style={styles.addText}>Add</Text>
+        <Text style={styles.addText}>Invite</Text>
       </TouchableOpacity>
     </View>
   );
@@ -88,10 +104,11 @@ export default function InviteScreen() {
     <View style={styles.container}>
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()}>
-          <Image source={BackArrow} style={{ fontSize: 24 }}></Image>
+          <Image source={BackArrow} style={{ width: 28, height: 28 }} />
         </TouchableOpacity>
         <Text style={styles.headerText}>Invite to Team</Text>
       </View>
+
       <TextInput
         style={styles.input}
         placeholder="Enter username..."
@@ -160,7 +177,7 @@ const styles = StyleSheet.create({
   addBtn: {
     backgroundColor: "#7CC540",
     paddingVertical: 8,
-    paddingHorizontal: 12,
+    paddingHorizontal: 14,
     borderRadius: 8,
   },
 

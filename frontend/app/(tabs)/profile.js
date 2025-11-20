@@ -17,6 +17,7 @@ import NotificationsScreen from "../notifications";
 export default function Profile() {
   const router = useRouter();
   const user = useSelector((state) => state.user);
+  const userId = useSelector((state) => state.user.userInfo.id);
   const [userData, setUserData] = useState(null);
   const [notifications, setNotifications] = useState([]);
   const [showModal, setShowModal] = useState(false);
@@ -47,12 +48,11 @@ export default function Profile() {
   }, []);
 
   useEffect(() => {
-    if (!user.userId) return;
-
+    if (!userId) return;
     const fetchNotifications = async () => {
       try {
         const res = await fetch(
-          `${process.env.EXPO_PUBLIC_API_URL}/notifications/${user.userId}`
+          `${process.env.EXPO_PUBLIC_API_URL}/notifications/${userId}`
         );
 
         const data = await res.json();
@@ -63,7 +63,7 @@ export default function Profile() {
     };
 
     fetchNotifications();
-  }, [user.userId]);
+  }, [userId]);
 
   const handleLogout = async () => {
     await AsyncStorage.removeItem("token");
