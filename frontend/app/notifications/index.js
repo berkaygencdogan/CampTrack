@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -6,67 +7,53 @@ import {
   StyleSheet,
   Modal,
 } from "react-native";
-import { useEffect, useState } from "react";
-import { useSelector } from "react-redux";
 
-export default function NotificationsScreen({ onClose }) {
-  const userId = useSelector((state) => state.user.id);
-  const [requests, setRequests] = useState([]);
-
-  const loadRequests = async () => {
-    try {
-      const res = await fetch(
-        `${process.env.EXPO_PUBLIC_API_URL}/teams/requests?userId=${userId}`
-      );
-      const data = await res.json();
-      setRequests(data.requests || []);
-    } catch (err) {
-      console.log("LOAD_REQUESTS_ERROR:", err);
-    }
-  };
+export default function NotificationsScreen({ onClose, data }) {
+  const [list, setList] = useState([]);
 
   useEffect(() => {
-    loadRequests();
-  }, []);
+    setList(data);
+  }, [data]);
 
-  const acceptRequest = async (requestId) => {
+  const acceptRequest = async (notifId, userId) => {
     const res = await fetch(
-      `${process.env.EXPO_PUBLIC_API_URL}/teams/request/accept`,
+      `${process.env.EXPO_PUBLIC_API_URL}/notifications/accept`,
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ requestId }),
+        body: JSON.stringify({ notifId, userId }),
       }
     );
-
-    const data = await res.json();
-    if (data.success) loadRequests();
+    const json = await res.json();
+    console.log("ACCEPT RESPONSE:", json);
+    if (json.success) setList((prev) => prev.filter((n) => n.id !== notifId));
   };
 
-  const rejectRequest = async (requestId) => {
+  const rejectRequest = async (notifId) => {
     const res = await fetch(
-      `${process.env.EXPO_PUBLIC_API_URL}/teams/request/reject`,
+      `${process.env.EXPO_PUBLIC_API_URL}/notifications/reject`,
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ requestId }),
+        body: JSON.stringify({ notifId }),
       }
     );
 
-    const data = await res.json();
-    if (data.success) loadRequests();
+    const json = await res.json();
+    console.log("REJECT RESPONSE:", json);
   };
 
   const renderItem = ({ item }) => (
     <View style={styles.card}>
       <Text style={styles.title}>
-        {item.fromName} invited you to **{item.teamName}**
+        {item.fromName || item.fromUserId} invited you to{" "}
+        {item.teamName && item.teamName.length > 0 ? item.teamName : "a team"}
       </Text>
 
       <View style={styles.row}>
         <TouchableOpacity
           style={[styles.btn, styles.accept]}
-          onPress={() => acceptRequest(item.id)}
+          onPress={() => acceptRequest(item.id, item.toUserId)}
         >
           <Text style={styles.btnText}>Accept</Text>
         </TouchableOpacity>
@@ -88,8 +75,8 @@ export default function NotificationsScreen({ onClose }) {
           <Text style={styles.header}>Notifications</Text>
 
           <FlatList
-            data={requests}
-            keyExtractor={(i) => i.id}
+            data={list}
+            keyExtractor={(i) => i.id.toString()}
             renderItem={renderItem}
           />
 

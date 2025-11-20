@@ -17,11 +17,14 @@ export default function Favorites() {
 
   useEffect(() => {
     const fetchFavs = async () => {
-      const res = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/favorites`, {
-        headers: {
-          Authorization: `Bearer ${user.token}`,
-        },
-      });
+      const res = await fetch(
+        `${process.env.EXPO_PUBLIC_API_URL}/favorites?userId=${user.userInfo.id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${user.token}`,
+          },
+        }
+      );
 
       const data = await res.json();
       setFavorites(data.favorites || []);

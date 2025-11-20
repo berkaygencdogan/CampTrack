@@ -63,7 +63,7 @@ export default function Profile() {
     };
 
     fetchNotifications();
-  }, [userId]);
+  }, [showModal]);
 
   const handleLogout = async () => {
     await AsyncStorage.removeItem("token");
@@ -110,7 +110,10 @@ export default function Profile() {
         <Text style={styles.logoutText}>Logout</Text>
       </TouchableOpacity>
       <Modal visible={showModal} transparent animationType="slide">
-        <NotificationsScreen onClose={() => setShowModal(false)} />
+        <NotificationsScreen
+          onClose={() => setShowModal(false)}
+          data={notifications}
+        />
       </Modal>
     </View>
   );

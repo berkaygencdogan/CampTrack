@@ -6,11 +6,10 @@ import { View, Text } from "react-native";
 import { useSelector } from "react-redux";
 
 export default function Layout() {
-  // 🔥 Redux'tan bildirim sayısını alıyoruz
-  const notifications = useSelector(
-    (state) => state.notifications?.items || []
-  );
-  const unreadCount = notifications.length;
+  const unreadCount = useSelector((state) => {
+    const list = state.notifications?.items;
+    return list ? list.length : 0;
+  });
 
   // 🔥 Badge component
   const ProfileIcon = ({ color }) => (

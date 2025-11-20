@@ -638,10 +638,11 @@ app.post("/login", async (req, res) => {
   }
 });
 
-app.post("/favorites/add", authMiddleware, async (req, res) => {
+app.post("/favorites/add", async (req, res) => {
   try {
-    const { placeId } = req.body;
-    const userId = req.user.uid;
+    const { userId, placeId } = req.body;
+
+    console.log(userId, placeId);
 
     if (!placeId) {
       return res.status(400).json({ error: "Missing placeId" });
@@ -659,10 +660,9 @@ app.post("/favorites/add", authMiddleware, async (req, res) => {
   }
 });
 
-app.post("/favorites/remove", authMiddleware, async (req, res) => {
+app.post("/favorites/remove", async (req, res) => {
   try {
-    const { placeId } = req.body;
-    const userId = req.user.uid;
+    const { userId, placeId } = req.body;
 
     if (!placeId) {
       return res.status(400).json({ error: "Missing placeId" });
@@ -682,9 +682,9 @@ app.post("/favorites/remove", authMiddleware, async (req, res) => {
   }
 });
 
-app.get("/favorites", authMiddleware, async (req, res) => {
+app.get("/favorites", async (req, res) => {
   try {
-    const userId = req.user.uid;
+    const { userId } = req.query;
 
     const snap = await db.collection("favorites").doc(userId).get();
 

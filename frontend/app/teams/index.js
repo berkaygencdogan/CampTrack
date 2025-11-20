@@ -48,7 +48,7 @@ export default function TeamsIndex() {
       onPress={() => router.push(`/teams/${item.id}`)}
     >
       <Text style={styles.teamName}>{item.name}</Text>
-      <Text style={styles.memberCount}>{item.memberCount || 0} members</Text>
+      <Text style={styles.memberCount}>{item.members.length || 1} members</Text>
     </TouchableOpacity>
   );
 

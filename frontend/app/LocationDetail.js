@@ -16,13 +16,13 @@ export default function LocationDetail() {
   const { id } = useLocalSearchParams();
   const [place, setPlace] = useState(null);
   const [loading, setLoading] = useState(true);
-
+  console.log("yer", id);
   // ❤️ FAVORİ STATE
   const [isFav, setIsFav] = useState(false);
 
   // Kullanıcı bilgisi (Redux’tan)
   const user = useSelector((state) => state.user.userInfo);
-
+  console.log("asdas", user);
   // ------------------------------------------------
   // FAVORİ EKLE / KALDIR
   // ------------------------------------------------
