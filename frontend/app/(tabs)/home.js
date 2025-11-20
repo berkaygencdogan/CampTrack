@@ -71,7 +71,6 @@ export default function Home() {
     <TouchableOpacity
       style={[styles.card, small && { width: 200 }]}
       onPress={() => {
-        console.log("giden id:", item.id);
         router.push(`../LocationDetail?id=${item.id}`);
       }}
     >

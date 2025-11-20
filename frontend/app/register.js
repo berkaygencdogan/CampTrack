@@ -68,7 +68,7 @@ export default function Register() {
       </Text>
 
       <TextInput
-        placeholder="Name"
+        placeholder="Nickname"
         placeholderTextColor="#bbb"
         value={name}
         onChangeText={setName}

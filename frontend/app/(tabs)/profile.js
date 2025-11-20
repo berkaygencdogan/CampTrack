@@ -1,17 +1,25 @@
-import { View, Text, StyleSheet, Image, TouchableOpacity } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  Image,
+  TouchableOpacity,
+  Modal,
+} from "react-native";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
+import NotificationButton from "../NotificationButton";
+import NotificationsScreen from "../notifications";
 
 export default function Profile() {
   const router = useRouter();
-
-  // REDUX USER → DOĞRU!
   const user = useSelector((state) => state.user);
-
   const [userData, setUserData] = useState(null);
+  const [notifications, setNotifications] = useState([]);
+  const [showModal, setShowModal] = useState(false);
 
   useEffect(() => {
     if (!user.isLoggedIn) {
@@ -38,6 +46,25 @@ export default function Profile() {
     fetchUser();
   }, []);
 
+  useEffect(() => {
+    if (!user.userId) return;
+
+    const fetchNotifications = async () => {
+      try {
+        const res = await fetch(
+          `${process.env.EXPO_PUBLIC_API_URL}/notifications/${user.userId}`
+        );
+
+        const data = await res.json();
+        setNotifications(data.notifications || []);
+      } catch (err) {
+        console.log("NOTIFICATION FETCH ERROR:", err);
+      }
+    };
+
+    fetchNotifications();
+  }, [user.userId]);
+
   const handleLogout = async () => {
     await AsyncStorage.removeItem("token");
     router.replace("/login");
@@ -45,8 +72,15 @@ export default function Profile() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.header}>Profile</Text>
-
+      <View style={styles.header}>
+        <Text style={styles.headerText}>Profile</Text>
+        <View style={{ position: "absolute", right: 0 }}>
+          <NotificationButton
+            unreadCount={notifications.length}
+            onPress={() => setShowModal(true)}
+          />
+        </View>
+      </View>
       <View style={styles.profileBox}>
         <Image
           source={{
@@ -75,6 +109,9 @@ export default function Profile() {
       <TouchableOpacity style={styles.logoutBtn} onPress={handleLogout}>
         <Text style={styles.logoutText}>Logout</Text>
       </TouchableOpacity>
+      <Modal visible={showModal} transparent animationType="slide">
+        <NotificationsScreen onClose={() => setShowModal(false)} />
+      </Modal>
     </View>
   );
 }
@@ -86,8 +123,13 @@ const styles = StyleSheet.create({
     paddingTop: 60,
     paddingHorizontal: 20,
   },
-
   header: {
+    width: "100%",
+    alignItems: "center",
+    marginBottom: 20,
+  },
+
+  headerText: {
     fontSize: 26,
     fontWeight: "bold",
   },
