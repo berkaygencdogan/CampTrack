@@ -6,12 +6,8 @@ import { View, Text } from "react-native";
 import { useSelector } from "react-redux";
 
 export default function Layout() {
-  const unreadCount = useSelector((state) => {
-    const list = state.notifications?.items;
-    return list ? list.length : 0;
-  });
+  const unreadCount = useSelector((state) => state.user.notificationCount);
 
-  // 🔥 Badge component
   const ProfileIcon = ({ color }) => (
     <View style={{ width: 28, height: 28 }}>
       <Ionicons name="person-outline" size={26} color={color} />

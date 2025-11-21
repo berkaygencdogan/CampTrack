@@ -8,6 +8,7 @@ const userSlice = createSlice({
     token: null,
     userInfo: {},
     isLoggedIn: false,
+    notificationCount: 0,
   },
 
   reducers: {
@@ -25,8 +26,12 @@ const userSlice = createSlice({
       state.token = null;
       state.isLoggedIn = false;
     },
+    setNotificationCount: (state, action) => {
+      state.notificationCount = action.payload;
+    },
   },
 });
 
-export const { setAuthData, logoutUser } = userSlice.actions;
+export const { setAuthData, logoutUser, setNotificationCount } =
+  userSlice.actions;
 export default userSlice.reducer;

@@ -10,9 +10,10 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import NotificationButton from "../NotificationButton";
 import NotificationsScreen from "../notifications";
+import { setNotificationCount } from "../../redux/userSlice";
 
 export default function Profile() {
   const router = useRouter();
@@ -21,6 +22,7 @@ export default function Profile() {
   const [userData, setUserData] = useState(null);
   const [notifications, setNotifications] = useState([]);
   const [showModal, setShowModal] = useState(false);
+  const dispatch = useDispatch();
 
   useEffect(() => {
     if (!user.isLoggedIn) {
@@ -57,6 +59,7 @@ export default function Profile() {
 
         const data = await res.json();
         setNotifications(data.notifications || []);
+        dispatch(setNotificationCount(data.notifications.length));
       } catch (err) {
         console.log("NOTIFICATION FETCH ERROR:", err);
       }
