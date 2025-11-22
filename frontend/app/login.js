@@ -18,7 +18,9 @@ export default function Login() {
   const [email, setEmail] = useState("");
   const [pass, setPass] = useState("");
   const [error, setError] = useState("");
+
   const dispatch = useDispatch();
+
   const loginWithEmail = async () => {
     setError("");
 
@@ -29,46 +31,53 @@ export default function Login() {
     }
 
     try {
+      // 1) LOGIN
       const res = await axios.post(`${process.env.EXPO_PUBLIC_API_URL}/login`, {
         email: cleanEmail,
         password: pass,
       });
 
-      if (res.data.success) {
-        const token = res.data.token;
-
-        // Kullanıcı bilgisi çek
-        const me = await axios.get(
-          `${process.env.EXPO_PUBLIC_API_URL}/auth/me`,
-          {
-            headers: { Authorization: "Bearer " + token },
-          }
-        );
-
-        dispatch(
-          setAuthData({
-            token,
-            user: {
-              id: me.data.user.id || me.data.user.uid, // ✔ Mutlaka uid alıyoruz
-              name: me.data.user.name,
-              email: me.data.user.email,
-            },
-            email: cleanEmail,
-          })
-        );
-
-        router.replace("/home");
+      if (!res.data.success) {
+        setError("Login failed");
+        return;
       }
+
+      const token = res.data.token;
+
+      // 2) AUTH.ME → kullanıcı bilgisi + role
+      const me = await axios.get(`${process.env.EXPO_PUBLIC_API_URL}/auth/me`, {
+        headers: { Authorization: "Bearer " + token },
+      });
+
+      const user = me.data.user;
+
+      // 3) REDUX’A TAM VERİYİ KAYDET
+      dispatch(
+        setAuthData({
+          token,
+          email: user.email,
+          userId: user.id,
+          user, // role dahil tüm bilgiler
+        })
+      );
+
+      // 4) LOCAL STORAGE
+      await AsyncStorage.setItem("token", token);
+
+      // 5) ANA SAYFAYA YÖNLENDİR
+      router.replace("/home");
     } catch (err) {
       console.log(err);
-
       const code = err.response?.data?.error;
 
-      if (code === "INVALID_CREDENTIALS")
+      if (code === "INVALID_CREDENTIALS") {
         setError("Email or password incorrect");
-      else setError("Login failed");
+      } else {
+        setError("Login failed");
+      }
     }
   };
+
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : undefined}
@@ -153,11 +162,6 @@ const styles = StyleSheet.create({
     color: "red",
     marginTop: 5,
     marginLeft: 3,
-  },
-  forgot: {
-    textAlign: "center",
-    marginTop: 15,
-    color: "#777",
   },
   loginBtn: {
     backgroundColor: "#7CC540",

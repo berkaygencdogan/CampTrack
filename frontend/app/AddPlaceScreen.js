@@ -1,3 +1,4 @@
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -6,20 +7,28 @@ import {
   TouchableOpacity,
   Image,
   ScrollView,
+  Modal,
 } from "react-native";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import * as ImagePicker from "expo-image-picker";
-import { useState } from "react";
 import { useRouter } from "expo-router";
+import { GoogleMaps } from "expo-maps";
 
-export default function AddTripScreen() {
+export default function AddPlaceScreen() {
   const router = useRouter();
 
-  const [tripName, setTripName] = useState("");
-  const [location, setLocation] = useState("");
+  const [name, setName] = useState("");
+  const [city, setCity] = useState("");
+  const [description, setDescription] = useState("");
   const [photos, setPhotos] = useState([]);
+  const [location, setLocation] = useState(null);
 
-  // --- PHOTO PICKER ---
+  const [mapVisible, setMapVisible] = useState(false);
+  const [selectedMarker, setSelectedMarker] = useState(null);
+
+  // ---------------------------------------
+  // PHOTO PICKER
+  // ---------------------------------------
   const pickPhotos = async () => {
     const res = await ImagePicker.launchImageLibraryAsync({
       base64: true,
@@ -35,80 +44,155 @@ export default function AddTripScreen() {
     }
   };
 
+  // ---------------------------------------
+  // KONUM SEÇME
+  // ---------------------------------------
+  const openMap = () => {
+    setMapVisible(true);
+  };
+
+  const selectLocation = () => {
+    if (selectedMarker) {
+      setLocation(selectedMarker);
+      setMapVisible(false);
+    }
+  };
+
+  // ---------------------------------------
+  // SUBMIT PLACE
+  // ---------------------------------------
+  const submitPlace = async () => {
+    if (!name || !city || photos.length === 0) {
+      alert("Name, city and at least one photo are required.");
+      return;
+    }
+
+    if (!location) {
+      alert("Please select a location.");
+      return;
+    }
+
+    // Backend’e JSON formatında gönderilecek
+    console.log("SEND:", {
+      name,
+      city,
+      description,
+      photos,
+      location,
+    });
+
+    alert("Place submitted!");
+  };
+
   return (
-    <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
-      <Text style={styles.header}>Add New Trip</Text>
+    <View style={{ flex: 1 }}>
+      <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+        <Text style={styles.header}>Add New Place</Text>
 
-      {/* Trip Name */}
-      <Text style={styles.label}>Trip Name</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="Our Catalina Trip 2021"
-        value={tripName}
-        onChangeText={setTripName}
-      />
-
-      {/* Location */}
-      <Text style={styles.label}>Location</Text>
-      <View style={styles.locationInput}>
+        {/* NAME */}
+        <Text style={styles.label}>Name</Text>
         <TextInput
-          style={{ flex: 1 }}
-          placeholder="Select a location"
-          value={location}
-          onChangeText={setLocation}
+          style={styles.input}
+          placeholder="Kelebekler Vadisi"
+          value={name}
+          onChangeText={setName}
         />
-        <Ionicons name="checkmark" size={20} color="#7CC540" />
-      </View>
 
-      {/* View Locations Button */}
-      <TouchableOpacity
-        style={styles.outlineBtn}
-        onPress={() => router.push("/view-locations")}
-      >
-        <Text style={styles.outlineText}>View Locations</Text>
-      </TouchableOpacity>
+        {/* CITY */}
+        <Text style={styles.label}>City</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="Muğla"
+          value={city}
+          onChangeText={setCity}
+        />
 
-      {/* Add Photos Button → SAME STYLE */}
-      <TouchableOpacity style={styles.outlineBtn} onPress={pickPhotos}>
-        <Text style={styles.outlineText}>Add Photos</Text>
-      </TouchableOpacity>
+        {/* DESCRIPTION */}
+        <Text style={styles.label}>Description</Text>
+        <TextInput
+          style={[styles.input, { height: 100 }]}
+          placeholder="Write description..."
+          multiline
+          value={description}
+          onChangeText={setDescription}
+        />
 
-      {/* Preview Photos */}
-      {photos.length > 0 && (
-        <ScrollView horizontal style={{ marginTop: 10 }}>
-          {photos.map((p, index) => (
-            <Image key={index} source={{ uri: p }} style={styles.previewImg} />
-          ))}
-        </ScrollView>
-      )}
+        {/* LOCATION */}
+        <Text style={styles.label}>Location</Text>
 
-      {/* Teammates */}
-      <Text style={styles.label}>Teammates</Text>
+        <TouchableOpacity style={styles.outlineBtn} onPress={openMap}>
+          <Text style={styles.outlineText}>
+            {location ? "Location Selected ✓" : "Select Location (Map)"}
+          </Text>
+        </TouchableOpacity>
 
-      <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-        <View style={styles.teammateBox} />
-        <View style={styles.teammateBox} />
-        <View style={styles.teammateBox} />
+        {/* PHOTOS */}
+        <Text style={styles.label}>Photos</Text>
+
+        <TouchableOpacity style={styles.outlineBtn} onPress={pickPhotos}>
+          <Text style={styles.outlineText}>Add Photos</Text>
+        </TouchableOpacity>
+
+        {photos.length > 0 && (
+          <ScrollView horizontal style={{ marginTop: 10 }}>
+            {photos.map((p, index) => (
+              <Image
+                key={index}
+                source={{ uri: p }}
+                style={styles.previewImg}
+              />
+            ))}
+          </ScrollView>
+        )}
+
+        {/* SUBMIT */}
+        <TouchableOpacity style={styles.saveBtn} onPress={submitPlace}>
+          <Text style={styles.saveText}>Submit</Text>
+        </TouchableOpacity>
       </ScrollView>
 
-      <TouchableOpacity style={styles.outlineBtn}>
-        <Text style={styles.outlineText}>Add New Teammates</Text>
-      </TouchableOpacity>
+      {/* ************************************************ */}
+      {/* **************  MAP MODAL  ********************** */}
+      {/* ************************************************ */}
 
-      {/* Continue */}
-      <TouchableOpacity style={styles.continueBtn}>
-        <Text style={styles.continueText}>Continue</Text>
-      </TouchableOpacity>
-    </ScrollView>
+      <Modal visible={mapVisible} animationType="slide">
+        <View style={{ flex: 1 }}>
+          <GoogleMaps.View
+            style={{ flex: 1 }}
+            onMapClick={(e) => {
+              const c = e.coordinates;
+              setSelectedMarker(c);
+            }}
+            markers={selectedMarker ? [{ coordinates: selectedMarker }] : []}
+          />
+
+          <View style={styles.mapFooter}>
+            <TouchableOpacity
+              style={[styles.mapBtn, { backgroundColor: "#ccc" }]}
+              onPress={() => setMapVisible(false)}
+            >
+              <Text style={styles.mapBtnText}>Cancel</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[styles.mapBtn, { backgroundColor: "#7CC540" }]}
+              onPress={selectLocation}
+            >
+              <Text style={styles.mapBtnText}>Select</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+    </View>
   );
 }
 
+/* ----------------------------------------- */
+/* STYLES */
+/* ----------------------------------------- */
+
 const styles = StyleSheet.create({
-  container: {
-    padding: 20,
-    backgroundColor: "#fff",
-    flex: 1,
-  },
+  container: { padding: 20, backgroundColor: "#fff", flex: 1 },
 
   header: {
     fontSize: 22,
@@ -116,27 +200,13 @@ const styles = StyleSheet.create({
     marginBottom: 25,
   },
 
-  label: {
-    marginTop: 10,
-    marginBottom: 6,
-    fontSize: 15,
-    fontWeight: "500",
-  },
+  label: { marginTop: 10, marginBottom: 6, fontSize: 15, fontWeight: "500" },
 
   input: {
     backgroundColor: "#F5F5F5",
     padding: 15,
     borderRadius: 14,
     fontSize: 16,
-    marginBottom: 15,
-  },
-
-  locationInput: {
-    flexDirection: "row",
-    backgroundColor: "#F5F5F5",
-    padding: 15,
-    borderRadius: 14,
-    alignItems: "center",
     marginBottom: 15,
   },
 
@@ -150,10 +220,7 @@ const styles = StyleSheet.create({
     marginBottom: 15,
   },
 
-  outlineText: {
-    color: "#7CC540",
-    fontWeight: "600",
-  },
+  outlineText: { color: "#7CC540", fontWeight: "600" },
 
   previewImg: {
     width: 70,
@@ -162,26 +229,29 @@ const styles = StyleSheet.create({
     marginRight: 10,
   },
 
-  teammateBox: {
-    width: 60,
-    height: 60,
-    backgroundColor: "#eee",
-    borderRadius: 12,
-    marginRight: 10,
-  },
-
-  continueBtn: {
+  saveBtn: {
     backgroundColor: "#7CC540",
     padding: 18,
     borderRadius: 14,
     alignItems: "center",
-    marginTop: 20,
+    marginTop: 30,
     marginBottom: 50,
   },
 
-  continueText: {
-    color: "white",
-    fontSize: 17,
-    fontWeight: "bold",
+  saveText: { color: "white", fontSize: 17, fontWeight: "bold" },
+
+  mapFooter: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    padding: 20,
+    backgroundColor: "#fff",
   },
+
+  mapBtn: {
+    paddingVertical: 12,
+    paddingHorizontal: 25,
+    borderRadius: 10,
+  },
+
+  mapBtnText: { color: "#fff", fontSize: 16 },
 });

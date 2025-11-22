@@ -5,6 +5,7 @@ import {
   StyleSheet,
   ScrollView,
   TouchableOpacity,
+  FlatList,
 } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import Ionicons from "@expo/vector-icons/Ionicons";
@@ -16,16 +17,24 @@ export default function LocationDetail() {
   const { id } = useLocalSearchParams();
   const [place, setPlace] = useState(null);
   const [loading, setLoading] = useState(true);
-  console.log("yer", id);
-  // ❤️ FAVORİ STATE
+  const [currentIndex, setCurrentIndex] = useState(0);
+
   const [isFav, setIsFav] = useState(false);
 
-  // Kullanıcı bilgisi (Redux’tan)
   const user = useSelector((state) => state.user.userInfo);
-  console.log("asdas", user);
-  // ------------------------------------------------
-  // FAVORİ EKLE / KALDIR
-  // ------------------------------------------------
+
+  const nextPhoto = () => {
+    if (currentIndex < place.photos.length - 1) {
+      setCurrentIndex(currentIndex + 1);
+    }
+  };
+
+  const prevPhoto = () => {
+    if (currentIndex > 0) {
+      setCurrentIndex(currentIndex - 1);
+    }
+  };
+
   const toggleFavorite = async () => {
     if (!user) return;
 
@@ -52,32 +61,33 @@ export default function LocationDetail() {
     }
   };
 
+  const fetchData = async () => {
+    try {
+      const res = await fetch(
+        `${process.env.EXPO_PUBLIC_API_URL}/places/${id}?userId=${user.id}`
+      );
+      const data = await res.json();
+      console.log("data", data);
+      if (res.ok) setPlace(data.place);
+
+      if (data.place.isFavorite) {
+        setIsFav(true);
+        console.log(isFav);
+      }
+    } catch (err) {
+      console.log("Error:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // ------------------------------------------------
   // PLACE DETAILS FETCH
   // ------------------------------------------------
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const res = await fetch(
-          `${process.env.EXPO_PUBLIC_API_URL}/places/${id}`
-        );
-        const data = await res.json();
-
-        if (res.ok) setPlace(data.place);
-
-        // Favori kontrolü
-        if (user && data.place.favoritedBy?.includes(user.uid)) {
-          setIsFav(true);
-        }
-      } catch (err) {
-        console.log("Error:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
+    if (!id) return;
     fetchData();
-  }, []);
+  }, [id, user]);
 
   if (loading) {
     return (
@@ -110,26 +120,42 @@ export default function LocationDetail() {
           color={isFav ? "#ff3b30" : "#fff"}
         />
       </TouchableOpacity>
-
-      <ScrollView showsVerticalScrollIndicator={false}>
-        {/* HEADER IMAGE */}
-        <Image source={{ uri: place.photos[0] }} style={styles.headerImage} />
-
-        {/* WHITE BOTTOM PANEL */}
-        <View style={styles.bottomPanel}>
-          <Text style={styles.placeName}>{place.name}</Text>
-          <Text style={styles.location}>{place.city}</Text>
-
-          <Text style={styles.description}>{place.description}</Text>
-
-          <TouchableOpacity
-            style={styles.selectBtn}
-            onPress={() => console.log("LOCATION SELECTED")}
-          >
-            <Text style={styles.selectText}>Select Location</Text>
+      <View style={styles.sliderContainer}>
+        {/* SOL OK */}
+        {currentIndex > 0 && (
+          <TouchableOpacity style={styles.leftArrow} onPress={prevPhoto}>
+            <Ionicons name="chevron-back" size={32} color="black" />
           </TouchableOpacity>
-        </View>
-      </ScrollView>
+        )}
+
+        {/* FOTO */}
+        <Image
+          source={{ uri: place.photos[currentIndex] }}
+          style={styles.headerImage}
+        />
+
+        {/* SAĞ OK */}
+        {currentIndex < place.photos.length - 1 && (
+          <TouchableOpacity style={styles.rightArrow} onPress={nextPhoto}>
+            <Ionicons name="chevron-forward" size={32} color="black" />
+          </TouchableOpacity>
+        )}
+      </View>
+
+      {/* WHITE BOTTOM PANEL */}
+      <View style={styles.bottomPanel}>
+        <Text style={styles.placeName}>{place.name}</Text>
+        <Text style={styles.location}>{place.city}</Text>
+
+        <Text style={styles.description}>{place.description}</Text>
+
+        <TouchableOpacity
+          style={styles.selectBtn}
+          onPress={() => console.log("LOCATION SELECTED")}
+        >
+          <Text style={styles.selectText}>Select Location</Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 }
@@ -139,7 +165,7 @@ export default function LocationDetail() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#000",
+    backgroundColor: "#fff",
   },
   loading: {
     flex: 1,
@@ -208,5 +234,30 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontSize: 16,
     fontWeight: "600",
+  },
+  sliderContainer: {
+    width: "100%",
+    height: 430,
+    position: "relative",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+
+  leftArrow: {
+    position: "absolute",
+    left: 10,
+    zIndex: 10,
+    padding: 2,
+    backgroundColor: "white",
+    borderRadius: 30,
+  },
+
+  rightArrow: {
+    position: "absolute",
+    right: 10,
+    zIndex: 10,
+    padding: 2,
+    backgroundColor: "white",
+    borderRadius: 30,
   },
 });

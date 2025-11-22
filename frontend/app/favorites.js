@@ -9,6 +9,7 @@ import {
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { useRouter } from "expo-router";
+import Ionicons from "@expo/vector-icons/Ionicons";
 
 export default function Favorites() {
   const router = useRouter();
@@ -35,8 +36,12 @@ export default function Favorites() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.header}>My Favorite Places</Text>
-
+      <View style={styles.header}>
+        <TouchableOpacity onPress={() => router.back()}>
+          <Ionicons name="chevron-back" size={26} color="black" />
+        </TouchableOpacity>
+        <Text style={styles.headerText}>My Favorite Places</Text>
+      </View>
       <FlatList
         data={favorites}
         keyExtractor={(item) => item.id}
@@ -64,7 +69,18 @@ const styles = StyleSheet.create({
     paddingTop: 60,
     paddingHorizontal: 20,
   },
-  header: { fontSize: 24, fontWeight: "bold", marginBottom: 20 },
+  header: {
+    width: "100%",
+    alignItems: "center",
+    marginBottom: 20,
+    flexDirection: "row",
+  },
+
+  headerText: {
+    fontSize: 26,
+    fontWeight: "bold",
+    marginLeft: 20,
+  },
   card: {
     flexDirection: "row",
     marginBottom: 15,

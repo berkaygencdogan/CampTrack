@@ -1,0 +1,28 @@
+node_modules
+npm-debug.log
+yarn-debug.log
+yarn-error.log
+
+# Expo / Metro
+.expo
+.expo-shared
+dist
+
+# Git
+.git
+.gitignore
+
+# Local environment
+.env
+*.keystore
+*.jks
+
+# Caches
+*.gradle
+*.iml
+
+# Images / temp
+*.psd
+*.ai
+*.zip
+*.rar

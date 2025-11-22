@@ -8,22 +8,31 @@
     "scheme": "frontend",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
+
     "ios": {
       "supportsTablet": true
     },
+
     "android": {
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE"
       },
       "edgeToEdgeEnabled": true,
+      "config": {
+        "googleMaps": {
+          "apiKey": "AIzaSyCwZZuZFhwLrYYUSaYbRn4Q87Mw8ZKT2Dk"
+        }
+      },
       "predictiveBackGestureEnabled": false,
       "googleServicesFile": "./google-services.json",
       "package": "com.berkay_gencdogan.camptrack"
     },
+
     "web": {
       "output": "static",
       "favicon": "./src/assets/images/favicon.png"
     },
+
     "plugins": [
       "expo-router",
       [
@@ -38,12 +47,19 @@
           }
         }
       ],
-      "expo-maps"
+      [
+        "expo-maps",
+        {
+          "requestLocationPermission": true
+        }
+      ]
     ],
+
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
     },
+
     "extra": {
       "router": {},
       "eas": {

@@ -83,37 +83,45 @@ export default function Home() {
   );
 
   return (
-    <ScrollView contentContainerStyle={{ paddingBottom: 80 }}>
-      <Text style={styles.sectionTitle}>⭐ Popüler Kamp Yerleri</Text>
+    <View>
+      <ScrollView contentContainerStyle={{ paddingBottom: 80 }}>
+        <Text style={styles.sectionTitle}>⭐ Popüler Kamp Yerleri</Text>
 
-      <FlatList
-        data={popular}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) => <PlaceCard item={item} small />}
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={{ paddingLeft: 15 }}
-      />
+        <FlatList
+          data={popular}
+          keyExtractor={(item) => item.id}
+          renderItem={({ item }) => <PlaceCard item={item} small />}
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={{ paddingLeft: 15 }}
+        />
 
-      <Text style={styles.sectionTitle}>🔥 Yeni Eklenenler</Text>
+        <Text style={styles.sectionTitle}>🔥 Yeni Eklenenler</Text>
 
-      <FlatList
-        data={recent}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) => <PlaceCard item={item} small />}
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={{ paddingLeft: 15 }}
-      />
+        <FlatList
+          data={recent}
+          keyExtractor={(item) => item.id}
+          renderItem={({ item }) => <PlaceCard item={item} small />}
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={{ paddingLeft: 15 }}
+        />
 
-      <Text style={styles.sectionTitle}>📍 Tüm Kamp Alanları</Text>
+        <Text style={styles.sectionTitle}>📍 Tüm Kamp Alanları</Text>
 
-      <View style={{ paddingHorizontal: 15 }}>
-        {allPlaces.map((item) => (
-          <PlaceCard key={item.id} item={item} />
-        ))}
-      </View>
-    </ScrollView>
+        <View style={{ paddingHorizontal: 15 }}>
+          {allPlaces.map((item) => (
+            <PlaceCard key={item.id} item={item} />
+          ))}
+        </View>
+      </ScrollView>
+      <TouchableOpacity
+        style={styles.addBtn}
+        onPress={() => router.push("../AddPlaceScreen")}
+      >
+        <Text style={styles.plus}>+</Text>
+      </TouchableOpacity>
+    </View>
   );
 }
 
@@ -142,5 +150,21 @@ const styles = StyleSheet.create({
   cardCity: {
     fontSize: 14,
     color: "#777",
+  },
+  addBtn: {
+    position: "absolute",
+    right: 25,
+    bottom: 35,
+    backgroundColor: "#7CC540",
+    paddingHorizontal: 22,
+    paddingVertical: 14,
+    borderRadius: 50,
+    elevation: 5,
+  },
+  plus: {
+    fontSize: 24,
+    color: "#fff",
+    fontWeight: "900",
+    marginTop: -4,
   },
 });
