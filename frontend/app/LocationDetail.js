@@ -67,12 +67,10 @@ export default function LocationDetail() {
         `${process.env.EXPO_PUBLIC_API_URL}/places/${id}?userId=${user.id}`
       );
       const data = await res.json();
-      console.log("data", data);
       if (res.ok) setPlace(data.place);
 
       if (data.place.isFavorite) {
         setIsFav(true);
-        console.log(isFav);
       }
     } catch (err) {
       console.log("Error:", err);

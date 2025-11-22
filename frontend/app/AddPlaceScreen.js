@@ -13,6 +13,7 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 import * as ImagePicker from "expo-image-picker";
 import { useRouter } from "expo-router";
 import { GoogleMaps } from "expo-maps";
+import { useSelector } from "react-redux";
 
 export default function AddPlaceScreen() {
   const router = useRouter();
@@ -22,10 +23,9 @@ export default function AddPlaceScreen() {
   const [description, setDescription] = useState("");
   const [photos, setPhotos] = useState([]);
   const [location, setLocation] = useState(null);
-
+  const user = useSelector((state) => state.user.userInfo);
   const [mapVisible, setMapVisible] = useState(false);
   const [selectedMarker, setSelectedMarker] = useState(null);
-
   // ---------------------------------------
   // PHOTO PICKER
   // ---------------------------------------
@@ -72,16 +72,27 @@ export default function AddPlaceScreen() {
       return;
     }
 
-    // Backend’e JSON formatında gönderilecek
-    console.log("SEND:", {
-      name,
-      city,
-      description,
-      photos,
-      location,
+    const res = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/places/add`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        userId: user.id,
+        name,
+        city,
+        description,
+        photos,
+        location,
+      }),
     });
 
-    alert("Place submitted!");
+    const data = await res.json();
+    if (data) {
+      alert("Place submitted!");
+    } else {
+      alert("hata var");
+    }
   };
 
   return (
