@@ -104,7 +104,10 @@ export default function Profile() {
         <Text style={styles.rowText}>Favorites</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity style={styles.row}>
+      <TouchableOpacity
+        style={styles.row}
+        onPress={() => router.push("/MyAddedPlaceScreen")}
+      >
         <Ionicons name="map-outline" size={22} color="#7CC540" />
         <Text style={styles.rowText}>My Added Places</Text>
       </TouchableOpacity>

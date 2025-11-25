@@ -6,9 +6,9 @@ import {
   StyleSheet,
   TouchableOpacity,
 } from "react-native";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useSelector } from "react-redux";
-import { useRouter } from "expo-router";
+import { useFocusEffect, useRouter } from "expo-router";
 import Ionicons from "@expo/vector-icons/Ionicons";
 
 export default function Favorites() {
@@ -16,23 +16,25 @@ export default function Favorites() {
   const [favorites, setFavorites] = useState([]);
   const user = useSelector((state) => state.user);
 
-  useEffect(() => {
-    const fetchFavs = async () => {
-      const res = await fetch(
-        `${process.env.EXPO_PUBLIC_API_URL}/favorites?userId=${user.userInfo.id}`,
-        {
-          headers: {
-            Authorization: `Bearer ${user.token}`,
-          },
-        }
-      );
+  useFocusEffect(
+    useCallback(() => {
+      const fetchFavs = async () => {
+        const res = await fetch(
+          `${process.env.EXPO_PUBLIC_API_URL}/favorites?userId=${user.userInfo.id}`,
+          {
+            headers: {
+              Authorization: `Bearer ${user.token}`,
+            },
+          }
+        );
 
-      const data = await res.json();
-      setFavorites(data.favorites || []);
-    };
+        const data = await res.json();
+        setFavorites(data.favorites || []);
+      };
 
-    fetchFavs();
-  }, []);
+      fetchFavs();
+    }, [])
+  );
 
   return (
     <View style={styles.container}>
