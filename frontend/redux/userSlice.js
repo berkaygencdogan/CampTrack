@@ -9,6 +9,7 @@ const userSlice = createSlice({
     userInfo: {},
     isLoggedIn: false,
     notificationCount: 0,
+    language: "en",
   },
 
   reducers: {
@@ -29,9 +30,12 @@ const userSlice = createSlice({
     setNotificationCount: (state, action) => {
       state.notificationCount = action.payload;
     },
+    setLanguage: (state, action) => {
+      state.language = action.payload;
+    },
   },
 });
 
-export const { setAuthData, logoutUser, setNotificationCount } =
+export const { setAuthData, logoutUser, setNotificationCount, setLanguage } =
   userSlice.actions;
 export default userSlice.reducer;

@@ -10,6 +10,7 @@ import {
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useState, useEffect } from "react";
 import { useRouter } from "expo-router";
+import i18n from "../language/index";
 
 export default function Search() {
   const router = useRouter();
@@ -68,7 +69,7 @@ export default function Search() {
       <View style={styles.searchBox}>
         <TextInput
           style={styles.searchInput}
-          placeholder="Search camp places..."
+          placeholder={i18n.t("searchcamp")}
           placeholderTextColor="#999"
           onChangeText={handleSearch}
           value={searchTerm}
@@ -79,7 +80,7 @@ export default function Search() {
       {/* POPULAR OR SEARCH RESULTS */}
       {searchTerm.trim() === "" ? (
         <View>
-          <Text style={styles.sectionTitle}>Popular Camps</Text>
+          <Text style={styles.sectionTitle}>{i18n.t("populerplaces")}</Text>
 
           <ScrollView
             horizontal
@@ -105,11 +106,11 @@ export default function Search() {
         </View>
       ) : (
         <ScrollView showsVerticalScrollIndicator={false}>
-          <Text style={styles.sectionTitle}>Search Results</Text>
+          <Text style={styles.sectionTitle}>{i18n.t("searchresult")}</Text>
 
           {results.length === 0 && (
             <Text style={{ marginTop: 15, color: "#777" }}>
-              No results found.
+              {i18n.t("noresult")}
             </Text>
           )}
 

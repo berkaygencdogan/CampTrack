@@ -4,6 +4,7 @@ import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import { View, Text } from "react-native";
 import { useSelector } from "react-redux";
+import I18n from "../language/index";
 
 export default function Layout() {
   const unreadCount = useSelector((state) => state.user.notificationCount);
@@ -57,7 +58,7 @@ export default function Layout() {
       <Tabs.Screen
         name="home"
         options={{
-          title: "Home",
+          title: `${I18n.t("home")}`,
           tabBarIcon: ({ color }) => (
             <Ionicons name="home-outline" size={26} color={color} />
           ),
@@ -67,7 +68,7 @@ export default function Layout() {
       <Tabs.Screen
         name="search"
         options={{
-          title: "Search",
+          title: `${I18n.t("search")}`,
           tabBarIcon: ({ color }) => (
             <Ionicons name="search-outline" size={26} color={color} />
           ),
@@ -77,7 +78,7 @@ export default function Layout() {
       <Tabs.Screen
         name="backpack"
         options={{
-          title: "Backpack",
+          title: `${I18n.t("backpack")}`,
           tabBarIcon: ({ color }) => (
             <MaterialIcons name="backpack" size={26} color={color} />
           ),
@@ -87,7 +88,7 @@ export default function Layout() {
       <Tabs.Screen
         name="teammates"
         options={{
-          title: "Teammates",
+          title: `${I18n.t("teammates")}`,
           tabBarIcon: ({ color }) => (
             <AntDesign name="team" size={26} color={color} />
           ),
@@ -98,7 +99,7 @@ export default function Layout() {
       <Tabs.Screen
         name="profile"
         options={{
-          title: "Profile",
+          title: `${I18n.t("profile")}`,
           tabBarIcon: ({ color }) => <ProfileIcon color={color} />,
         }}
       />

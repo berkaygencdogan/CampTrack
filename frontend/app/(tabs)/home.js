@@ -9,6 +9,7 @@ import {
   View,
 } from "react-native";
 import PlaceCard from "../PlaceCard";
+import i18n from "../language/index";
 
 export default function Home() {
   const router = useRouter();
@@ -71,7 +72,7 @@ export default function Home() {
   return (
     <View>
       <ScrollView contentContainerStyle={{ paddingBottom: 80 }}>
-        <Text style={styles.sectionTitle}>⭐ Popüler Kamp Yerleri</Text>
+        <Text style={styles.sectionTitle}>⭐ {i18n.t("populerplaces")}</Text>
 
         <FlatList
           data={popular}
@@ -82,7 +83,7 @@ export default function Home() {
           contentContainerStyle={{ paddingLeft: 15 }}
         />
 
-        <Text style={styles.sectionTitle}>🔥 Yeni Eklenenler</Text>
+        <Text style={styles.sectionTitle}>🔥 {i18n.t("newaddedplaces")}</Text>
 
         <FlatList
           data={recent}
@@ -93,7 +94,7 @@ export default function Home() {
           contentContainerStyle={{ paddingLeft: 15 }}
         />
 
-        <Text style={styles.sectionTitle}>📍 Tüm Kamp Alanları</Text>
+        <Text style={styles.sectionTitle}>📍 {i18n.t("allplaces")}</Text>
 
         <View style={{ paddingHorizontal: 15 }}>
           {allPlaces.map((item) => (

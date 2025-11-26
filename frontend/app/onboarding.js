@@ -11,33 +11,46 @@ import {
   View,
 } from "react-native";
 import LeftImage from "../src/assets/images/arrow-left.png";
+import I18n from "./language/index";
 
 const { width } = Dimensions.get("window");
 
 const slides = [
   {
     id: 1,
-    title: "Your Tasks",
-    desc: "I always remind you about your planned activities. which is always my priority and your importance.",
-    image: require("../src/assets/images/onboard1.png"),
+    title: I18n.t("onboard1Title"),
+    desc: I18n.t("onboard1Desc"),
+    image: require("../src/assets/images/onboarding1.png"),
   },
   {
     id: 2,
-    title: "Capture Your Memories",
-    desc: "We know that catching photos are necessary in your trip. that’s why we have built-in camera and gallery feature.",
-    image: require("../src/assets/images/onboard2.png"),
+    title: I18n.t("onboard2Title"),
+    desc: I18n.t("onboard2Desc"),
+    image: require("../src/assets/images/onboarding2.png"),
   },
   {
     id: 3,
-    title: "Track Your Fitness",
-    desc: "Fitness is really important to your body and we help you track it every second.",
-    image: require("../src/assets/images/onboard3.png"),
+    title: I18n.t("onboard3Title"),
+    desc: I18n.t("onboard3Desc"),
+    image: require("../src/assets/images/onboarding3.png"),
   },
   {
     id: 4,
-    title: "There Is Much More",
-    desc: "We have many cool features that help your camping trip be easier and fun!",
-    image: require("../src/assets/images/onboard4.png"),
+    title: I18n.t("onboard4Title"),
+    desc: I18n.t("onboard4Desc"),
+    image: require("../src/assets/images/onboarding4.png"),
+  },
+  {
+    id: 5,
+    title: I18n.t("onboard5Title"),
+    desc: I18n.t("onboard5Desc"),
+    image: require("../src/assets/images/onboarding5.png"),
+  },
+  {
+    id: 6,
+    title: I18n.t("onboard6Title"),
+    desc: I18n.t("onboard6Desc"),
+    image: require("../src/assets/images/onboarding6.png"),
   },
 ];
 

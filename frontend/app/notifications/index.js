@@ -8,7 +8,7 @@ import {
   Modal,
 } from "react-native";
 
-export default function NotificationsScreen({ onClose, data }) {
+export default function NotificationsScreen({ onClose, data, isModal }) {
   const [list, setList] = useState([]);
 
   useEffect(() => {
@@ -46,7 +46,7 @@ export default function NotificationsScreen({ onClose, data }) {
   const renderItem = ({ item }) => (
     <View style={styles.card}>
       <Text style={styles.title}>
-        {item.fromName || item.fromUserId} invited you to{" "}
+        {item.fromName || item.fromUserId} invited you to
         {item.teamName && item.teamName.length > 0 ? item.teamName : "a team"}
       </Text>
 

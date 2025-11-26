@@ -13,6 +13,7 @@ import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import NotificationButton from "../NotificationButton";
 import NotificationsScreen from "../notifications";
+import i18n from "../language/index";
 import { setNotificationCount } from "../../redux/userSlice";
 
 export default function Profile() {
@@ -76,7 +77,7 @@ export default function Profile() {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.headerText}>Profile</Text>
+        <Text style={styles.headerText}>{i18n.t("profile")}</Text>
         <View style={{ position: "absolute", right: 0 }}>
           <NotificationButton
             unreadCount={notifications.length}
@@ -92,7 +93,7 @@ export default function Profile() {
           style={styles.avatar}
         />
 
-        <Text style={styles.name}>{userData?.name || "Loading..."}</Text>
+        <Text style={styles.name}>{userData?.name || i18n.t("loading")}</Text>
         <Text style={styles.email}>{userData?.email || ""}</Text>
       </View>
 
@@ -101,7 +102,7 @@ export default function Profile() {
         onPress={() => router.push("/favorites")}
       >
         <Ionicons name="heart-outline" size={22} color="#7CC540" />
-        <Text style={styles.rowText}>Favorites</Text>
+        <Text style={styles.rowText}>{i18n.t("favorites")}</Text>
       </TouchableOpacity>
 
       <TouchableOpacity
@@ -109,17 +110,20 @@ export default function Profile() {
         onPress={() => router.push("/MyAddedPlaceScreen")}
       >
         <Ionicons name="map-outline" size={22} color="#7CC540" />
-        <Text style={styles.rowText}>My Added Places</Text>
+        <Text style={styles.rowText}>{i18n.t("myaddedplaces")}</Text>
       </TouchableOpacity>
 
       <TouchableOpacity style={styles.logoutBtn} onPress={handleLogout}>
-        <Text style={styles.logoutText}>Logout</Text>
+        <Text style={styles.logoutText}>{i18n.t("logout")}</Text>
       </TouchableOpacity>
-      <Modal visible={showModal} transparent animationType="slide">
-        <NotificationsScreen
-          onClose={() => setShowModal(false)}
-          data={notifications}
-        />
+      <Modal visible={showModal} transparent={true} animationType="slide">
+        <View style={{ flex: 1, backgroundColor: "#fff" }}>
+          <NotificationsScreen
+            onClose={() => setShowModal(false)}
+            data={notifications}
+            isModal={true}
+          />
+        </View>
       </Modal>
     </View>
   );

@@ -151,7 +151,7 @@ export default function LocationDetail() {
           style={styles.selectBtn}
           onPress={() => console.log("LOCATION SELECTED")}
         >
-          <Text style={styles.selectText}>Select Location</Text>
+          <Text style={styles.selectText}>Added My Visit Places</Text>
         </TouchableOpacity>
       </View>
     </View>

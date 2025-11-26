@@ -1,0 +1,982 @@
+[
+  {
+    "id": 1,
+    "category": "Camping Gear",
+    "tr": "Tent",
+    "en": "Tent",
+    "img": "https://firebasestorage.googleapis.com/v0/b/camp-track-478616.firebasestorage.app/o/backpack%2Ftent.webp?alt=media"
+  },
+  {
+    "id": 2,
+    "category": "Camping Gear",
+    "tr": "Sleeping bag",
+    "en": "Sleeping bag",
+    "img": "https://firebasestorage.googleapis.com/v0/b/camp-track-478616.firebasestorage.app/o/backpack%2Fsleepingbag.webp?alt=media"
+  },
+  {
+    "id": 3,
+    "category": "Camping Gear",
+    "tr": "Sleeping pad",
+    "en": "Sleeping pad",
+    "img": "https://firebasestorage.googleapis.com/v0/b/camp-track-478616.firebasestorage.app/o/backpack%2Fsleepingpad.webp?alt=media"
+  },
+  {
+    "id": 152,
+    "category": "Camping Gear",
+    "tr": "Uyku Bandı",
+    "en": "Sleeping Band",
+    "img": "https://firebasestorage.googleapis.com/v0/b/camp-track-478616.firebasestorage.app/o/backpack%2Fsleepingband.webp?alt=media"
+  },
+  {
+    "id": 4,
+    "category": "Camping Gear",
+    "tr": "Camping pillow",
+    "en": "Camping pillow",
+    "img": "https://firebasestorage.googleapis.com/v0/b/camp-track-478616.firebasestorage.app/o/backpack%2Fpillow.webp?alt=media"
+  },
+  {
+    "id": 5,
+    "category": "Camping Gear",
+    "tr": "Camp chair",
+    "en": "Camp chair",
+    "img": "https://firebasestorage.googleapis.com/v0/b/camp-track-478616.firebasestorage.app/o/backpack%2Fcampchair.png?alt=media"
+  },
+  {
+    "id": 6,
+    "category": "Camping Gear",
+    "tr": "Hammock",
+    "en": "Hammock",
+    "img": "https://firebasestorage.googleapis.com/v0/b/camp-track-478616.firebasestorage.app/o/backpack%2Fhammock.webp?alt=media"
+  },
+  {
+    "id": 7,
+    "category": "Camping Gear",
+    "tr": "Tarp",
+    "en": "Tarp",
+    "img": "https://firebasestorage.googleapis.com/v0/b/camp-track-478616.firebasestorage.app/o/backpack%2Ftarp.webp?alt=media"
+  },
+  {
+    "id": 8,
+    "category": "Camping Gear",
+    "tr": "Groundsheet",
+    "en": "Groundsheet",
+    "img": "https://firebasestorage.googleapis.com/v0/b/camp-track-478616.firebasestorage.app/o/backpack%2Fgroundsheet.webp?alt=media"
+  },
+  {
+    "id": 9,
+    "category": "Camping Gear",
+    "tr": "Lantern",
+    "en": "Lantern",
+    "img": "https://firebasestorage.googleapis.com/v0/b/camp-track-478616.firebasestorage.app/o/backpack%2Flantern.png?alt=media"
+  },
+  {
+    "id": 10,
+    "category": "Camping Gear",
+    "tr": "Headlamp",
+    "en": "Headlamp",
+    "img": "https://firebasestorage.googleapis.com/v0/b/camp-track-478616.firebasestorage.app/o/backpack%2Fheadlamp.webp?alt=media"
+  },
+  {
+    "id": 11,
+    "category": "Camping Gear",
+    "tr": "Flashlight",
+    "en": "Flashlight",
+    "img": "https://firebasestorage.googleapis.com/v0/b/camp-track-478616.firebasestorage.app/o/backpack%2Fflashlight.webp?alt=media"
+  },
+  {
+    "id": 14,
+    "category": "Camping Gear",
+    "tr": "Camp table",
+    "en": "Camp table",
+    "img": "https://firebasestorage.googleapis.com/v0/b/camp-track-478616.firebasestorage.app/o/backpack%2Fcamptable.png?alt=media"
+  },
+  {
+    "id": 15,
+    "category": "Camping Gear",
+    "tr": "Canopy shelter",
+    "en": "Canopy shelter",
+    "img": "https://firebasestorage.googleapis.com/v0/b/camp-track-478616.firebasestorage.app/o/backpack%2Fcanopyshelter.webp?alt=media"
+  },
+  {
+    "id": 16,
+    "category": "Cooking Equipment",
+    "tr": "Camping stove",
+    "en": "Camping stove",
+    "img": "https://firebasestorage.googleapis.com/v0/b/camp-track-478616.firebasestorage.app/o/backpack%2Fstove.webp?alt=media"
+  },
+  {
+    "id": 17,
+    "category": "Cooking Equipment",
+    "tr": "Propane canister",
+    "en": "Propane canister",
+    "img": "https://firebasestorage.googleapis.com/v0/b/camp-track-478616.firebasestorage.app/o/backpack%2Fpropanecanister.webp?alt=media"
+  },
+  {
+    "id": 18,
+    "category": "Cooking Equipment",
+    "tr": "Lighter",
+    "en": "Lighter",
+    "img": "https://firebasestorage.googleapis.com/v0/b/camp-track-478616.firebasestorage.app/o/backpack%2Flighter.webp?alt=media"
+  },
+  {
+    "id": 153,
+    "category": "Cooking Equipment",
+    "tr": "Kibrit",
+    "en": "Match",
+    "img": "https://firebasestorage.googleapis.com/v0/b/camp-track-478616.firebasestorage.app/o/backpack%2Fmatch.webp?alt=media"
+  },
+  {
+    "id": 19,
+    "category": "Cooking Equipment",
+    "tr": "Water filter",
+    "en": "Water filter",
+    "img": "https://firebasestorage.googleapis.com/v0/b/camp-track-478616.firebasestorage.app/o/backpack%2Fwaterfilter.png?alt=media"
+  },
+  {
+    "id": 190,
+    "category": "Cooking Equipment",
+    "tr": "Su Şişesi",
+    "en": "Water Bottle",
+    "img": "https://firebasestorage.googleapis.com/v0/b/camp-track-478616.firebasestorage.app/o/backpack%2Fwaterbottle.webp?alt=media"
+  },
+  {
+    "id": 160,
+    "category": "Cooking Equipment",
+    "tr": "Izgara",
+    "en": "Grill",
+    "img": "https://firebasestorage.googleapis.com/v0/b/camp-track-478616.firebasestorage.app/o/backpack%2Fgrill.webp?alt=media"
+  },
+  {
+    "id": 20,
+    "category": "Cooking Equipment",
+    "tr": "Cook pot",
+    "en": "Cook pot",
+    "img": "https://firebasestorage.googleapis.com/v0/b/camp-track-478616.firebasestorage.app/o/backpack%2Fcookpot.webp?alt=media"
+  },
+  {
+    "id": 21,
+    "category": "Cooking Equipment",
+    "tr": "Tava",
+    "en": "Pan",
+    "img": "https://firebasestorage.googleapis.com/v0/b/camp-track-478616.firebasestorage.app/o/backpack%2Fdrypants.webp?alt=media"
+  },
+  {
+    "id": 22,
+    "category": "Cooking Equipment",
+    "tr": "Cutting board",
+    "en": "Cutting board",
+    "img": "https://firebasestorage.googleapis.com/v0/b/camp-track-478616.firebasestorage.app/o/backpack%2Fcuttingboard.webp?alt=media"
+  },
+  {
+    "id": 23,
+    "category": "Cooking Equipment",
+    "tr": "Knife",
+    "en": "Knife",
+    "img": "https://firebasestorage.googleapis.com/v0/b/camp-track-478616.firebasestorage.app/o/backpack%2Fpocketknife.jpg?alt=media"
+  },
+  {
+    "id": 24,
+    "category": "Cooking Equipment",
+    "tr": "Spork",
+    "en": "Spork",
+    "img": "https://firebasestorage.googleapis.com/v0/b/camp-track-478616.firebasestorage.app/o/backpack%2Fspork.webp?alt=media"
+  },
+  {
+    "id": 25,
+    "category": "Cooking Equipment",
+    "tr": "Mess kit",
+    "en": "Mess kit",
+    "img": "https://firebasestorage.googleapis.com/v0/b/camp-track-478616.firebasestorage.app/o/backpack%2Fmesskit.webp?alt=media"
+  },
+  {
+    "id": 26,
+    "category": "Cooking Equipment",
+    "tr": "Camping kettle",
+    "en": "Camping kettle",
+    "img": "https://firebasestorage.googleapis.com/v0/b/camp-track-478616.firebasestorage.app/o/backpack%2Fkettle.webp?alt=media"
+  },
+  {
+    "id": 27,
+    "category": "Cooking Equipment",
+    "tr": "Coffee maker",
+    "en": "Coffee maker",
+    "img": "https://firebasestorage.googleapis.com/v0/b/camp-track-478616.firebasestorage.app/o/backpack%2Fcoffeemaker.webp?alt=media"
+  },
+  {
+    "id": 28,
+    "category": "Cooking Equipment",
+    "tr": "Thermos",
+    "en": "Thermos",
+    "img": "https://firebasestorage.googleapis.com/v0/b/camp-track-478616.firebasestorage.app/o/backpack%2Fthermos.webp?alt=media"
+  },
+  {
+    "id": 29,
+    "category": "Cooking Equipment",
+    "tr": "Cooler",
+    "en": "Cooler",
+    "img": "https://firebasestorage.googleapis.com/v0/b/camp-track-478616.firebasestorage.app/o/backpack%2Fcooler.webp?alt=media"
+  },
+  {
+    "id": 155,
+    "category": "Cooking Equipment",
+    "tr": "Bardak",
+    "en": "Cup",
+    "img": "https://firebasestorage.googleapis.com/v0/b/camp-track-478616.firebasestorage.app/o/backpack%2Fcup.webp?alt=media"
+  },
+  {
+    "id": 156,
+    "category": "Cooking Equipment",
+    "tr": "Çatal Bıçak Takımı",
+    "en": "Cutlery Set",
+    "img": "https://firebasestorage.googleapis.com/v0/b/camp-track-478616.firebasestorage.app/o/backpack%2Fcutleryset.webp?alt=media"
+  },
+  {
+    "id": 159,
+    "category": "Cooking Equipment",
+    "tr": "Yemek Seti",
+    "en": "Food Set",
+    "img": "https://firebasestorage.googleapis.com/v0/b/camp-track-478616.firebasestorage.app/o/backpack%2Ffoodset.webp?alt=media"
+  },
+  {
+    "id": 158,
+    "category": "Clothing",
+    "tr": "Sırt Çantası",
+    "en": "Backpack",
+    "img": "https://firebasestorage.googleapis.com/v0/b/camp-track-478616.firebasestorage.app/o/backpack%2Fbackpack.webp?alt=media"
+  },
+  {
+    "id": 31,
+    "category": "Clothing",
+    "tr": "Rain jacket",
+    "en": "Rain jacket",
+    "img": "https://firebasestorage.googleapis.com/v0/b/camp-track-478616.firebasestorage.app/o/backpack%2Frainjacket.webp?alt=media"
+  },
+  {
+    "id": 32,
+    "category": "Clothing",
+    "tr": "Bot",
+    "en": "Boots",
+    "img": "https://firebasestorage.googleapis.com/v0/b/camp-track-478616.firebasestorage.app/o/backpack%2Fboots.webp?alt=media"
+  },
+  {
+    "id": 33,
+    "category": "Clothing",
+    "tr": "Thermal underwear",
+    "en": "Thermal underwear",
+    "img": "https://firebasestorage.googleapis.com/v0/b/camp-track-478616.firebasestorage.app/o/backpack%2Fthermalunderwear.webp?alt=media"
+  },
+  {
+    "id": 171,
+    "category": "Clothing",
+    "tr": "Kazak",
+    "en": "Sweater",
+    "img": "https://firebasestorage.googleapis.com/v0/b/camp-track-478616.firebasestorage.app/o/backpack%2Fsweater.webp?alt=media"
+  },
+  {
+    "id": 34,
+    "category": "Clothing",
+    "tr": "Socks",
+    "en": "Socks",
+    "img": "https://firebasestorage.googleapis.com/v0/b/camp-track-478616.firebasestorage.app/o/backpack%2Fsocks.webp?alt=media"
+  },
+  {
+    "id": 35,
+    "category": "Clothing",
+    "tr": "Hat",
+    "en": "Hat",
+    "img": "https://firebasestorage.googleapis.com/v0/b/camp-track-478616.firebasestorage.app/o/backpack%2Fhatchet.webp?alt=media"
+  },
+  {
+    "id": 36,
+    "category": "Clothing",
+    "tr": "Gloves",
+    "en": "Gloves",
+    "img": "https://firebasestorage.googleapis.com/v0/b/camp-track-478616.firebasestorage.app/o/backpack%2Fgloves.webp?alt=media"
+  },
+  {
+    "id": 37,
+    "category": "Clothing",
+    "tr": "Scarf",
+    "en": "Scarf",
+    "img": "https://firebasestorage.googleapis.com/v0/b/camp-track-478616.firebasestorage.app/o/backpack%2Fscarf.webp?alt=media"
+  },
+  {
+    "id": 38,
+    "category": "Clothing",
+    "tr": "Beanie",
+    "en": "Beanie",
+    "img": "https://firebasestorage.googleapis.com/v0/b/camp-track-478616.firebasestorage.app/o/backpack%2Fbeanie.webp?alt=media"
+  },
+  {
+    "id": 39,
+    "category": "Clothing",
+    "tr": "Sandals",
+    "en": "Sandals",
+    "img": "https://firebasestorage.googleapis.com/v0/b/camp-track-478616.firebasestorage.app/o/backpack%2Fsandals.webp?alt=media"
+  },
+  {
+    "id": 40,
+    "category": "Clothing",
+    "tr": "Kir Tutmaz Pantalon",
+    "en": "Dry pants",
+    "img": "ttps://firebasestorage.googleapis.com/v0/b/camp-track-478616.firebasestorage.app/o/backpack%2Fdrypants.webp?alt=media"
+  },
+  {
+    "id": 41,
+    "category": "Clothing",
+    "tr": "Shorts",
+    "en": "Shorts",
+    "img": "https://firebasestorage.googleapis.com/v0/b/camp-track-478616.firebasestorage.app/o/backpack%2Fshort.webp?alt=media"
+  },
+  {
+    "id": 42,
+    "category": "Clothing",
+    "tr": "Swimsuit",
+    "en": "Swimsuit",
+    "img": "https://firebasestorage.googleapis.com/v0/b/camp-track-478616.firebasestorage.app/o/backpack%2Fswimsuit.webp?alt=media"
+  },
+  {
+    "id": 43,
+    "category": "Clothing",
+    "tr": "Fleece jacket",
+    "en": "Fleece jacket",
+    "img": "https://firebasestorage.googleapis.com/v0/b/camp-track-478616.firebasestorage.app/o/backpack%2Ffleecejacket.webp?alt=media"
+  },
+  {
+    "id": 44,
+    "category": "Clothing",
+    "tr": "Base layer",
+    "en": "Base layer",
+    "img": "https://firebasestorage.googleapis.com/v0/b/camp-track-478616.firebasestorage.app/o/backpack%2Fbaselayer.webp?alt=media"
+  },
+  {
+    "id": 170,
+    "category": "Clothing",
+    "tr": "Güneş Gözlüğü",
+    "en": "Sunglasses",
+    "img": "https://firebasestorage.googleapis.com/v0/b/camp-track-478616.firebasestorage.app/o/backpack%2Fsunglasses.webp?alt=media"
+  },
+  {
+    "id": 46,
+    "category": "Tools",
+    "tr": "Multi-tool",
+    "en": "Multi-tool",
+    "img": "https://firebasestorage.googleapis.com/v0/b/camp-track-478616.firebasestorage.app/o/backpack%2Fmultitool.webp?alt=media"
+  },
+  {
+    "id": 47,
+    "category": "Tools",
+    "tr": "Pocket knife",
+    "en": "Pocket knife",
+    "img": "https://firebasestorage.googleapis.com/v0/b/camp-track-478616.firebasestorage.app/o/backpack%2Fpocketknife.jpg?alt=media"
+  },
+  {
+    "id": 48,
+    "category": "Tools",
+    "tr": "Duct tape",
+    "en": "Duct tape",
+    "img": "https://firebasestorage.googleapis.com/v0/b/camp-track-478616.firebasestorage.app/o/backpack%2Fducttape.webp?alt=media"
+  },
+  {
+    "id": 49,
+    "category": "Tools",
+    "tr": "Paracord",
+    "en": "Paracord",
+    "img": "https://firebasestorage.googleapis.com/v0/b/camp-track-478616.firebasestorage.app/o/backpack%2Fparacord.webp?alt=media"
+  },
+  {
+    "id": 50,
+    "category": "Tools",
+    "tr": "Shovel",
+    "en": "Shovel",
+    "img": "https://firebasestorage.googleapis.com/v0/b/camp-track-478616.firebasestorage.app/o/backpack%2Fshovel.webp?alt=media"
+  },
+  {
+    "id": 52,
+    "category": "Tools",
+    "tr": "Saw",
+    "en": "Saw",
+    "img": "https://firebasestorage.googleapis.com/v0/b/camp-track-478616.firebasestorage.app/o/backpack%2Fsaw.webp?alt=media"
+  },
+  {
+    "id": 53,
+    "category": "Tools",
+    "tr": "Rope",
+    "en": "Rope",
+    "img": "https://firebasestorage.googleapis.com/v0/b/camp-track-478616.firebasestorage.app/o/backpack%2Frope.webp?alt=media"
+  },
+  {
+    "id": 54,
+    "category": "Tools",
+    "tr": "Repair kit",
+    "en": "Repair kit",
+    "img": "https://firebasestorage.googleapis.com/v0/b/camp-track-478616.firebasestorage.app/o/backpack%2Frepairkit.webp?alt=media"
+  },
+  {
+    "id": 55,
+    "category": "Tools",
+    "tr": "Zip ties",
+    "en": "Zip ties",
+    "img": "https://firebasestorage.googleapis.com/v0/b/camp-track-478616.firebasestorage.app/o/backpack%2Fzipties.webp?alt=media"
+  },
+  {
+    "id": 56,
+    "category": "Tools",
+    "tr": "Carabiner",
+    "en": "Carabiner",
+    "img": "https://firebasestorage.googleapis.com/v0/b/camp-track-478616.firebasestorage.app/o/backpack%2Fcarabiner.webp?alt=media"
+  },
+  {
+    "id": 59,
+    "category": "Tools",
+    "tr": "Compass",
+    "en": "Compass",
+    "img": "https://firebasestorage.googleapis.com/v0/b/camp-track-478616.firebasestorage.app/o/backpack%2Fcompass.webp?alt=media"
+  },
+  {
+    "id": 60,
+    "category": "Tools",
+    "tr": "Whistle",
+    "en": "Whistle",
+    "img": "https://firebasestorage.googleapis.com/v0/b/camp-track-478616.firebasestorage.app/o/backpack%2Fwhistle.webp?alt=media"
+  },
+  {
+    "id": 151,
+    "category": "Tools",
+    "tr": "Balta",
+    "en": "Hatchet",
+    "img": "https://firebasestorage.googleapis.com/v0/b/camp-track-478616.firebasestorage.app/o/backpack%2Fhatchet.webp?alt=media"
+  },
+  {
+    "id": 61,
+    "category": "Health & Safety",
+    "tr": "First aid kit",
+    "en": "First aid kit",
+    "img": "https://firebasestorage.googleapis.com/v0/b/camp-track-478616.firebasestorage.app/o/backpack%2Ffirstaidkit.webp?alt=media"
+  },
+  {
+    "id": 62,
+    "category": "Health & Safety",
+    "tr": "Bandages",
+    "en": "Bandages",
+    "img": "https://firebasestorage.googleapis.com/v0/b/camp-track-478616.firebasestorage.app/o/backpack%2Fbandages.webp?alt=media"
+  },
+  {
+    "id": 63,
+    "category": "Health & Safety",
+    "tr": "Pain reliever",
+    "en": "Pain reliever",
+    "img": "https://firebasestorage.googleapis.com/v0/b/camp-track-478616.firebasestorage.app/o/backpack%2Fpainreliever.webp?alt=media"
+  },
+  {
+    "id": 64,
+    "category": "Health & Safety",
+    "tr": "Insect repellent",
+    "en": "Insect repellent",
+    "img": "https://firebasestorage.googleapis.com/v0/b/camp-track-478616.firebasestorage.app/o/backpack%2Finsectrepellent.webp?alt=media"
+  },
+  {
+    "id": 65,
+    "category": "Health & Safety",
+    "tr": "Sunscreen",
+    "en": "Sunscreen",
+    "img": "https://firebasestorage.googleapis.com/v0/b/camp-track-478616.firebasestorage.app/o/backpack%2Fsunscreen.webp?alt=media"
+  },
+  {
+    "id": 66,
+    "category": "Health & Safety",
+    "tr": "Aloe gel",
+    "en": "Aloe jel",
+    "img": "https://firebasestorage.googleapis.com/v0/b/camp-track-478616.firebasestorage.app/o/backpack%2Faloejel.webp?alt=media"
+  },
+  {
+    "id": 67,
+    "category": "Health & Safety",
+    "tr": "Hand sanitizer",
+    "en": "Hand sanitizer",
+    "img": "https://firebasestorage.googleapis.com/v0/b/camp-track-478616.firebasestorage.app/o/backpack%2Fhandsanitizer.webp?alt=media"
+  },
+  {
+    "id": 68,
+    "category": "Health & Safety",
+    "tr": "Battaniye",
+    "en": "Blanket",
+    "img": "https://firebasestorage.googleapis.com/v0/b/camp-track-478616.firebasestorage.app/o/backpack%2Fblanket.png?alt=media"
+  },
+  {
+    "id": 69,
+    "category": "Health & Safety",
+    "tr": "Fire extinguisher",
+    "en": "Fire extinguisher",
+    "img": "https://firebasestorage.googleapis.com/v0/b/camp-track-478616.firebasestorage.app/o/backpack%2Ffireextinguisher.webp?alt=media"
+  },
+  {
+    "id": 70,
+    "category": "Health & Safety",
+    "tr": "Water purification tablets",
+    "en": "Water purification tablets",
+    "img": "https://firebasestorage.googleapis.com/v0/b/camp-track-478616.firebasestorage.app/o/backpack%2Fwaterpurificationtablets.webp?alt=media"
+  },
+  {
+    "id": 71,
+    "category": "Health & Safety",
+    "tr": "Masks",
+    "en": "Masks",
+    "img": "https://firebasestorage.googleapis.com/v0/b/camp-track-478616.firebasestorage.app/o/backpack%2Fmasks.webp?alt=media"
+  },
+  {
+    "id": 72,
+    "category": "Health & Safety",
+    "tr": "Gloves",
+    "en": "Gloves",
+    "img": "https://firebasestorage.googleapis.com/v0/b/camp-track-478616.firebasestorage.app/o/backpack%2Fgloves.webp?alt=media"
+  },
+  {
+    "id": 73,
+    "category": "Health & Safety",
+    "tr": "Tweezers",
+    "en": "Tweezers",
+    "img": "https://firebasestorage.googleapis.com/v0/b/camp-track-478616.firebasestorage.app/o/backpack%2Ftweezers.webp?alt=media"
+  },
+  {
+    "id": 74,
+    "category": "Health & Safety",
+    "tr": "Antiseptic",
+    "en": "Antiseptic",
+    "img": "https://firebasestorage.googleapis.com/v0/b/camp-track-478616.firebasestorage.app/o/backpack%2Fantiseptic.webp?alt=media"
+  },
+  {
+    "id": 76,
+    "category": "Navigation & Tech",
+    "tr": "GPS device",
+    "en": "GPS device",
+    "img": "https://firebasestorage.googleapis.com/v0/b/camp-track-478616.firebasestorage.app/o/backpack%2Fgpsdevice.webp?alt=media"
+  },
+  {
+    "id": 77,
+    "category": "Navigation & Tech",
+    "tr": "Power bank",
+    "en": "Power bank",
+    "img": "https://firebasestorage.googleapis.com/v0/b/camp-track-478616.firebasestorage.app/o/backpack%2Fpowerbank.webp?alt=media"
+  },
+  {
+    "id": 78,
+    "category": "Navigation & Tech",
+    "tr": "Solar charger",
+    "en": "Solar charger",
+    "img": "https://firebasestorage.googleapis.com/v0/b/camp-track-478616.firebasestorage.app/o/backpack%2Fsolarcharger.webp?alt=media"
+  },
+  {
+    "id": 79,
+    "category": "Navigation & Tech",
+    "tr": "Telsiz",
+    "en": "Wwalkie-Talkie",
+    "img": "https://firebasestorage.googleapis.com/v0/b/camp-track-478616.firebasestorage.app/o/backpack%2Fwalkietalkie.webp?alt=media"
+  },
+  {
+    "id": 80,
+    "category": "Navigation & Tech",
+    "tr": "Portable speaker",
+    "en": "Portable speaker",
+    "img": "https://firebasestorage.googleapis.com/v0/b/camp-track-478616.firebasestorage.app/o/backpack%2Fportablespeaker.webp?alt=media"
+  },
+  {
+    "id": 81,
+    "category": "Navigation & Tech",
+    "tr": "Camera",
+    "en": "Camera",
+    "img": "https://firebasestorage.googleapis.com/v0/b/camp-track-478616.firebasestorage.app/o/backpack%2Fcamera.webp?alt=media"
+  },
+  {
+    "id": 82,
+    "category": "Navigation & Tech",
+    "tr": "Memory card",
+    "en": "Memory card",
+    "img": "https://firebasestorage.googleapis.com/v0/b/camp-track-478616.firebasestorage.app/o/backpack%2Fmemorycard.webp?alt=media"
+  },
+  {
+    "id": 83,
+    "category": "Navigation & Tech",
+    "tr": "Tripod",
+    "en": "Tripod",
+    "img": "https://firebasestorage.googleapis.com/v0/b/camp-track-478616.firebasestorage.app/o/backpack%2Ftripod.webp?alt=media"
+  },
+  {
+    "id": 84,
+    "category": "Navigation & Tech",
+    "tr": "Drone",
+    "en": "Drone",
+    "img": "https://firebasestorage.googleapis.com/v0/b/camp-track-478616.firebasestorage.app/o/backpack%2Fdrone.webp?alt=media"
+  },
+  {
+    "id": 85,
+    "category": "Navigation & Tech",
+    "tr": "Phone mount",
+    "en": "Phone mount",
+    "img": "https://firebasestorage.googleapis.com/v0/b/camp-track-478616.firebasestorage.app/o/backpack%2Fphonemount.png?alt=media"
+  },
+  {
+    "id": 86,
+    "category": "Navigation & Tech",
+    "tr": "Charging cable",
+    "en": "Charging cable",
+    "img": "https://firebasestorage.googleapis.com/v0/b/camp-track-478616.firebasestorage.app/o/backpack%2Fchargingcable.webp?alt=media"
+  },
+  {
+    "id": 87,
+    "category": "Navigation & Tech",
+    "tr": "Car charger",
+    "en": "Car charger",
+    "img": "https://firebasestorage.googleapis.com/v0/b/camp-track-478616.firebasestorage.app/o/backpack%2Fcarcharger.webp?alt=media"
+  },
+  {
+    "id": 88,
+    "category": "Navigation & Tech",
+    "tr": "Laptop",
+    "en": "Laptop",
+    "img": "https://firebasestorage.googleapis.com/v0/b/camp-track-478616.firebasestorage.app/o/backpack%2Flaptop.webp?alt=media"
+  },
+  {
+    "id": 89,
+    "category": "Navigation & Tech",
+    "tr": "Smartwatch",
+    "en": "Smartwatch",
+    "img": "https://firebasestorage.googleapis.com/v0/b/camp-track-478616.firebasestorage.app/o/backpack%2Fsmartwatch.webp?alt=media"
+  },
+  {
+    "id": 90,
+    "category": "Navigation & Tech",
+    "tr": "Binoculars",
+    "en": "Binoculars",
+    "img": "https://firebasestorage.googleapis.com/v0/b/camp-track-478616.firebasestorage.app/o/backpack%2Fbinoculars.webp?alt=media"
+  },
+  {
+    "id": 91,
+    "category": "Personal Care",
+    "tr": "Diş Fırçası & Diş Macunu",
+    "en": "Toothbrush & Toothpaste",
+    "img": "https://firebasestorage.googleapis.com/v0/b/camp-track-478616.firebasestorage.app/o/backpack%2Ftoothbrushtoothpaste.webp?alt=media"
+  },
+  {
+    "id": 93,
+    "category": "Personal Care",
+    "tr": "Shampoo",
+    "en": "Shampoo",
+    "img": "https://firebasestorage.googleapis.com/v0/b/camp-track-478616.firebasestorage.app/o/backpack%2Fshampoo.webp?alt=media"
+  },
+  {
+    "id": 94,
+    "category": "Personal Care",
+    "tr": "Soap",
+    "en": "Soap",
+    "img": "https://firebasestorage.googleapis.com/v0/b/camp-track-478616.firebasestorage.app/o/backpack%2Fsoap.webp?alt=media"
+  },
+  {
+    "id": 97,
+    "category": "Personal Care",
+    "tr": "Deodorant",
+    "en": "Deodorant",
+    "img": "https://firebasestorage.googleapis.com/v0/b/camp-track-478616.firebasestorage.app/o/backpack%2Fdeodorant.webp?alt=media"
+  },
+  {
+    "id": 99,
+    "category": "Personal Care",
+    "tr": "Hair ties",
+    "en": "Hair ties",
+    "img": "https://firebasestorage.googleapis.com/v0/b/camp-track-478616.firebasestorage.app/o/backpack%2Fhairties.webp?alt=media"
+  },
+  {
+    "id": 100,
+    "category": "Personal Care",
+    "tr": "Shaving kit",
+    "en": "Shaving kit",
+    "img": "https://firebasestorage.googleapis.com/v0/b/camp-track-478616.firebasestorage.app/o/backpack%2Fshavingkit.webp?alt=media"
+  },
+  {
+    "id": 101,
+    "category": "Personal Care",
+    "tr": "Nail clippers",
+    "en": "Nail clippers",
+    "img": "https://firebasestorage.googleapis.com/v0/b/camp-track-478616.firebasestorage.app/o/backpack%2Fnailclippers.webp?alt=media"
+  },
+  {
+    "id": 102,
+    "category": "Personal Care",
+    "tr": "Toilet paper",
+    "en": "Toilet paper",
+    "img": "https://firebasestorage.googleapis.com/v0/b/camp-track-478616.firebasestorage.app/o/backpack%2Ftoiletpaper.webp?alt=media"
+  },
+  {
+    "id": 104,
+    "category": "Personal Care",
+    "tr": "Moisturizer",
+    "en": "Moisturizer",
+    "img": "https://firebasestorage.googleapis.com/v0/b/camp-track-478616.firebasestorage.app/o/backpack%2Fmoisturizer.webp?alt=media"
+  },
+  {
+    "id": 105,
+    "category": "Personal Care",
+    "tr": "Sponge",
+    "en": "Sponge",
+    "img": "https://firebasestorage.googleapis.com/v0/b/camp-track-478616.firebasestorage.app/o/backpack%2Fsponge.webp?alt=media"
+  },
+  {
+    "id": 106,
+    "category": "Food & Drink",
+    "tr": "Energy bars",
+    "en": "Energy bars",
+    "img": "https://firebasestorage.googleapis.com/v0/b/camp-track-478616.firebasestorage.app/o/backpack%2Fenergy%20bars.webp?alt=media"
+  },
+  {
+    "id": 107,
+    "category": "Food & Drink",
+    "tr": "Trail mix",
+    "en": "Trail mix",
+    "img": "https://firebasestorage.googleapis.com/v0/b/camp-track-478616.firebasestorage.app/o/backpack%2Ftrailmix.webp?alt=media"
+  },
+  {
+    "id": 108,
+    "category": "Food & Drink",
+    "tr": "Instant noodles",
+    "en": "Instant noodles",
+    "img": "https://firebasestorage.googleapis.com/v0/b/camp-track-478616.firebasestorage.app/o/backpack%2Finstantnoodles.webp?alt=media"
+  },
+  {
+    "id": 109,
+    "category": "Food & Drink",
+    "tr": "Canned beans",
+    "en": "Canned beans",
+    "img": "https://firebasestorage.googleapis.com/v0/b/camp-track-478616.firebasestorage.app/o/backpack%2Fcannedbeans.png?alt=media"
+  },
+  {
+    "id": 110,
+    "category": "Food & Drink",
+    "tr": "Rice",
+    "en": "Rice",
+    "img": "https://firebasestorage.googleapis.com/v0/b/camp-track-478616.firebasestorage.app/o/backpack%2Frice.png?alt=media"
+  },
+  {
+    "id": 111,
+    "category": "Food & Drink",
+    "tr": "Pasta",
+    "en": "Pasta",
+    "img": "https://firebasestorage.googleapis.com/v0/b/camp-track-478616.firebasestorage.app/o/backpack%2Fpasta.png?alt=media"
+  },
+  {
+    "id": 112,
+    "category": "Food & Drink",
+    "tr": "Tea",
+    "en": "Tea",
+    "img": "https://firebasestorage.googleapis.com/v0/b/camp-track-478616.firebasestorage.app/o/backpack%2Ftea.png?alt=media"
+  },
+  {
+    "id": 113,
+    "category": "Food & Drink",
+    "tr": "Coffee",
+    "en": "Coffee",
+    "img": "https://firebasestorage.googleapis.com/v0/b/camp-track-478616.firebasestorage.app/o/backpack%2Fcoffee.webp?alt=media"
+  },
+  {
+    "id": 114,
+    "category": "Food & Drink",
+    "tr": "Salt",
+    "en": "Salt",
+    "img": "https://firebasestorage.googleapis.com/v0/b/camp-track-478616.firebasestorage.app/o/backpack%2Fsalt.webp?alt=media"
+  },
+  {
+    "id": 115,
+    "category": "Food & Drink",
+    "tr": "Sugar",
+    "en": "Sugar",
+    "img": "https://firebasestorage.googleapis.com/v0/b/camp-track-478616.firebasestorage.app/o/backpack%2Fsugar.webp?alt=media"
+  },
+  {
+    "id": 116,
+    "category": "Food & Drink",
+    "tr": "Oil",
+    "en": "Oil",
+    "img": "https://firebasestorage.googleapis.com/v0/b/camp-track-478616.firebasestorage.app/o/backpack%2Foil.webp?alt=media"
+  },
+  {
+    "id": 117,
+    "category": "Food & Drink",
+    "tr": "Bread",
+    "en": "Bread",
+    "img": "https://firebasestorage.googleapis.com/v0/b/camp-track-478616.firebasestorage.app/o/backpack%2Fbread.webp?alt=media"
+  },
+  {
+    "id": 118,
+    "category": "Food & Drink",
+    "tr": "Snacks",
+    "en": "Snacks",
+    "img": "https://firebasestorage.googleapis.com/v0/b/camp-track-478616.firebasestorage.app/o/backpack%2Fsnacks.png?alt=media"
+  },
+  {
+    "id": 119,
+    "category": "Food & Drink",
+    "tr": "Peanut butter",
+    "en": "Peanut butter",
+    "img": "https://firebasestorage.googleapis.com/v0/b/camp-track-478616.firebasestorage.app/o/backpack%2Fpeanut%20butter.png?alt=media"
+  },
+  {
+    "id": 120,
+    "category": "Food & Drink",
+    "tr": "Dried fruit",
+    "en": "Dried fruit",
+    "img": "https://firebasestorage.googleapis.com/v0/b/camp-track-478616.firebasestorage.app/o/backpack%2Fdried%20fruit.png?alt=media"
+  },
+  {
+    "id": 121,
+    "category": "Emergency Items",
+    "tr": "Radio",
+    "en": "Radio",
+    "img": "https://firebasestorage.googleapis.com/v0/b/camp-track-478616.firebasestorage.app/o/backpack%2Fradio.webp?alt=media"
+  },
+  {
+    "id": 122,
+    "category": "Emergency Items",
+    "tr": "Flare",
+    "en": "Flare",
+    "img": "https://firebasestorage.googleapis.com/v0/b/camp-track-478616.firebasestorage.app/o/backpack%2Fflare.webp?alt=media"
+  },
+  {
+    "id": 123,
+    "category": "Emergency Items",
+    "tr": "Signal mirror",
+    "en": "Signal mirror",
+    "img": "https://firebasestorage.googleapis.com/v0/b/camp-track-478616.firebasestorage.app/o/backpack%2Fsignalmirror.webp?alt=media"
+  },
+  {
+    "id": 125,
+    "category": "Emergency Items",
+    "tr": "Heat packs",
+    "en": "Heat packs",
+    "img": "https://firebasestorage.googleapis.com/v0/b/camp-track-478616.firebasestorage.app/o/backpack%2Fheatpack.webp?alt=media"
+  },
+  {
+    "id": 128,
+    "category": "Emergency Items",
+    "tr": "Map",
+    "en": "Map",
+    "img": "https://firebasestorage.googleapis.com/v0/b/camp-track-478616.firebasestorage.app/o/backpack%2Fmap.webp?alt=media"
+  },
+  {
+    "id": 129,
+    "category": "Emergency Items",
+    "tr": "Notebook",
+    "en": "Notebook",
+    "img": "https://firebasestorage.googleapis.com/v0/b/camp-track-478616.firebasestorage.app/o/backpack%2Fnotebook.png?alt=media"
+  },
+  {
+    "id": 130,
+    "category": "Emergency Items",
+    "tr": "Pen",
+    "en": "Pen",
+    "img": "https://firebasestorage.googleapis.com/v0/b/camp-track-478616.firebasestorage.app/o/backpack%2Fpen.webp?alt=media"
+  },
+  {
+    "id": 131,
+    "category": "Emergency Items",
+    "tr": "Knife sharpener",
+    "en": "Knife sharpener",
+    "img": "https://firebasestorage.googleapis.com/v0/b/camp-track-478616.firebasestorage.app/o/backpack%2Fknifesharpener.webp?alt=media"
+  },
+  {
+    "id": 132,
+    "category": "Emergency Items",
+    "tr": "Bear spray",
+    "en": "Bear spray",
+    "img": "https://firebasestorage.googleapis.com/v0/b/camp-track-478616.firebasestorage.app/o/backpack%2Fbearspray.webp?alt=media"
+  },
+  {
+    "id": 135,
+    "category": "Emergency Items",
+    "tr": "Life jacket",
+    "en": "Life jacket",
+    "img": "https://firebasestorage.googleapis.com/v0/b/camp-track-478616.firebasestorage.app/o/backpack%2Flifejacket.webp?alt=media"
+  },
+  {
+    "id": 136,
+    "category": "Games & Activities",
+    "tr": "Playing cards",
+    "en": "Playing cards",
+    "img": "https://firebasestorage.googleapis.com/v0/b/camp-track-478616.firebasestorage.app/o/backpack%2Fplayingcards.webp?alt=media"
+  },
+  {
+    "id": 137,
+    "category": "Games & Activities",
+    "tr": "Frisbee",
+    "en": "Frisbee",
+    "img": "https://firebasestorage.googleapis.com/v0/b/camp-track-478616.firebasestorage.app/o/backpack%2Ffrisbee.webp?alt=media"
+  },
+  {
+    "id": 139,
+    "category": "Games & Activities",
+    "tr": "Board game",
+    "en": "Board game",
+    "img": "https://firebasestorage.googleapis.com/v0/b/camp-track-478616.firebasestorage.app/o/backpack%2Fboardgame.png?alt=media"
+  },
+  {
+    "id": 140,
+    "category": "Games & Activities",
+    "tr": "Chess set",
+    "en": "Chess",
+    "img": "https://firebasestorage.googleapis.com/v0/b/camp-track-478616.firebasestorage.app/o/backpack%2Fchess.webp?alt=media"
+  },
+  {
+    "id": 141,
+    "category": "Games & Activities",
+    "tr": "Fishing rod",
+    "en": "Fishing rod",
+    "img": "https://firebasestorage.googleapis.com/v0/b/camp-track-478616.firebasestorage.app/o/backpack%2Ffishingrod.webp?alt=media"
+  },
+  {
+    "id": 142,
+    "category": "Games & Activities",
+    "tr": "Bait",
+    "en": "Bait",
+    "img": "https://firebasestorage.googleapis.com/v0/b/camp-track-478616.firebasestorage.app/o/backpack%2Fbait.webp?alt=media"
+  },
+  {
+    "id": 143,
+    "category": "Games & Activities",
+    "tr": "Books",
+    "en": "Books",
+    "img": "https://firebasestorage.googleapis.com/v0/b/camp-track-478616.firebasestorage.app/o/backpack%2Fbooks.webp?alt=media"
+  },
+  {
+    "id": 146,
+    "category": "Games & Activities",
+    "tr": "Portable projector",
+    "en": "Portable projector",
+    "img": "https://firebasestorage.googleapis.com/v0/b/camp-track-478616.firebasestorage.app/o/backpack%2Fportableprojector.webp?alt=media"
+  },
+  {
+    "id": 147,
+    "category": "Games & Activities",
+    "tr": "Bluetooth karaoke mic",
+    "en": "Bluetooth karaoke mic",
+    "img": "https://firebasestorage.googleapis.com/v0/b/camp-track-478616.firebasestorage.app/o/backpack%2Fkaraokemic.webp?alt=media"
+  },
+  {
+    "id": 148,
+    "category": "Games & Activities",
+    "tr": "Domino set",
+    "en": "Domino set",
+    "img": "https://firebasestorage.googleapis.com/v0/b/camp-track-478616.firebasestorage.app/o/backpack%2Fdominoset.webp?alt=media"
+  },
+  {
+    "id": 149,
+    "category": "Games & Activities",
+    "tr": "Puzzle",
+    "en": "Puzzles",
+    "img": "https://firebasestorage.googleapis.com/v0/b/camp-track-478616.firebasestorage.app/o/backpack%2Fpuzzles.webp?alt=media"
+  },
+  {
+    "id": 150,
+    "category": "Games & Activities",
+    "tr": "Toplar",
+    "en": "Balls",
+    "img": "https://firebasestorage.googleapis.com/v0/b/camp-track-478616.firebasestorage.app/o/backpack%2Fballs.webp?alt=media"
+  }
+]
