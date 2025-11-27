@@ -12,6 +12,7 @@ import { useRouter } from "expo-router";
 import axios from "axios";
 import { useDispatch, useSelector } from "react-redux";
 import { setOnboardScreen } from "../redux/onboardSlice";
+import i18n from "./language";
 
 export default function Register() {
   const router = useRouter();
@@ -127,11 +128,11 @@ export default function Register() {
       ) : null}
 
       <TouchableOpacity style={styles.registerBtn} onPress={handleRegister}>
-        <Text style={styles.registerText}>Register</Text>
+        <Text style={styles.registerText}>{i18n.t("register")}</Text>
       </TouchableOpacity>
 
       <TouchableOpacity onPress={() => router.replace("/login")}>
-        <Text style={styles.loginLink}>Log In</Text>
+        <Text style={styles.loginLink}>{i18n.t("login")}</Text>
       </TouchableOpacity>
     </KeyboardAvoidingView>
   );

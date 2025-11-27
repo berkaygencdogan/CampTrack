@@ -4,29 +4,31 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as Localization from "expo-localization";
 import ImmersiveMode from "react-native-immersive-mode";
 import { useSelector } from "react-redux";
+import * as SplashScreen from "expo-splash-screen";
+import { Image, StyleSheet, View } from "react-native";
 
 export default function Index() {
   const [loading, setLoading] = useState(true);
-  const [splashDone, setSplashDone] = useState(false);
+
   const seenOnboarding = useSelector(
     (state) => state.onboard.showOnboardScreen
   );
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const isLoggedIn = useSelector((state) => state.user.isLoggedIn);
+
+  const loadingGif = require("../src/assets/images/loadingScreen.gif");
 
   useEffect(() => {
-    ImmersiveMode.fullLayout(true);
-    ImmersiveMode.setBarMode("BottomSticky");
-
     const init = async () => {
-      // 1) Splash beklet
-      await new Promise((res) => setTimeout(res, 3000));
-      setSplashDone(true);
+      ImmersiveMode.fullLayout(true);
+      ImmersiveMode.setBarMode("BottomSticky");
 
-      // 3) Login kontrolü
-      const token = await AsyncStorage.getItem("token");
-      setIsLoggedIn(!!token);
+      // Native splash kapanıyor
+      await SplashScreen.hideAsync();
 
-      // 4) Dil tespiti
+      // 2-3 saniye splash görünmesi için küçük delay
+      await new Promise((res) => setTimeout(res, 2000));
+
+      // Dil
       const locales = Localization.getLocales();
       const langCode = locales?.[0]?.languageCode || "en";
       const appLang = langCode === "tr" ? "tr" : "en";
@@ -38,22 +40,38 @@ export default function Index() {
     init();
   }, []);
 
-  console.log(seenOnboarding, loading, splashDone);
+  // 🔥 Splash ekranı göster
+  if (loading) {
+    return (
+      <View style={styles.container}>
+        <Image source={loadingGif} style={styles.gif} resizeMode="cover" />
+      </View>
+    );
+  }
 
+  // 🔥 Onboarding
   if (!seenOnboarding) {
     return <Redirect href="/onboarding" />;
   }
 
-  // 🔥 İlk açılış: Splash göster
-  if (loading || !splashDone) {
-    return <Redirect href="/splash" />;
-  }
-
-  // 🔥 Eğer kullanıcı giriş yaptıysa → Home
+  // 🔥 Kullanıcı giriş yaptıysa → Home
   if (isLoggedIn) {
     return <Redirect href="/home" />;
   }
 
-  // 🔥 Onboarding görüldü ama login yok → login sayfası
+  // 🔥 Giriş yapılmadı → Login
   return <Redirect href="/login" />;
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "#000",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  gif: {
+    width: "100%",
+    height: "100%",
+  },
+});

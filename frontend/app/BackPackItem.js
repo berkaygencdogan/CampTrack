@@ -3,6 +3,7 @@ import React from "react";
 import { useDispatch, useSelector } from "react-redux";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { syncRemoveItem } from "../api/backpackApi";
+import i18n from "./language";
 
 export default function BackPackItem({ item }) {
   const dispatch = useDispatch();
@@ -13,8 +14,8 @@ export default function BackPackItem({ item }) {
       <Image source={{ uri: item.img }} style={styles.img} />
 
       <View style={{ flex: 1 }}>
-        <Text style={styles.name}>{item.tr}</Text>
-        <Text style={styles.category}>{item.category}</Text>
+        <Text style={styles.name}>{i18n.t(item.name)}</Text>
+        <Text style={styles.category}>{i18n.t(item.category)}</Text>
       </View>
 
       <TouchableOpacity

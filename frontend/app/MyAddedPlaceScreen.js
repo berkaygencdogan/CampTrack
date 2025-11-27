@@ -11,6 +11,7 @@ import {
 } from "react-native";
 import { useSelector } from "react-redux";
 import PlaceCard from "./PlaceCard";
+import i18n from "./language";
 
 export default function MyAddedPlaceScreen() {
   const router = useRouter();
@@ -55,10 +56,10 @@ export default function MyAddedPlaceScreen() {
           <TouchableOpacity onPress={() => router.back()}>
             <Ionicons name="chevron-back" size={26} color="black" />
           </TouchableOpacity>
-          <Text style={styles.headerText}>My Favorite Places</Text>
+          <Text style={styles.headerText}>{i18n.t("myfavoriteplaces")}</Text>
         </View>
         <Text style={{ fontSize: 17, color: "#777" }}>
-          Henüz eklediğin bir yer yok.
+          {i18n.t("notplacesyet")}
         </Text>
       </View>
     );
@@ -70,7 +71,7 @@ export default function MyAddedPlaceScreen() {
         <TouchableOpacity onPress={() => router.back()}>
           <Ionicons name="chevron-back" size={26} color="black" />
         </TouchableOpacity>
-        <Text style={styles.headerText}>My Added Places</Text>
+        <Text style={styles.headerText}>{i18n.t("myaddedplaces")}</Text>
       </View>
       <FlatList
         data={places}

@@ -4,13 +4,14 @@ import {
   Modal,
   FlatList,
   TouchableOpacity,
-  Image,
   StyleSheet,
 } from "react-native";
+import { Image } from "expo-image";
 import React, { useState } from "react";
 import itemsData from "../src/assets/items.json";
 import { useDispatch, useSelector } from "react-redux";
 import { syncAddItem } from "../api/backpackApi";
+import i18n from "./language/index";
 
 export default function AddItemsModal({ visible, onClose }) {
   const dispatch = useDispatch();
@@ -38,11 +39,18 @@ export default function AddItemsModal({ visible, onClose }) {
   return (
     <Modal visible={visible} animationType="slide">
       <View style={styles.container}>
-        <Text style={styles.title}>Add Items</Text>
+        <Text style={styles.title}>{i18n.t("addItems")}</Text>
+        <TouchableOpacity style={styles.closeBtn} onPress={onClose}>
+          <Text style={styles.closeText}>{i18n.t("close")}</Text>
+        </TouchableOpacity>
 
         <FlatList
           data={itemsData}
           keyExtractor={(item) => item.id.toString()}
+          removeClippedSubviews={false}
+          initialNumToRender={20}
+          maxToRenderPerBatch={20}
+          windowSize={10}
           renderItem={({ item }) => {
             const isSelected = selected.some((x) => x.id === item.id);
             return (
@@ -50,10 +58,15 @@ export default function AddItemsModal({ visible, onClose }) {
                 style={[styles.itemRow, isSelected && styles.selected]}
                 onPress={() => toggleSelect(item)}
               >
-                <Image source={{ uri: item.img }} style={styles.img} />
+                <Image
+                  source={{ uri: item.img }}
+                  style={styles.img}
+                  cachePolicy="disk"
+                  transition={200}
+                />
                 <View style={{ flex: 1 }}>
-                  <Text style={styles.name}>{item.tr}</Text>
-                  <Text style={styles.category}>{item.category}</Text>
+                  <Text style={styles.name}>{i18n.t(item.name)}</Text>
+                  <Text style={styles.category}>{i18n.t(item.category)}</Text>
                 </View>
 
                 {isSelected && <Text style={styles.check}>✓</Text>}
@@ -63,11 +76,7 @@ export default function AddItemsModal({ visible, onClose }) {
         />
 
         <TouchableOpacity style={styles.saveBtn} onPress={confirmAdd}>
-          <Text style={styles.saveText}>Add Selected</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity style={styles.closeBtn} onPress={onClose}>
-          <Text style={styles.closeText}>Close</Text>
+          <Text style={styles.saveText}>{i18n.t("addselected")}</Text>
         </TouchableOpacity>
       </View>
     </Modal>
@@ -110,10 +119,10 @@ const styles = StyleSheet.create({
     padding: 15,
     borderRadius: 12,
     alignItems: "center",
-    marginVertical: 10,
+    marginVertical: 40,
   },
   saveText: { color: "#fff", fontSize: 16, fontWeight: "600" },
 
-  closeBtn: { alignItems: "center", padding: 10 },
+  closeBtn: { position: "absolute", right: 40, top: 50 },
   closeText: { fontSize: 16, color: "red" },
 });

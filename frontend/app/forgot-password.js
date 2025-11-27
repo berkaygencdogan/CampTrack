@@ -9,6 +9,7 @@ import {
   Platform,
 } from "react-native";
 import { useRouter } from "expo-router";
+import i18n from "./language/index";
 
 export default function ForgotPassword() {
   const router = useRouter();
@@ -59,13 +60,11 @@ export default function ForgotPassword() {
         <Text style={styles.backArrow}>←</Text>
       </TouchableOpacity>
 
-      <Text style={styles.title}>Forgot Password</Text>
+      <Text style={styles.title}>{i18n.t("forgotpassword")}</Text>
 
-      <Text style={styles.desc}>
-        Enter your phone number below. We will send you a verification code.
-      </Text>
+      <Text style={styles.desc}>{i18n.t("enterphone")}</Text>
 
-      <Text style={styles.label}>Phone</Text>
+      <Text style={styles.label}>{i18n.t("phone")}</Text>
 
       <TextInput
         placeholder="+1 | 202-555-0174"
@@ -86,7 +85,9 @@ export default function ForgotPassword() {
         onPress={sendOTP}
         disabled={loading}
       >
-        <Text style={styles.sendText}>{loading ? "Sending..." : "Send"}</Text>
+        <Text style={styles.sendText}>
+          {loading ? i18n.t("sending") : i18n.t("send")}
+        </Text>
       </TouchableOpacity>
     </KeyboardAvoidingView>
   );

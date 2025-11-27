@@ -1,16 +1,9 @@
-import {
-  View,
-  Text,
-  Image,
-  StyleSheet,
-  ScrollView,
-  TouchableOpacity,
-  FlatList,
-} from "react-native";
-import { useLocalSearchParams, useRouter } from "expo-router";
 import Ionicons from "@expo/vector-icons/Ionicons";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
+import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { useSelector } from "react-redux";
+import i18n from "./language/index";
 
 export default function LocationDetail() {
   const router = useRouter();
@@ -90,7 +83,7 @@ export default function LocationDetail() {
   if (loading) {
     return (
       <View style={styles.loading}>
-        <Text style={{ fontSize: 18 }}>Loading...</Text>
+        <Text style={{ fontSize: 18 }}>{i18n.t("loading")}</Text>
       </View>
     );
   }
@@ -98,7 +91,9 @@ export default function LocationDetail() {
   if (!place) {
     return (
       <View style={styles.loading}>
-        <Text style={{ fontSize: 18, color: "red" }}>Place not found</Text>
+        <Text style={{ fontSize: 18, color: "red" }}>
+          {i18n.t("placenotfound")}
+        </Text>
       </View>
     );
   }
@@ -151,7 +146,7 @@ export default function LocationDetail() {
           style={styles.selectBtn}
           onPress={() => console.log("LOCATION SELECTED")}
         >
-          <Text style={styles.selectText}>Added My Visit Places</Text>
+          <Text style={styles.selectText}>{i18n.t("addedvisitplace")}</Text>
         </TouchableOpacity>
       </View>
     </View>

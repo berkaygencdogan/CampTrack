@@ -13,6 +13,7 @@ import {
 import { useDispatch, useSelector } from "react-redux";
 import { setAuthData } from "../redux/userSlice";
 import { setOnboardScreen } from "../redux/onboardSlice";
+import i18n from "./language";
 
 export default function Login() {
   const router = useRouter();
@@ -28,7 +29,6 @@ export default function Login() {
     dispatch(setOnboardScreen(true));
   }
   const loginWithEmail = async () => {
-    console.log("girdi");
     setError("");
 
     const cleanEmail = email.trim();
@@ -120,13 +120,13 @@ export default function Login() {
       {error ? <Text style={styles.errorText}>! {error}</Text> : null}
 
       <TouchableOpacity style={styles.loginBtn} onPress={loginWithEmail}>
-        <Text style={styles.loginText}>Log in</Text>
+        <Text style={styles.loginText}>{i18n.t("login")}</Text>
       </TouchableOpacity>
 
       <TouchableOpacity onPress={() => router.push("/register")}>
         <Text style={styles.registerText}>
-          Don’t have an Account?{" "}
-          <Text style={styles.registerLink}>Register</Text>
+          {i18n.t("haveaccount")}
+          <Text style={styles.registerLink}>{i18n.t("register")}</Text>
         </Text>
       </TouchableOpacity>
     </KeyboardAvoidingView>

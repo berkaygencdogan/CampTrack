@@ -9,6 +9,7 @@ import {
   Platform,
 } from "react-native";
 import { useRouter, useLocalSearchParams } from "expo-router";
+import i18n from "./language";
 
 export default function NewPassword() {
   const router = useRouter();
@@ -71,14 +72,11 @@ export default function NewPassword() {
         <Text style={styles.backArrow}>←</Text>
       </TouchableOpacity>
 
-      <Text style={styles.title}>New Password</Text>
+      <Text style={styles.title}>{i18n.t("newpassword")}</Text>
 
-      <Text style={styles.desc}>
-        Enter your new password below and please {"\n"}
-        don’t forget it. Make sure to remember it.
-      </Text>
+      <Text style={styles.desc}>{i18n.t("enternewpassword")}</Text>
 
-      <Text style={styles.label}>Set Password</Text>
+      <Text style={styles.label}>{i18n.t("setpassword")}</Text>
 
       <TextInput
         value={password}
@@ -102,7 +100,9 @@ export default function NewPassword() {
         onPress={handleSend}
         disabled={loading}
       >
-        <Text style={styles.sendText}>{loading ? "Saving..." : "Send"}</Text>
+        <Text style={styles.sendText}>
+          {loading ? i18n.t("saving") : i18n.t("send")}
+        </Text>
       </TouchableOpacity>
     </KeyboardAvoidingView>
   );

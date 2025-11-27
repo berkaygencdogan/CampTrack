@@ -36,6 +36,7 @@ export default function Backpack() {
         <FlatList
           data={items}
           keyExtractor={(item) => item.id.toString()}
+          removeClippedSubviews={false}
           renderItem={({ item }) => <BackPackItem item={item} />}
         />
       )}

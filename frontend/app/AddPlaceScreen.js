@@ -14,6 +14,7 @@ import * as ImagePicker from "expo-image-picker";
 import { useRouter } from "expo-router";
 import { GoogleMaps } from "expo-maps";
 import { useSelector } from "react-redux";
+import i18n from "./language/index";
 
 export default function AddPlaceScreen() {
   const router = useRouter();
@@ -98,10 +99,10 @@ export default function AddPlaceScreen() {
   return (
     <View style={{ flex: 1 }}>
       <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
-        <Text style={styles.header}>Add New Place</Text>
+        <Text style={styles.header}>{i18n.t("addnewplace")}</Text>
 
         {/* NAME */}
-        <Text style={styles.label}>Name</Text>
+        <Text style={styles.label}>{i18n.t("name")}</Text>
         <TextInput
           style={styles.input}
           placeholder="Kelebekler Vadisi"
@@ -110,7 +111,7 @@ export default function AddPlaceScreen() {
         />
 
         {/* CITY */}
-        <Text style={styles.label}>City</Text>
+        <Text style={styles.label}>{i18n.t("city")}</Text>
         <TextInput
           style={styles.input}
           placeholder="Muğla"
@@ -119,7 +120,7 @@ export default function AddPlaceScreen() {
         />
 
         {/* DESCRIPTION */}
-        <Text style={styles.label}>Description</Text>
+        <Text style={styles.label}>{i18n.t("desc")}</Text>
         <TextInput
           style={[styles.input, { height: 100 }]}
           placeholder="Write description..."
@@ -129,7 +130,7 @@ export default function AddPlaceScreen() {
         />
 
         {/* LOCATION */}
-        <Text style={styles.label}>Location</Text>
+        <Text style={styles.label}>{i18n.t("location")}</Text>
 
         <TouchableOpacity style={styles.outlineBtn} onPress={openMap}>
           <Text style={styles.outlineText}>
@@ -138,10 +139,10 @@ export default function AddPlaceScreen() {
         </TouchableOpacity>
 
         {/* PHOTOS */}
-        <Text style={styles.label}>Photos</Text>
+        <Text style={styles.label}>{i18n.t("photos")}</Text>
 
         <TouchableOpacity style={styles.outlineBtn} onPress={pickPhotos}>
-          <Text style={styles.outlineText}>Add Photos</Text>
+          <Text style={styles.outlineText}>{i18n.t("addphotos")}</Text>
         </TouchableOpacity>
 
         {photos.length > 0 && (
@@ -158,7 +159,7 @@ export default function AddPlaceScreen() {
 
         {/* SUBMIT */}
         <TouchableOpacity style={styles.saveBtn} onPress={submitPlace}>
-          <Text style={styles.saveText}>Submit</Text>
+          <Text style={styles.saveText}>{i18n.t("submit")}</Text>
         </TouchableOpacity>
       </ScrollView>
 
@@ -182,14 +183,14 @@ export default function AddPlaceScreen() {
               style={[styles.mapBtn, { backgroundColor: "#ccc" }]}
               onPress={() => setMapVisible(false)}
             >
-              <Text style={styles.mapBtnText}>Cancel</Text>
+              <Text style={styles.mapBtnText}>{i18n.t("cancel")}</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
               style={[styles.mapBtn, { backgroundColor: "#7CC540" }]}
               onPress={selectLocation}
             >
-              <Text style={styles.mapBtnText}>Select</Text>
+              <Text style={styles.mapBtnText}>{i18n.t("select")}</Text>
             </TouchableOpacity>
           </View>
         </View>

@@ -10,6 +10,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { useFocusEffect, useRouter } from "expo-router";
 import Ionicons from "@expo/vector-icons/Ionicons";
+import i18n from "./language/index";
 
 export default function Favorites() {
   const router = useRouter();
@@ -42,7 +43,7 @@ export default function Favorites() {
         <TouchableOpacity onPress={() => router.back()}>
           <Ionicons name="chevron-back" size={26} color="black" />
         </TouchableOpacity>
-        <Text style={styles.headerText}>My Favorite Places</Text>
+        <Text style={styles.headerText}>{i18n.t("myfavoriteplaces")}</Text>
       </View>
       <FlatList
         data={favorites}
