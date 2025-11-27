@@ -10,6 +10,8 @@ import {
 } from "react-native";
 import { useRouter } from "expo-router";
 import axios from "axios";
+import { useDispatch, useSelector } from "react-redux";
+import { setOnboardScreen } from "../redux/onboardSlice";
 
 export default function Register() {
   const router = useRouter();
@@ -20,7 +22,14 @@ export default function Register() {
   const [pass, setPass] = useState("");
   const [emailError, setEmailError] = useState("");
   const [generalError, setGeneralError] = useState("");
+  const dispatch = useDispatch();
+  const seenOnboarding = useSelector(
+    (state) => state.onboard.showOnboardScreen
+  );
 
+  if (!seenOnboarding) {
+    dispatch(setOnboardScreen(true));
+  }
   const handleRegister = async () => {
     setGeneralError("");
     setEmailError("");

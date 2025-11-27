@@ -1,3 +1,5 @@
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import axios from "axios";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import {
@@ -8,20 +10,25 @@ import {
   TextInput,
   TouchableOpacity,
 } from "react-native";
-import axios from "axios";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { setAuthData } from "../redux/userSlice";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import { setOnboardScreen } from "../redux/onboardSlice";
 
 export default function Login() {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [pass, setPass] = useState("");
   const [error, setError] = useState("");
-
   const dispatch = useDispatch();
+  const seenOnboarding = useSelector(
+    (state) => state.onboard.showOnboardScreen
+  );
 
+  if (!seenOnboarding) {
+    dispatch(setOnboardScreen(true));
+  }
   const loginWithEmail = async () => {
+    console.log("girdi");
     setError("");
 
     const cleanEmail = email.trim();
