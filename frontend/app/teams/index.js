@@ -5,6 +5,7 @@ import {
   StyleSheet,
   FlatList,
   TouchableOpacity,
+  Image,
 } from "react-native";
 import { useRouter } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -41,36 +42,77 @@ export default function TeamsIndex() {
     }
   };
 
-  // Tek bir takım kartı
-  const renderTeam = ({ item }) => (
-    <TouchableOpacity
-      style={styles.teamCard}
-      onPress={() => router.push(`/teams/${item.id}`)}
-    >
-      <Text style={styles.teamName}>{item.name}</Text>
-      <Text style={styles.memberCount}>{item.members.length || 1} members</Text>
-    </TouchableOpacity>
-  );
+  // ========= TEAM CARD =========
+  const renderTeam = ({ item }) => {
+    const members = item.members || [];
+    const avatarsToShow = members.slice(0, 5); // max 5 kişinin resmi
+
+    return (
+      <TouchableOpacity
+        style={styles.teamCard}
+        onPress={() => router.push(`/teams/${item.id}`)}
+      >
+        {/* SOL LOGO */}
+        <Image
+          source={{
+            uri: item.logo || "https://via.placeholder.com/100",
+          }}
+          style={styles.logo}
+        />
+
+        {/* SAĞ BİLGİLER */}
+        <View style={{ flex: 1, marginLeft: 12 }}>
+          {/* Takım adı */}
+          <Text style={styles.teamName}>{item.teamName}</Text>
+
+          {/* Üye avatarları */}
+          <View style={styles.avatarRow}>
+            {avatarsToShow.map((uid) => (
+              <Image
+                key={uid}
+                source={{
+                  uri:
+                    item.userMap?.[uid]?.avatar ||
+                    `https://ui-avatars.com/api/?name=${
+                      item.userMap?.[uid]?.name || "U"
+                    }`,
+                }}
+                style={styles.avatar}
+              />
+            ))}
+
+            {/* Fazla kişi varsa ... */}
+            {members.length > 5 && (
+              <Text style={styles.moreText}>+{members.length - 5}</Text>
+            )}
+          </View>
+
+          {/* Sağ altta kişi sayısı */}
+          <Text style={styles.memberCount}>{members.length} members</Text>
+        </View>
+      </TouchableOpacity>
+    );
+  };
 
   return (
     <View style={styles.container}>
-      {/* HEADER */}
       <Text style={styles.header}>My Teams</Text>
 
-      {teams && (
+      {teams.length > 0 ? (
         <FlatList
           data={teams}
           keyExtractor={(item) => item.id}
           renderItem={renderTeam}
           contentContainerStyle={{ paddingBottom: 100 }}
         />
+      ) : (
+        <NoTeams />
       )}
-      {!teams && <NoTeams />}
 
       {/* ADD TEAM BUTTON */}
       <TouchableOpacity
         style={styles.addBtn}
-        onPress={() => router.push("/teams/add")}
+        onPress={() => router.push("/teams/create")}
       >
         <Text style={styles.plus}>+</Text>
       </TouchableOpacity>
@@ -93,14 +135,20 @@ const styles = StyleSheet.create({
     fontWeight: "700",
     marginBottom: 20,
     textAlign: "center",
-    flex: 0.1,
   },
 
   teamCard: {
-    backgroundColor: "#F3F3F3",
-    padding: 18,
-    borderRadius: 14,
+    flexDirection: "row",
+    backgroundColor: "#F6F6F6",
+    padding: 12,
+    borderRadius: 12,
     marginBottom: 15,
+  },
+
+  logo: {
+    width: 75,
+    height: 75,
+    borderRadius: 12,
   },
 
   teamName: {
@@ -109,9 +157,29 @@ const styles = StyleSheet.create({
   },
 
   memberCount: {
+    fontSize: 13,
+    color: "#777",
+    marginTop: 8,
+  },
+
+  avatarRow: {
+    flexDirection: "row",
+    marginTop: 6,
+    alignItems: "center",
+  },
+
+  avatar: {
+    width: 28,
+    height: 28,
+    borderRadius: 40,
+    marginRight: 5,
+  },
+
+  moreText: {
     fontSize: 14,
-    color: "#888",
-    marginTop: 4,
+    fontWeight: "700",
+    color: "#555",
+    marginLeft: 4,
   },
 
   addBtn: {

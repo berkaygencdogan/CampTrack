@@ -80,7 +80,7 @@ export default function TeamDetail() {
         <TouchableOpacity onPress={() => router.back()}>
           <Image source={BackArrow} style={{ fontSize: 24 }}></Image>
         </TouchableOpacity>
-        <Text style={styles.headerText}>{team.name}</Text>
+        <Text style={styles.headerText}>{team.teamName}</Text>
 
         <TouchableOpacity
           onPress={() => router.push(`/teams/invite?teamId=${teamId}`)}

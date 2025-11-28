@@ -1,5 +1,5 @@
-import { useRouter } from "expo-router";
-import { useEffect, useState } from "react";
+import { useFocusEffect, useRouter } from "expo-router";
+import { useCallback, useState } from "react";
 import {
   FlatList,
   ScrollView,
@@ -59,11 +59,13 @@ export default function Home() {
     }
   };
 
-  useEffect(() => {
-    fetchPopular();
-    fetchNew();
-    fetchAll();
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      fetchPopular();
+      fetchNew();
+      fetchAll();
+    }, [])
+  );
 
   // -----------------------------------------------------------
   // CARD COMPONENT

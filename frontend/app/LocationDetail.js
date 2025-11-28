@@ -11,7 +11,7 @@ import {
 } from "react-native";
 import { useSelector } from "react-redux";
 import i18n from "./language/index";
-
+import VisitsModal from "./VisitsModal";
 import CommentsModal from "./CommentsModal"; // 🔥 YORUM MODAL
 
 export default function LocationDetail() {
@@ -194,22 +194,12 @@ export default function LocationDetail() {
         placeId={id}
       />
 
-      {/* 🔥 VISITED PLACE MODAL — Sen dolduracaksın */}
-      <Modal visible={visitModalVisible} animationType="slide">
-        <View style={styles.visitModal}>
-          <Text style={{ fontSize: 20, fontWeight: "700" }}>
-            Buraya Gittiğini Kaydet
-          </Text>
-
-          {/* Sen dolduracaksın */}
-          <TouchableOpacity
-            style={[styles.selectBtn, { marginTop: 30 }]}
-            onPress={() => setVisitModalVisible(false)}
-          >
-            <Text style={styles.selectText}>Kapat</Text>
-          </TouchableOpacity>
-        </View>
-      </Modal>
+      <VisitsModal
+        visible={visitModalVisible}
+        onClose={() => setVisitModalVisible(false)}
+        place={place}
+        onSaved={fetchData}
+      />
     </View>
   );
 }

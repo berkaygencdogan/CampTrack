@@ -18,11 +18,35 @@ admin.initializeApp({
     clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
     privateKey: process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, "\n"),
   }),
+  storeBucket: process.env.FIREBASE_STORAGE_BUCKET,
 });
 
 const db = admin.firestore();
-// Middleware: Admin mi kontrol et
-const admins = ["kaVlHiAjZfhGIXRnJyklTDcOGh23", "adminUid2", "adminUid3"];
+
+const admins = ["Z6CGz9EtV0TKcMjiyClotxFUy9J3", "adminUid2", "adminUid3"];
+
+async function getUsersMap(userIds) {
+  if (!userIds || userIds.length === 0) return {};
+
+  const map = {};
+
+  // Firebase aynı anda birkaç doc'u getirebilir
+  const promises = userIds.map((uid) => db.collection("users").doc(uid).get());
+
+  const results = await Promise.all(promises);
+
+  results.forEach((doc) => {
+    if (doc.exists) {
+      const data = doc.data();
+      map[data.id] = {
+        name: data.name || "Unknown",
+        avatar: data.avatar || null,
+      };
+    }
+  });
+
+  return map;
+}
 
 async function checkAdmin(req, res, next) {
   try {
@@ -89,6 +113,27 @@ function authOptional(req, res, next) {
   next();
 }
 
+function createNotification({
+  toUserId,
+  fromUserId,
+  type,
+  teamId,
+  teamName,
+  teamLogo,
+}) {
+  return {
+    id: Date.now().toString(),
+    toUserId,
+    fromUserId,
+    type,
+    teamId,
+    teamName: teamName || "",
+    teamLogo: teamLogo || "",
+    createdAt: Date.now(),
+    seen: false,
+  };
+}
+
 // --------------------------------------------------
 // ROOT
 // --------------------------------------------------
@@ -137,39 +182,72 @@ const generateKeywords = (name) => {
 
 app.post("/teams/create", async (req, res) => {
   try {
-    const { userId, name } = req.body;
-    if (!userId || !name) {
-      return res.status(400).json({ error: "Missing userId or name" });
+    const { teamName, logo, createdBy } = req.body;
+
+    if (!teamName || !createdBy) {
+      return res.json({ success: false, error: "Eksik alanlar var." });
     }
 
-    const teamRef = await db.collection("teams").add({
-      name,
-      ownerId: userId,
-      createdAt: Date.now(),
-      members: [userId],
-    });
+    const teamId = Date.now().toString();
 
-    return res.json({
-      success: true,
-      teamId: teamRef.id,
-      name,
-    });
+    // -------------------------------------------------------------------
+    // 1) TAKIM LOGO YÜKLEME
+    // -------------------------------------------------------------------
+    let logoUrl = null;
+
+    if (logo) {
+      const buffer = Buffer.from(logo, "base64");
+      const fileName = `teamLogos/${teamId}.jpg`;
+
+      const bucket = admin
+        .storage()
+        .bucket(process.env.FIREBASE_STORAGE_BUCKET);
+      const file = bucket.file(fileName);
+
+      // 1) Dosyayı yükle
+      await file.save(buffer, {
+        metadata: { contentType: "image/jpeg" },
+        public: true, // optional
+      });
+
+      // 2) Public yap
+      await file.makePublic();
+
+      // 3) Doğru public URL
+      logoUrl = `https://storage.googleapis.com/${process.env.FIREBASE_STORAGE_BUCKET}/${fileName}`;
+    }
+
+    // -------------------------------------------------------------------
+    // 2) FIRESTORE TAKIM KAYDI
+    // -------------------------------------------------------------------
+    const teamData = {
+      id: teamId,
+      teamName,
+      logo: logoUrl,
+      createdAt: new Date(),
+      members: [createdBy], // ✅ İlk üye -> takım sahibi
+    };
+
+    await db.collection("teams").doc(teamId).set(teamData);
+
+    return res.json({ success: true, teamId, team: teamData });
   } catch (err) {
-    console.log("TEAM_CREATE_ERROR:", err);
-    return res.status(500).json({ error: "TEAM_CREATE_FAILED" });
+    console.log("TEAM CREATE ERROR:", err);
+    return res.status(500).json({ success: false, error: err.message });
   }
 });
 
 // 3) USER INVITE (add member)
 app.post("/teams/invite", async (req, res) => {
   try {
-    const { teamId, fromId, toId } = req.body;
+    const { fromId, toId, teamId } = req.body;
 
     if (!teamId || !fromId || !toId) {
       return res.status(400).json({ error: "MISSING_FIELDS" });
     }
 
-    const teamSnap = await db.collection("teams").doc(teamId).get();
+    const teamSnap = await db.collection("teams").doc(toId).get();
+
     if (!teamSnap.exists)
       return res.status(404).json({ error: "TEAM_NOT_FOUND" });
 
@@ -186,7 +264,7 @@ app.post("/teams/invite", async (req, res) => {
     await db.collection("teamRequests").doc(requestId).set({
       id: requestId,
       teamId,
-      teamName: team.name,
+      teamName: team.teamName,
       fromId,
       fromName: fromUser.data().name,
       toId,
@@ -275,23 +353,39 @@ app.post("/teams/requests/accept", async (req, res) => {
 // 3) Kullanıcının tüm takımlarını listele
 app.get("/teams/my/:userId", async (req, res) => {
   try {
-    const { userId } = req.params;
-    if (!userId) return res.status(400).json({ error: "MISSING_USER_ID" });
+    const userId = req.params.userId;
 
-    const snap = await db.collection("teams").get();
+    // Üyesi olduğun takımları getir
+    const snapshot = await db
+      .collection("teams")
+      .where("members", "array-contains", userId)
+      .get();
 
-    const myTeams = [];
-    snap.forEach((doc) => {
-      const data = doc.data();
-      if (data.members?.includes(userId)) {
-        myTeams.push({ id: doc.id, ...data });
-      }
-    });
+    const teams = [];
 
-    return res.json({ teams: myTeams });
+    for (const doc of snapshot.docs) {
+      const team = doc.data();
+
+      // userMap için her üyeyi çek
+      const userMap = await getUsersMap(team.members);
+
+      teams.push({
+        id: team.id,
+        teamName: team.teamName,
+        logo: team.logo || null,
+        members: team.members || [],
+        userMap, // avatar + isim eklenmiş şekilde
+        createdAt: team.createdAt,
+      });
+    }
+
+    return res.json({ success: true, teams });
   } catch (err) {
-    console.log("TEAMS_MY_ERROR:", err);
-    return res.status(500).json({ error: "TEAMS_MY_FAILED" });
+    console.log("TEAMS MY ERROR:", err);
+    return res.json({
+      success: false,
+      error: err.message,
+    });
   }
 });
 
@@ -663,24 +757,33 @@ app.get("/places/:id", authOptional, async (req, res) => {
 // REGISTER USER
 // --------------------------------------------------
 
+// --------------------------------------------------
+// REGISTER USER (FINAL VERSION)
+// --------------------------------------------------
 app.post("/register", async (req, res) => {
   try {
     let { name, email, phone, password } = req.body;
+
     if (!name || !email || !phone || !password) {
       return res.status(400).json({ error: "MISSING_FIELDS" });
     }
 
     // nickname orijinal kalır → sadece arama için lowercase çıkarılır
-    const keywords = name.toLowerCase();
+    const keywords = generateKeywords(name);
 
     // Nickname var mı? (case-insensitive kontrol)
     const nickCheck = await db
       .collection("users")
-      .where("keywords", "==", keywords)
+      .where("keywords", "array-contains", keywords[0])
       .get();
 
     if (!nickCheck.empty) {
-      return res.status(400).json({ error: "NICKNAME_EXISTS" });
+      const found = nickCheck.docs.some(
+        (doc) => doc.data().name.toLowerCase() === name.toLowerCase()
+      );
+      if (found) {
+        return res.status(400).json({ error: "NICKNAME_EXISTS" });
+      }
     }
 
     // Email var mı?
@@ -700,19 +803,32 @@ app.post("/register", async (req, res) => {
       displayName: name,
     });
 
-    // Firestore kayıt
+    // 🔥 Firestore kullanıcı kaydı (GÜNCEL TAM ALANLAR)
     await db
       .collection("users")
       .doc(cred.uid)
       .set({
         id: cred.uid,
-        name, // orijinal isim
-        keywords: generateKeywords(name), // küçük harfli arama
+        name,
         email,
         phone,
         image: `https://ui-avatars.com/api/?name=${name}`,
-        createdAt: Date.now(),
+
+        // 🔥 Arama için keyword'ler
+        keywords,
+
+        // 🔥 Sistem alanları
         role: "user",
+        createdAt: Date.now(),
+
+        // 🔥 Ban yapısı
+        banExpiresAt: 0,
+        banType: "none",
+        banUntil: 0,
+
+        // 🔥 Online tracking
+        isOnline: false,
+        lastSeen: Date.now(),
       });
 
     return res.json({ success: true });
@@ -927,19 +1043,33 @@ app.post("/notifications/send", async (req, res) => {
 app.get("/notifications/:userId", async (req, res) => {
   try {
     const { userId } = req.params;
-    const snap = await db
+
+    const notifSnap = await db
       .collection("notifications")
       .where("toUserId", "==", userId)
       .orderBy("createdAt", "desc")
       .get();
 
-    const list = [];
-    snap.forEach((d) => list.push(d.data()));
+    const notifications = [];
 
-    return res.json({ notifications: list });
+    for (const doc of notifSnap.docs) {
+      const data = doc.data();
+
+      // Gönderen kişinin avatar + isim
+      const sender = await db.collection("users").doc(data.fromUserId).get();
+      const senderInfo = sender.exists ? sender.data() : {};
+
+      notifications.push({
+        ...data,
+        fromName: senderInfo.name || "",
+        fromAvatar: senderInfo.avatar || "",
+      });
+    }
+
+    return res.json({ success: true, notifications });
   } catch (err) {
-    console.log("NOTIFICATIONS_GET_ERROR:", err);
-    res.status(500).json({ error: "NOTIFICATIONS_FETCH_FAILED" });
+    console.log("NOTIFICATION LIST ERROR:", err);
+    return res.json({ success: false });
   }
 });
 
@@ -947,55 +1077,90 @@ app.get("/notifications/:userId", async (req, res) => {
 app.post("/notifications/accept", async (req, res) => {
   try {
     const { notifId, userId } = req.body;
-    if (!notifId || !userId)
-      return res.status(400).json({ error: "MISSING_FIELDS" });
 
-    const notifSnap = await db.collection("notifications").doc(notifId).get();
+    const notifRef = db.collection("notifications").doc(notifId);
+    const notifSnap = await notifRef.get();
+
     if (!notifSnap.exists)
-      return res.status(404).json({ error: "NOTIFICATION_NOT_FOUND" });
+      return res.json({ success: false, msg: "Notification not found" });
 
     const notif = notifSnap.data();
 
-    // Takıma ekle
-    const teamSnap = await db.collection("teams").doc(notif.teamId).get();
-    if (!teamSnap.exists)
-      return res.status(404).json({ error: "TEAM_NOT_FOUND" });
+    // 1 — Takıma kişi ekleniyor
+    const teamRef = db.collection("teams").doc(notif.teamId);
+    const teamSnap = await teamRef.get();
+    const teamData = teamSnap.data();
 
-    const team = teamSnap.data();
-    const members = team.members || [];
+    await teamRef.update({
+      members: [...teamData.members, userId],
+    });
 
-    if (!members.includes(userId)) members.push(userId);
+    // Takım logosu al
+    const teamLogo = teamData.teamLogo || "";
 
-    await db.collection("teams").doc(notif.teamId).update({ members });
+    // 2 — Daveti ACCEPT eden kişinin bilgileri
+    const userRef = await db.collection("users").doc(userId).get();
+    const userInfo = userRef.data();
 
-    // userTeams güncelle
-    await db
-      .collection("userTeams")
-      .doc(userId)
-      .set({ [notif.teamId]: true }, { merge: true });
+    // 3 — Yeni bildirim oluştur → İsteği atan kişiye gidiyor
+    const newNotif = createNotification({
+      toUserId: notif.fromUserId,
+      fromUserId: userId,
+      type: "team_invite_accept",
+      teamId: notif.teamId,
+      teamName: notif.teamName,
+      teamLogo,
+    });
 
-    // Bildirimi sil
-    await db.collection("notifications").doc(notifId).delete();
+    await db.collection("notifications").doc(newNotif.id).set(newNotif);
+
+    // 4 — Eski daveti sil
+    await notifRef.delete();
 
     return res.json({ success: true });
   } catch (err) {
-    console.log("NOTIFICATION_ACCEPT_ERROR:", err);
-    res.status(500).json({ error: "NOTIFICATION_ACCEPT_FAILED" });
+    console.log("ACCEPT ERROR:", err);
+    return res.json({ success: false });
   }
 });
 
 app.post("/notifications/reject", async (req, res) => {
   try {
     const { notifId } = req.body;
-    console.log("/notifications/reject", notifId);
-    if (!notifId) return res.status(400).json({ error: "MISSING_FIELDS" });
 
-    await db.collection("notifications").doc(notifId).delete();
+    const notifRef = db.collection("notifications").doc(notifId);
+    const notifSnap = await notifRef.get();
+
+    if (!notifSnap.exists)
+      return res.json({ success: false, msg: "Notification not found" });
+
+    const notif = notifSnap.data();
+
+    // Takım bilgilerini çek
+    const teamRef = db.collection("teams").doc(notif.teamId);
+    const teamSnap = await teamRef.get();
+    const teamData = teamSnap.data();
+    const teamLogo = teamData.teamLogo || "";
+
+    // RED bildirimini oluştur
+    const newNotif = createNotification({
+      toUserId: notif.fromUserId, // → daveti atan
+      fromUserId: notif.toUserId, // → reddeden kişi
+      type: "team_invite_reject",
+      teamId: notif.teamId,
+      teamName: notif.teamName,
+      teamLogo,
+    });
+
+    await db.collection("notifications").doc(newNotif.id).set(newNotif);
+
+    // Eski daveti sil
+    await notifRef.delete();
 
     return res.json({ success: true });
   } catch (err) {
-    console.log("NOTIFICATION_REJECT_ERROR:", err);
-    res.status(500).json({ error: "NOTIFICATION_REJECT_FAILED" });
+    console.log("REJECT ERROR:", err);
+    return res.json({ success: false });
   }
 });
 
@@ -1313,19 +1478,23 @@ app.post("/admin/users/ban", checkAdmin, async (req, res) => {
   }
 });
 
-app.post("/admin/users/unban", async (req, res) => {
+app.post("/admin/users/unban", checkAdmin, async (req, res) => {
   const { userId } = req.body;
 
-  if (!userId) return res.json({ success: false });
+  if (!userId) {
+    return res.json({ success: false, error: "userId gerekli." });
+  }
 
   try {
-    await admin.firestore().collection("users").doc(userId).update({
-      banUntil: 0,
+    await db.collection("users").doc(userId).update({
+      banExpiresAt: 0,
+      banType: "none",
     });
 
-    res.json({ success: true });
-  } catch {
-    res.json({ success: false });
+    return res.json({ success: true });
+  } catch (err) {
+    console.log("UNBAN ERROR:", err);
+    return res.status(500).json({ success: false, error: "UNBAN_FAILED" });
   }
 });
 
@@ -1560,6 +1729,170 @@ app.get("/admin/stats", async (req, res) => {
       success: false,
       error: "Server error",
     });
+  }
+});
+
+//VİSİT//
+
+app.get("/visited/:userId", async (req, res) => {
+  try {
+    const { userId } = req.params;
+
+    const snap = await db.collection("visitedPlaces").doc(userId).get();
+
+    if (!snap.exists) {
+      return res.json({ success: true, visits: {} });
+    }
+
+    return res.json({ success: true, visits: snap.data() });
+  } catch (err) {
+    console.log("VISITED GET ERROR:", err);
+    return res.status(500).json({ success: false });
+  }
+});
+
+app.post("/visits/detail", async (req, res) => {
+  try {
+    const { ids } = req.body;
+
+    if (!ids || ids.length === 0) {
+      return res.json({ success: true, visits: [] });
+    }
+
+    const visits = await Promise.all(
+      ids.map(async (id) => {
+        const snap = await db.collection("visits").doc(id).get();
+        if (!snap.exists) return null;
+
+        const data = snap.data();
+
+        // teammatesFull oluştur
+        const teammatesFull = {};
+        await Promise.all(
+          data.teammates.map(async (uid) => {
+            const u = await db.collection("users").doc(uid).get();
+            teammatesFull[uid] = { id: uid, ...u.data() };
+          })
+        );
+
+        return {
+          id,
+          ...data,
+          teammatesFull: Object.values(teammatesFull),
+          userMap: teammatesFull,
+        };
+      })
+    );
+
+    return res.json({ success: true, visits: visits.filter((v) => v) });
+  } catch (err) {
+    console.log("VISITS DETAIL ERROR:", err);
+    return res
+      .status(500)
+      .json({ success: false, error: "Visits detail error" });
+  }
+});
+
+// DELETE VISIT (herkesten siler)
+app.post("/visits/delete", async (req, res) => {
+  try {
+    const { visitId } = req.body;
+
+    if (!visitId) return res.json({ success: false, error: "visitId gerekli" });
+
+    // 1) visits → komple sil
+    await db.collection("visits").doc(visitId).delete();
+
+    // 2) herkesin visitedPlaces listesinden kaldır
+    const allUsers = await db.collection("visitedPlaces").get();
+
+    for (let doc of allUsers.docs) {
+      await doc.ref.update({
+        [visitId]: admin.firestore.FieldValue.delete(),
+      });
+    }
+
+    return res.json({ success: true });
+  } catch (err) {
+    console.log("VISIT DELETE ERROR:", err);
+    return res.status(500).json({ success: false });
+  }
+});
+
+app.post("/visits/addOrUpdate", async (req, res) => {
+  try {
+    const {
+      visitId,
+      placeId,
+      name,
+      city,
+      teammates,
+      startDate,
+      endDate,
+      experience,
+      photos,
+    } = req.body;
+
+    if (!placeId || !teammates || teammates.length === 0) {
+      return res.json({ success: false, error: "Eksik bilgi gönderildi." });
+    }
+
+    // -----------------------------
+    // 🔥 Eğer UPDATE ise
+    // -----------------------------
+    if (visitId) {
+      await db
+        .collection("visits")
+        .doc(visitId)
+        .update({
+          placeId,
+          placeName: name,
+          city,
+          teammates, // ID listesi
+          startDate: new Date(startDate).getTime(),
+          endDate: new Date(endDate).getTime(),
+          experience,
+          photos,
+          updatedAt: Date.now(),
+        });
+
+      return res.json({ success: true, message: "updated" });
+    }
+
+    // -----------------------------
+    // 🔥 NEW VISIT
+    // -----------------------------
+    const visitRef = await db.collection("visits").add({
+      placeId,
+      placeName: name,
+      city,
+      teammates, // uid listesi
+      startDate: new Date(startDate).getTime(),
+      endDate: new Date(endDate).getTime(),
+      experience,
+      photos,
+      createdAt: Date.now(),
+    });
+
+    const visitIdNew = visitRef.id;
+
+    // -----------------------------
+    // 🔥 Gitti → her kişinin hesabına kaydet
+    // visited -> userId -> { visitId : true }
+    // -----------------------------
+    await Promise.all(
+      teammates.map(async (uid) => {
+        await db
+          .collection("visited")
+          .doc(uid)
+          .set({ [visitIdNew]: true }, { merge: true });
+      })
+    );
+
+    return res.json({ success: true, id: visitIdNew });
+  } catch (err) {
+    console.log("VISIT ADD/UPDATE ERROR:", err);
+    return res.status(500).json({ success: false, error: err.message });
   }
 });
 

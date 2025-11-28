@@ -91,6 +91,7 @@ export default function AddPlaceScreen() {
     const data = await res.json();
     if (data) {
       alert("Place submitted!");
+      router.push("/home");
     } else {
       alert("hata var");
     }

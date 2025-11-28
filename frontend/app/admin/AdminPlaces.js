@@ -52,7 +52,7 @@ export default function AdminPlaces() {
         onPress: async () => {
           try {
             const res = await fetch(
-              `${process.env.EXPO_PUBLIC_API_URL}/admin/places/delete`,
+              `${process.env.EXPO_PUBLIC_API_URL}/admin/places/delete?uid=${admin.id}`,
               {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },

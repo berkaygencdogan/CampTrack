@@ -14,20 +14,19 @@ export default function AdminUsers() {
   const admin = useSelector((state) => state.user.userInfo);
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [banHours, setBanHours] = useState(""); // X saat ban süresi
+  const [banHoursMap, setBanHoursMap] = useState({});
 
-  // ------------------------------------------------
-  // 🔥 KULLANICILARI GETİR
-  // ------------------------------------------------
   const fetchUsers = async () => {
     try {
       const res = await fetch(
         `${process.env.EXPO_PUBLIC_API_URL}/admin/users/getAll?uid=${admin.id}`
       );
-
       const data = await res.json();
 
-      if (data.success) setUsers(data.users);
+      if (data.success) {
+        const filtered = data.users.filter((u) => u.id !== admin.id);
+        setUsers(filtered);
+      }
     } catch (err) {
       console.log("admin fetch users error:", err);
     } finally {
@@ -39,9 +38,9 @@ export default function AdminUsers() {
     fetchUsers();
   }, []);
 
-  // ------------------------------------------------
-  // 🔥 KULLANICI SİL
-  // ------------------------------------------------
+  // --------------------------
+  // DELETE USER
+  // --------------------------
   const deleteUser = (user) => {
     Alert.alert("Kullanıcıyı Sil", `${user.name} tamamen silinsin mi?`, [
       { text: "İptal", style: "cancel" },
@@ -51,16 +50,15 @@ export default function AdminUsers() {
         onPress: async () => {
           try {
             const res = await fetch(
-              `${process.env.EXPO_PUBLIC_API_URL}/admin/users/delete`,
+              `${process.env.EXPO_PUBLIC_API_URL}/admin/users/delete?uid=${admin.id}`,
               {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ userId: user.id }),
+                body: JSON.stringify({ targetId: user.id }),
               }
             );
 
             const data = await res.json();
-
             if (data.success) {
               Alert.alert("Başarılı", "Kullanıcı silindi");
               fetchUsers();
@@ -75,38 +73,35 @@ export default function AdminUsers() {
     ]);
   };
 
-  // ------------------------------------------------
-  // 🔥 KULLANICIYI BANLAMA
-  // ------------------------------------------------
   const banUser = (user) => {
-    if (!banHours.trim()) {
+    const hours = banHoursMap[user.id];
+
+    if (!hours || isNaN(hours)) {
       Alert.alert("Uyarı", "Ban süresi (saat) giriniz!");
       return;
     }
 
-    Alert.alert("Ban Uygula", `${user.name} ${banHours} saat yasaklansın mı?`, [
+    Alert.alert("Ban Uygula", `${user.name} ${hours} saat yasaklansın mı?`, [
       { text: "İptal", style: "cancel" },
       {
         text: "Banla",
         onPress: async () => {
           try {
             const res = await fetch(
-              `${process.env.EXPO_PUBLIC_API_URL}/admin/users/ban`,
+              `${process.env.EXPO_PUBLIC_API_URL}/admin/users/ban?uid=${admin.id}`,
               {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
-                  userId: user.id,
-                  hours: Number(banHours),
+                  targetId: user.id,
+                  hours: Number(hours),
                 }),
               }
             );
-
             const data = await res.json();
-
             if (data.success) {
               Alert.alert("Başarılı", `${user.name} yasaklandı`);
-              setBanHours("");
+              setBanHoursMap((prev) => ({ ...prev, [user.id]: "" }));
               fetchUsers();
             } else {
               Alert.alert("Hata", data.error || "Ban uygulanamadı");
@@ -119,13 +114,10 @@ export default function AdminUsers() {
     ]);
   };
 
-  // ------------------------------------------------
-  // 🔥 BAN KALDIR
-  // ------------------------------------------------
   const unbanUser = async (user) => {
     try {
       const res = await fetch(
-        `${process.env.EXPO_PUBLIC_API_URL}/admin/users/unban`,
+        `${process.env.EXPO_PUBLIC_API_URL}/admin/users/unban?uid=${admin.id}`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -146,24 +138,30 @@ export default function AdminUsers() {
     }
   };
 
-  // ------------------------------------------------
-  // 🔥 UI — Kullanıcı Kartı
-  // ------------------------------------------------
   const renderItem = ({ item }) => (
     <View style={styles.card}>
+      {item.role === "admin" && (
+        <View style={styles.adminBadge}>
+          <Text style={styles.adminBadgeText}>ADMIN</Text>
+        </View>
+      )}
+
       <Text style={styles.name}>{item.name}</Text>
       <Text style={styles.email}>{item.email}</Text>
 
-      {item.banExpires && (
-        <Text style={styles.banText}>
-          ⛔ Yorum yasağı bitiş: {new Date(item.banExpires).toLocaleString()}
-        </Text>
-      )}
+      {typeof item.banExpiresAt === "number" &&
+        item.banExpiresAt > Date.now() && (
+          <Text style={styles.banText}>
+            ⛔ Ban bitiş: {new Date(item.banExpiresAt).toLocaleString()}
+          </Text>
+        )}
 
       <View style={styles.row}>
         <TextInput
-          value={banHours}
-          onChangeText={setBanHours}
+          value={banHoursMap[item.id] || ""}
+          onChangeText={(v) =>
+            setBanHoursMap((prev) => ({ ...prev, [item.id]: v }))
+          }
           placeholder="Ban süresi (saat)"
           keyboardType="numeric"
           style={styles.input}
@@ -213,8 +211,6 @@ export default function AdminUsers() {
   );
 }
 
-/* ----------------------------- STYLES ----------------------------- */
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -222,43 +218,36 @@ const styles = StyleSheet.create({
     paddingTop: 60,
     paddingHorizontal: 20,
   },
-
   header: {
     fontSize: 26,
     fontWeight: "bold",
     marginBottom: 20,
     textAlign: "center",
   },
-
   card: {
     backgroundColor: "#f6f6f6",
     padding: 15,
     borderRadius: 10,
     marginBottom: 15,
   },
-
   name: {
     fontSize: 18,
     fontWeight: "700",
   },
-
   email: {
     fontSize: 14,
     color: "#555",
   },
-
   banText: {
     marginTop: 8,
     color: "red",
     fontWeight: "bold",
   },
-
   row: {
     flexDirection: "row",
     marginTop: 10,
     alignItems: "center",
   },
-
   input: {
     backgroundColor: "#fff",
     padding: 10,
@@ -268,49 +257,56 @@ const styles = StyleSheet.create({
     flex: 1,
     marginRight: 10,
   },
-
   banBtn: {
     backgroundColor: "#ff8800",
     padding: 10,
     borderRadius: 10,
   },
-
   banTextBtn: {
     color: "#fff",
     fontWeight: "700",
   },
-
   actions: {
     flexDirection: "row",
     marginTop: 10,
     justifyContent: "space-between",
   },
-
   unbanBtn: {
     backgroundColor: "#4caf50",
     padding: 10,
     borderRadius: 10,
   },
-
   unbanText: {
     color: "#fff",
     fontWeight: "700",
   },
-
   deleteBtn: {
     backgroundColor: "red",
     padding: 10,
     borderRadius: 10,
   },
-
   deleteText: {
     color: "#fff",
     fontWeight: "700",
   },
-
   center: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
+  },
+  adminBadge: {
+    position: "absolute",
+    right: 10,
+    top: 10,
+    backgroundColor: "red",
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 6,
+  },
+
+  adminBadgeText: {
+    color: "#fff",
+    fontSize: 10,
+    fontWeight: "bold",
   },
 });

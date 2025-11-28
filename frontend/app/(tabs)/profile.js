@@ -15,6 +15,8 @@ import NotificationButton from "../NotificationButton";
 import NotificationsScreen from "../notifications";
 import i18n from "../language/index";
 import { setNotificationCount } from "../../redux/userSlice";
+import MaterialIcons from "@expo/vector-icons/MaterialIcons";
+import { LinearGradient } from "expo-linear-gradient";
 
 export default function Profile() {
   const router = useRouter();
@@ -98,12 +100,27 @@ export default function Profile() {
       </View>
       {user.userInfo?.role === "admin" && (
         <TouchableOpacity
-          style={styles.adminBtn}
           onPress={() => router.push("/admin")}
+          style={{ marginTop: 30 }}
         >
-          <Text style={styles.adminBtnText}>Admin Panel</Text>
+          <LinearGradient
+            colors={["#7CC540", "#65A832"]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={styles.adminBtn}
+          >
+            <MaterialIcons name="admin-panel-settings" size={24} color="#fff" />
+            <Text style={styles.adminBtnText}>Admin Panel</Text>
+          </LinearGradient>
         </TouchableOpacity>
       )}
+      <TouchableOpacity
+        style={styles.row}
+        onPress={() => router.push("/MyVisited")}
+      >
+        <Ionicons name="checkmark-done-outline" size={22} color="#7CC540" />
+        <Text style={styles.rowText}>Gittiğim Yerler</Text>
+      </TouchableOpacity>
 
       <TouchableOpacity
         style={styles.row}
@@ -124,15 +141,14 @@ export default function Profile() {
       <TouchableOpacity style={styles.logoutBtn} onPress={handleLogout}>
         <Text style={styles.logoutText}>{i18n.t("logout")}</Text>
       </TouchableOpacity>
-      <Modal visible={showModal} transparent={true} animationType="slide">
-        <View style={{ flex: 1, backgroundColor: "#fff" }}>
-          <NotificationsScreen
-            onClose={() => setShowModal(false)}
-            data={notifications}
-            isModal={true}
-          />
-        </View>
-      </Modal>
+
+      {showModal && (
+        <NotificationsScreen
+          onClose={() => setShowModal(false)}
+          data={notifications}
+          isModal={true}
+        />
+      )}
     </View>
   );
 }
@@ -194,7 +210,7 @@ const styles = StyleSheet.create({
 
   logoutBtn: {
     marginTop: 40,
-    backgroundColor: "#7CC540",
+    backgroundColor: "#ff5555",
     paddingVertical: 14,
     borderRadius: 12,
     alignItems: "center",
@@ -203,5 +219,24 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontSize: 16,
     fontWeight: "600",
+  },
+  adminBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 14,
+    borderRadius: 14,
+    elevation: 4,
+    shadowColor: "#000",
+    shadowOpacity: 0.15,
+    shadowOffset: { width: 0, height: 3 },
+    shadowRadius: 6,
+  },
+
+  adminBtnText: {
+    color: "#fff",
+    fontSize: 17,
+    fontWeight: "700",
+    marginLeft: 10,
   },
 });
