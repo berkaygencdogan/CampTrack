@@ -278,7 +278,7 @@ export default {
     sending: "Gönderiliyor...",
     send: "Gönder",
     placenotfound: "Yer Bulunamadı",
-    addedvisitplace: "Ziyaret Ettiğim Yerler",
+    addedvisitplace: "Ziyaret Ettim",
     login: "Giriş Yap",
     register: "Kayıt Ol",
     haveaccount: "Hesabın yok mu?",

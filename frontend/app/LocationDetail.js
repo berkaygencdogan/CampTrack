@@ -1,21 +1,38 @@
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
-import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import {
+  Image,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+  Modal,
+} from "react-native";
 import { useSelector } from "react-redux";
 import i18n from "./language/index";
+
+import CommentsModal from "./CommentsModal"; // 🔥 YORUM MODAL
 
 export default function LocationDetail() {
   const router = useRouter();
   const { id } = useLocalSearchParams();
+
   const [place, setPlace] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [currentIndex, setCurrentIndex] = useState(0);
 
+  const [currentIndex, setCurrentIndex] = useState(0);
   const [isFav, setIsFav] = useState(false);
+
+  const [commentsVisible, setCommentsVisible] = useState(false);
+
+  const [visitModalVisible, setVisitModalVisible] = useState(false);
 
   const user = useSelector((state) => state.user.userInfo);
 
+  // ------------------------------------------------
+  // FOTO SLIDER
+  // ------------------------------------------------
   const nextPhoto = () => {
     if (currentIndex < place.photos.length - 1) {
       setCurrentIndex(currentIndex + 1);
@@ -28,6 +45,9 @@ export default function LocationDetail() {
     }
   };
 
+  // ------------------------------------------------
+  // FAVORİ
+  // ------------------------------------------------
   const toggleFavorite = async () => {
     if (!user) return;
 
@@ -54,32 +74,35 @@ export default function LocationDetail() {
     }
   };
 
+  // ------------------------------------------------
+  // PLACE DETAILS GETİR
+  // ------------------------------------------------
   const fetchData = async () => {
     try {
       const res = await fetch(
         `${process.env.EXPO_PUBLIC_API_URL}/places/${id}?userId=${user.id}`
       );
       const data = await res.json();
-      if (res.ok) setPlace(data.place);
 
-      if (data.place.isFavorite) {
-        setIsFav(true);
+      if (res.ok) {
+        setPlace(data.place);
+        if (data.place.isFavorite) setIsFav(true);
       }
     } catch (err) {
-      console.log("Error:", err);
+      console.log("PLACE ERROR:", err);
     } finally {
       setLoading(false);
     }
   };
 
-  // ------------------------------------------------
-  // PLACE DETAILS FETCH
-  // ------------------------------------------------
   useEffect(() => {
     if (!id) return;
     fetchData();
-  }, [id, user]);
+  }, [id]);
 
+  // ------------------------------------------------
+  // LOADING
+  // ------------------------------------------------
   if (loading) {
     return (
       <View style={styles.loading}>
@@ -98,6 +121,9 @@ export default function LocationDetail() {
     );
   }
 
+  // ------------------------------------------------
+  // UI
+  // ------------------------------------------------
   return (
     <View style={styles.container}>
       {/* BACK BUTTON */}
@@ -113,21 +139,20 @@ export default function LocationDetail() {
           color={isFav ? "#ff3b30" : "#fff"}
         />
       </TouchableOpacity>
+
+      {/* SLIDER */}
       <View style={styles.sliderContainer}>
-        {/* SOL OK */}
         {currentIndex > 0 && (
           <TouchableOpacity style={styles.leftArrow} onPress={prevPhoto}>
             <Ionicons name="chevron-back" size={32} color="black" />
           </TouchableOpacity>
         )}
 
-        {/* FOTO */}
         <Image
           source={{ uri: place.photos[currentIndex] }}
           style={styles.headerImage}
         />
 
-        {/* SAĞ OK */}
         {currentIndex < place.photos.length - 1 && (
           <TouchableOpacity style={styles.rightArrow} onPress={nextPhoto}>
             <Ionicons name="chevron-forward" size={32} color="black" />
@@ -138,17 +163,53 @@ export default function LocationDetail() {
       {/* WHITE BOTTOM PANEL */}
       <View style={styles.bottomPanel}>
         <Text style={styles.placeName}>{place.name}</Text>
-        <Text style={styles.location}>{place.city}</Text>
+
+        <View style={styles.locationRow}>
+          <Text style={styles.location}>{place.city}</Text>
+
+          {/* VISIT BUTTON */}
+          <TouchableOpacity
+            style={styles.visitBtn}
+            onPress={() => setVisitModalVisible(true)}
+          >
+            <Text style={styles.selectText}>{i18n.t("addedvisitplace")}</Text>
+          </TouchableOpacity>
+        </View>
 
         <Text style={styles.description}>{place.description}</Text>
 
+        {/* COMMENTS BUTTON */}
         <TouchableOpacity
           style={styles.selectBtn}
-          onPress={() => console.log("LOCATION SELECTED")}
+          onPress={() => setCommentsVisible(true)}
         >
-          <Text style={styles.selectText}>{i18n.t("addedvisitplace")}</Text>
+          <Text style={styles.selectText}>Yorumları Gör</Text>
         </TouchableOpacity>
       </View>
+
+      {/* 🔥 COMMENTS MODAL */}
+      <CommentsModal
+        visible={commentsVisible}
+        onClose={() => setCommentsVisible(false)}
+        placeId={id}
+      />
+
+      {/* 🔥 VISITED PLACE MODAL — Sen dolduracaksın */}
+      <Modal visible={visitModalVisible} animationType="slide">
+        <View style={styles.visitModal}>
+          <Text style={{ fontSize: 20, fontWeight: "700" }}>
+            Buraya Gittiğini Kaydet
+          </Text>
+
+          {/* Sen dolduracaksın */}
+          <TouchableOpacity
+            style={[styles.selectBtn, { marginTop: 30 }]}
+            onPress={() => setVisitModalVisible(false)}
+          >
+            <Text style={styles.selectText}>Kapat</Text>
+          </TouchableOpacity>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -208,26 +269,34 @@ const styles = StyleSheet.create({
   location: {
     fontSize: 17,
     color: "#777",
-    marginBottom: 12,
   },
   description: {
     fontSize: 15,
     color: "#666",
     lineHeight: 22,
+    marginTop: 10,
   },
 
   selectBtn: {
     backgroundColor: "#7CC540",
-    paddingVertical: 15,
     borderRadius: 14,
-    alignItems: "center",
-    marginTop: 25,
+    paddingVertical: 8,
+    paddingHorizontal: 15,
+    marginVertical: 10,
+  },
+
+  visitBtn: {
+    backgroundColor: "#7CC540",
+    borderRadius: 14,
+    paddingVertical: 8,
+    paddingHorizontal: 15,
   },
   selectText: {
     color: "#fff",
-    fontSize: 16,
     fontWeight: "600",
+    textAlign: "center",
   },
+
   sliderContainer: {
     width: "100%",
     height: 430,
@@ -252,5 +321,19 @@ const styles = StyleSheet.create({
     padding: 2,
     backgroundColor: "white",
     borderRadius: 30,
+  },
+
+  locationRow: {
+    width: "100%",
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginVertical: 10,
+  },
+
+  visitModal: {
+    flex: 1,
+    backgroundColor: "#fff",
+    padding: 20,
+    paddingTop: 60,
   },
 });

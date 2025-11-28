@@ -1,14 +1,14 @@
 import { StyleSheet, Text, View } from "react-native";
 import React from "react";
 
-const PlaceDetailScreen = () => {
+const VisitsModal = () => {
   return (
     <View>
-      <Text>PlaceDetailScreen</Text>
+      <Text>VisitsModal</Text>
     </View>
   );
 };
 
-export default PlaceDetailScreen;
+export default VisitsModal;
 
 const styles = StyleSheet.create({});

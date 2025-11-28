@@ -96,6 +96,14 @@ export default function Profile() {
         <Text style={styles.name}>{userData?.name || i18n.t("loading")}</Text>
         <Text style={styles.email}>{userData?.email || ""}</Text>
       </View>
+      {user.userInfo?.role === "admin" && (
+        <TouchableOpacity
+          style={styles.adminBtn}
+          onPress={() => router.push("/admin")}
+        >
+          <Text style={styles.adminBtnText}>Admin Panel</Text>
+        </TouchableOpacity>
+      )}
 
       <TouchableOpacity
         style={styles.row}

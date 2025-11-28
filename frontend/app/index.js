@@ -1,16 +1,16 @@
 import { useEffect, useState } from "react";
-import { Redirect } from "expo-router";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import * as Localization from "expo-localization";
-import ImmersiveMode from "react-native-immersive-mode";
+import { useRouter } from "expo-router";
+import { Image, StyleSheet, View } from "react-native";
 import { useSelector } from "react-redux";
 import * as SplashScreen from "expo-splash-screen";
-import { Image, StyleSheet, View } from "react-native";
+import * as Localization from "expo-localization";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function Index() {
-  const [loading, setLoading] = useState(true);
+  const router = useRouter();
+  const [ready, setReady] = useState(false);
 
-  const seenOnboarding = useSelector(
+  const hasSeenOnboarding = useSelector(
     (state) => state.onboard.showOnboardScreen
   );
   const isLoggedIn = useSelector((state) => state.user.isLoggedIn);
@@ -18,57 +18,59 @@ export default function Index() {
   const loadingGif = require("../src/assets/images/loadingScreen.gif");
 
   useEffect(() => {
-    const init = async () => {
-      ImmersiveMode.fullLayout(true);
-      ImmersiveMode.setBarMode("BottomSticky");
+    const prepare = async () => {
+      try {
+        // Splash ekranda kalsın
+        SplashScreen.preventAutoHideAsync();
 
-      // Native splash kapanıyor
-      await SplashScreen.hideAsync();
+        // Minimum bekleme
+        await new Promise((res) => setTimeout(res, 900));
 
-      // 2-3 saniye splash görünmesi için küçük delay
-      await new Promise((res) => setTimeout(res, 2000));
-
-      // Dil
-      const locales = Localization.getLocales();
-      const langCode = locales?.[0]?.languageCode || "en";
-      const appLang = langCode === "tr" ? "tr" : "en";
-      await AsyncStorage.setItem("appLanguage", appLang);
-
-      setLoading(false);
+        // Dil kaydet
+        const langCode = Localization.getLocales()[0]?.languageCode ?? "en";
+        await AsyncStorage.setItem(
+          "appLanguage",
+          langCode === "tr" ? "tr" : "en"
+        );
+      } finally {
+        setReady(true);
+      }
     };
 
-    init();
+    prepare();
   }, []);
 
-  // 🔥 Splash ekranı göster
-  if (loading) {
-    return (
-      <View style={styles.container}>
-        <Image source={loadingGif} style={styles.gif} resizeMode="cover" />
-      </View>
-    );
-  }
+  useEffect(() => {
+    if (!ready) return;
 
-  // 🔥 Onboarding
-  if (!seenOnboarding) {
-    return <Redirect href="/onboarding" />;
-  }
+    // Splash artık kapanabilir
+    SplashScreen.hideAsync();
 
-  // 🔥 Kullanıcı giriş yaptıysa → Home
-  if (isLoggedIn) {
-    return <Redirect href="/home" />;
-  }
+    // Redirect güvenli gecikmeyle
+    setTimeout(() => {
+      if (!hasSeenOnboarding) {
+        router.replace("/onboarding");
+        return;
+      }
+      if (isLoggedIn) {
+        router.replace("/home");
+        return;
+      }
+      router.replace("/login");
+    }, 100);
+  }, [ready]);
 
-  // 🔥 Giriş yapılmadı → Login
-  return <Redirect href="/login" />;
+  return (
+    <View style={styles.container}>
+      <Image source={loadingGif} style={styles.gif} resizeMode="cover" />
+    </View>
+  );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#000",
-    justifyContent: "center",
-    alignItems: "center",
   },
   gif: {
     width: "100%",
