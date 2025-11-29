@@ -18,6 +18,7 @@ export default function Search() {
   const [popular, setPopular] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [results, setResults] = useState([]);
+  const [searchMode, setSearchMode] = useState("place"); // "place" | "user"
 
   // -------------------------------------
   // POPULAR
@@ -51,13 +52,22 @@ export default function Search() {
     }
 
     try {
-      const res = await fetch(
-        `${process.env.EXPO_PUBLIC_API_URL}/places/search?query=${text}`
-      );
+      let url = "";
 
+      if (searchMode === "place") {
+        url = `${process.env.EXPO_PUBLIC_API_URL}/places/search?query=${text}`;
+      } else {
+        url = `${process.env.EXPO_PUBLIC_API_URL}/users/search?username=${text}`;
+      }
+
+      const res = await fetch(url);
       const data = await res.json();
 
-      if (res.ok) setResults(data.places || []);
+      if (searchMode === "place") {
+        setResults(data.places || []);
+      } else {
+        setResults(data.users || []);
+      }
     } catch (err) {
       console.log("Search API error:", err);
     }
@@ -65,11 +75,54 @@ export default function Search() {
 
   return (
     <View style={styles.container}>
+      {/* SEARCH MODE SWITCH */}
+      <View style={styles.modeRow}>
+        <TouchableOpacity
+          onPress={() => setSearchMode("place")}
+          style={[
+            styles.modeBtn,
+            {
+              backgroundColor: searchMode === "place" ? "#7CC540" : "#EDEDED",
+            },
+          ]}
+        >
+          <Text
+            style={{
+              color: searchMode === "place" ? "#fff" : "#333",
+              fontWeight: "600",
+            }}
+          >
+            Place
+          </Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          onPress={() => setSearchMode("user")}
+          style={[
+            styles.modeBtn,
+            {
+              backgroundColor: searchMode === "user" ? "#7CC540" : "#EDEDED",
+            },
+          ]}
+        >
+          <Text
+            style={{
+              color: searchMode === "user" ? "#fff" : "#333",
+              fontWeight: "600",
+            }}
+          >
+            User
+          </Text>
+        </TouchableOpacity>
+      </View>
+
       {/* SEARCH BAR */}
       <View style={styles.searchBox}>
         <TextInput
           style={styles.searchInput}
-          placeholder={i18n.t("searchcamp")}
+          placeholder={
+            searchMode === "place" ? i18n.t("searchcamp") : "Search users..."
+          }
           placeholderTextColor="#999"
           onChangeText={handleSearch}
           value={searchTerm}
@@ -79,32 +132,47 @@ export default function Search() {
 
       {/* POPULAR OR SEARCH RESULTS */}
       {searchTerm.trim() === "" ? (
-        <View>
-          <Text style={styles.sectionTitle}>{i18n.t("populerplaces")}</Text>
+        searchMode === "place" ? (
+          // -------------------------------------
+          // POPULAR PLACES (ONLY PLACE MODE)
+          // -------------------------------------
+          <View>
+            <Text style={styles.sectionTitle}>{i18n.t("populerplaces")}</Text>
 
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            style={{ marginTop: 10 }}
-          >
-            {popular.map((item) => (
-              <TouchableOpacity
-                key={item.id}
-                onPress={() => router.push(`/LocationDetail?id=${item.id}`)}
-              >
-                <View style={styles.popularCard}>
-                  <Image
-                    source={{ uri: item.photos?.[0] }}
-                    style={styles.popularImage}
-                  />
-                  <Text style={styles.popularName}>{item.name}</Text>
-                  <Text style={styles.popularCity}>{item.city}</Text>
-                </View>
-              </TouchableOpacity>
-            ))}
-          </ScrollView>
-        </View>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              style={{ marginTop: 10 }}
+            >
+              {popular.map((item) => (
+                <TouchableOpacity
+                  key={item.id}
+                  onPress={() => router.push(`/LocationDetail?id=${item.id}`)}
+                >
+                  <View style={styles.popularCard}>
+                    <Image
+                      source={{ uri: item.photos?.[0] }}
+                      style={styles.popularImage}
+                    />
+                    <Text style={styles.popularName}>{item.name}</Text>
+                    <Text style={styles.popularCity}>{item.city}</Text>
+                  </View>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+          </View>
+        ) : (
+          // -------------------------------------
+          // USER MODE → boşken popüler gösterme
+          // -------------------------------------
+          <Text style={{ marginTop: 20, color: "#777" }}>
+            Kullanıcı aramak için bir şey yazın...
+          </Text>
+        )
       ) : (
+        // -------------------------------------
+        // SEARCH RESULTS (PLACE OR USER)
+        // -------------------------------------
         <ScrollView showsVerticalScrollIndicator={false}>
           <Text style={styles.sectionTitle}>{i18n.t("searchresult")}</Text>
 
@@ -117,16 +185,33 @@ export default function Search() {
           {results.map((item) => (
             <TouchableOpacity
               key={item.id}
-              onPress={() => router.push(`/LocationDetail?id=${item.id}`)}
+              onPress={() => {
+                if (searchMode === "user") {
+                  router.push(`/UserProfile?id=${item.id}`);
+                } else {
+                  router.push(`/LocationDetail?id=${item.id}`);
+                }
+              }}
             >
               <View style={styles.resultRow}>
                 <Image
-                  source={{ uri: item.photos?.[0] }}
+                  source={{
+                    uri:
+                      searchMode === "place"
+                        ? item.photos?.[0]
+                        : item.avatar ||
+                          item.image ||
+                          "https://i.imgur.com/0y8Ftya.png",
+                  }}
                   style={styles.resultImg}
                 />
                 <View>
-                  <Text style={styles.resultName}>{item.name}</Text>
-                  <Text style={styles.resultCity}>{item.city}</Text>
+                  <Text style={styles.resultName}>
+                    {searchMode === "place" ? item.name : item.name}
+                  </Text>
+                  <Text style={styles.resultCity}>
+                    {searchMode === "place" ? item.city : ""}
+                  </Text>
                 </View>
               </View>
             </TouchableOpacity>
@@ -146,6 +231,19 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingTop: 20,
   },
+
+  modeRow: {
+    flexDirection: "row",
+    justifyContent: "flex-start",
+    marginBottom: 15,
+  },
+  modeBtn: {
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 12,
+    marginRight: 10,
+  },
+
   searchBox: {
     flexDirection: "row",
     alignItems: "center",
@@ -158,11 +256,13 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 16,
   },
+
   sectionTitle: {
     fontSize: 18,
     fontWeight: "bold",
     marginTop: 25,
   },
+
   popularCard: {
     width: 160,
     backgroundColor: "#F8F8F8",
@@ -186,6 +286,7 @@ const styles = StyleSheet.create({
     color: "#777",
     marginLeft: 10,
   },
+
   resultRow: {
     flexDirection: "row",
     alignItems: "center",
