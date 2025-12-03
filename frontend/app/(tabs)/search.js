@@ -80,7 +80,11 @@ export default function Search() {
       {/* CATEGORY CHIPS */}
       <View style={styles.categoryRow}>
         <TouchableOpacity
-          onPress={() => setSearchMode("place")}
+          onPress={() => {
+            setSearchMode("place");
+            setSearchTerm("");
+            setResults([]);
+          }}
           style={[
             styles.categoryChip,
             searchMode === "place" && styles.categoryChipActive,
@@ -89,7 +93,7 @@ export default function Search() {
           <Ionicons
             name="location-outline"
             size={16}
-            color={searchMode === "place" ? "#000" : "#ccc"}
+            color={searchMode === "place" ? "#fff" : "#ccc"}
             style={{ marginRight: 6 }}
           />
           <Text
@@ -101,10 +105,12 @@ export default function Search() {
             Place
           </Text>
         </TouchableOpacity>
-
-        {/* USER */}
         <TouchableOpacity
-          onPress={() => setSearchMode("user")}
+          onPress={() => {
+            setSearchMode("user");
+            setSearchTerm("");
+            setResults([]);
+          }}
           style={[
             styles.categoryChip,
             searchMode === "user" && styles.categoryChipActive,
@@ -113,7 +119,7 @@ export default function Search() {
           <Ionicons
             name="person-outline"
             size={16}
-            color={searchMode === "user" ? "#000" : "#ccc"}
+            color={searchMode === "user" ? "#fff" : "#ccc"}
             style={{ marginRight: 6 }}
           />
           <Text
@@ -222,7 +228,7 @@ export default function Search() {
                     <Text style={styles.cardDesc}>
                       {searchMode === "place"
                         ? item.description?.slice(0, 80)
-                        : "User profile"}
+                        : item.bio}
                     </Text>
 
                     <View style={styles.cardBottomRow}>
@@ -235,7 +241,7 @@ export default function Search() {
                         <Text style={styles.cardBottomText}>
                           {searchMode === "place"
                             ? item.city
-                            : "@" + item.username}
+                            : "@" + item.nickname}
                         </Text>
                       </View>
 
