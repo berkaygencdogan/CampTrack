@@ -23,7 +23,8 @@
       },
       "predictiveBackGestureEnabled": false,
       "googleServicesFile": "./google-services.json",
-      "package": "com.berkay_gencdogan.camptrack"
+      "package": "com.berkay_gencdogan.camptrack",
+      "versionCode": 1
     },
     "web": {
       "output": "static",

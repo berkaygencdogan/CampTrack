@@ -5,8 +5,7 @@ import { useSelector } from "react-redux";
 import * as SplashScreen from "expo-splash-screen";
 import * as Localization from "expo-localization";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import ImmersiveMode from "react-native-immersive-mode";
-
+import NavigationBar from "expo-navigation-bar";
 export default function Index() {
   const router = useRouter();
   const [ready, setReady] = useState(false);
@@ -21,8 +20,8 @@ export default function Index() {
   useEffect(() => {
     const prepare = async () => {
       try {
-        ImmersiveMode.fullLayout(true);
-        ImmersiveMode.setBarMode("BottomSticky");
+        NavigationBar.setVisibilityAsync("hidden"); // Tamamen gizle
+        NavigationBar.setBehaviorAsync("overlay-swipe"); // Immersive swipe-to-show
         // Splash ekranda kalsın
         SplashScreen.preventAutoHideAsync();
 

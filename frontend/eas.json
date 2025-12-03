@@ -5,7 +5,8 @@
   "build": {
     "production": {
       "android": {
-        "buildType": "app-bundle"
+        "buildType": "app-bundle",
+        "autoIncrement": true
       },
       "ios": {
         "simulator": false
@@ -13,7 +14,8 @@
     },
     "development": {
       "android": {
-        "buildType": "apk"
+        "buildType": "apk",
+        "autoIncrement": true
       },
       "ios": {
         "simulator": true
