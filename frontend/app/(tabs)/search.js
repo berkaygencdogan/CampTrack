@@ -18,11 +18,9 @@ export default function Search() {
   const [popular, setPopular] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [results, setResults] = useState([]);
-  const [searchMode, setSearchMode] = useState("place"); // "place" | "user"
+  const [searchMode, setSearchMode] = useState("place");
 
-  // -------------------------------------
-  // POPULAR
-  // -------------------------------------
+  // FETCH POPULAR
   useEffect(() => {
     const fetchPopular = async () => {
       try {
@@ -30,7 +28,6 @@ export default function Search() {
           `${process.env.EXPO_PUBLIC_API_URL}/places/popular`
         );
         const data = await res.json();
-
         if (res.ok) setPopular(data.places || []);
       } catch (err) {
         console.log("Popular fetch error:", err);
@@ -40,9 +37,7 @@ export default function Search() {
     fetchPopular();
   }, []);
 
-  // -------------------------------------
   // SEARCH
-  // -------------------------------------
   const handleSearch = async (text) => {
     setSearchTerm(text);
 
@@ -52,22 +47,15 @@ export default function Search() {
     }
 
     try {
-      let url = "";
-
-      if (searchMode === "place") {
-        url = `${process.env.EXPO_PUBLIC_API_URL}/places/search?query=${text}`;
-      } else {
-        url = `${process.env.EXPO_PUBLIC_API_URL}/users/search?username=${text}`;
-      }
+      const url =
+        searchMode === "place"
+          ? `${process.env.EXPO_PUBLIC_API_URL}/places/search?query=${text}`
+          : `${process.env.EXPO_PUBLIC_API_URL}/users/search?username=${text}`;
 
       const res = await fetch(url);
       const data = await res.json();
 
-      if (searchMode === "place") {
-        setResults(data.places || []);
-      } else {
-        setResults(data.users || []);
-      }
+      setResults(searchMode === "place" ? data.places || [] : data.users || []);
     } catch (err) {
       console.log("Search API error:", err);
     }
@@ -75,238 +63,330 @@ export default function Search() {
 
   return (
     <View style={styles.container}>
-      {/* SEARCH MODE SWITCH */}
-      <View style={styles.modeRow}>
+      {/* SEARCH BAR (PREMIUM STYLE) */}
+      <View style={styles.searchWrapper}>
+        <Ionicons name="search-outline" size={20} color="#bbb" />
+        <TextInput
+          style={styles.searchInput}
+          placeholder={
+            searchMode === "place" ? i18n.t("searchcamp") : "Search users..."
+          }
+          placeholderTextColor="#888"
+          value={searchTerm}
+          onChangeText={handleSearch}
+        />
+      </View>
+
+      {/* CATEGORY CHIPS */}
+      <View style={styles.categoryRow}>
         <TouchableOpacity
           onPress={() => setSearchMode("place")}
           style={[
-            styles.modeBtn,
-            {
-              backgroundColor: searchMode === "place" ? "#7CC540" : "#EDEDED",
-            },
+            styles.categoryChip,
+            searchMode === "place" && styles.categoryChipActive,
           ]}
         >
+          <Ionicons
+            name="location-outline"
+            size={16}
+            color={searchMode === "place" ? "#000" : "#ccc"}
+            style={{ marginRight: 6 }}
+          />
           <Text
-            style={{
-              color: searchMode === "place" ? "#fff" : "#333",
-              fontWeight: "600",
-            }}
+            style={[
+              styles.categoryText,
+              searchMode === "place" && styles.categoryTextActive,
+            ]}
           >
             Place
           </Text>
         </TouchableOpacity>
 
+        {/* USER */}
         <TouchableOpacity
           onPress={() => setSearchMode("user")}
           style={[
-            styles.modeBtn,
-            {
-              backgroundColor: searchMode === "user" ? "#7CC540" : "#EDEDED",
-            },
+            styles.categoryChip,
+            searchMode === "user" && styles.categoryChipActive,
           ]}
         >
+          <Ionicons
+            name="person-outline"
+            size={16}
+            color={searchMode === "user" ? "#000" : "#ccc"}
+            style={{ marginRight: 6 }}
+          />
           <Text
-            style={{
-              color: searchMode === "user" ? "#fff" : "#333",
-              fontWeight: "600",
-            }}
+            style={[
+              styles.categoryText,
+              searchMode === "user" && styles.categoryTextActive,
+            ]}
           >
             User
           </Text>
         </TouchableOpacity>
       </View>
 
-      {/* SEARCH BAR */}
-      <View style={styles.searchBox}>
-        <TextInput
-          style={styles.searchInput}
-          placeholder={
-            searchMode === "place" ? i18n.t("searchcamp") : "Search users..."
-          }
-          placeholderTextColor="#999"
-          onChangeText={handleSearch}
-          value={searchTerm}
-        />
-        <Ionicons name="search-outline" size={22} color="#7CC540" />
-      </View>
+      {/* SCROLL CONTENT */}
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        style={{ marginTop: 15 }}
+      >
+        {/* NO SEARCH → POPULAR */}
+        {searchTerm.trim() === "" ? (
+          searchMode === "place" ? (
+            <View>
+              <Text style={styles.sectionTitle}>{i18n.t("populerplaces")}</Text>
 
-      {/* POPULAR OR SEARCH RESULTS */}
-      {searchTerm.trim() === "" ? (
-        searchMode === "place" ? (
-          // -------------------------------------
-          // POPULAR PLACES (ONLY PLACE MODE)
-          // -------------------------------------
-          <View>
-            <Text style={styles.sectionTitle}>{i18n.t("populerplaces")}</Text>
-
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              style={{ marginTop: 10 }}
-            >
               {popular.map((item) => (
                 <TouchableOpacity
                   key={item.id}
                   onPress={() => router.push(`/LocationDetail?id=${item.id}`)}
                 >
-                  <View style={styles.popularCard}>
+                  <View style={styles.card}>
                     <Image
                       source={{ uri: item.photos?.[0] }}
-                      style={styles.popularImage}
+                      style={styles.cardImage}
                     />
-                    <Text style={styles.popularName}>{item.name}</Text>
-                    <Text style={styles.popularCity}>{item.city}</Text>
+
+                    <View style={styles.cardOverlay}>
+                      <Text style={styles.cardTitle}>{item.name}</Text>
+
+                      <Text style={styles.cardDesc}>
+                        {item.description?.slice(0, 80)}...
+                      </Text>
+
+                      <View style={styles.cardBottomRow}>
+                        <View style={styles.bottomLeft}>
+                          <Ionicons
+                            name="location-outline"
+                            size={14}
+                            color="#fff"
+                          />
+                          <Text style={styles.cardBottomText}>{item.city}</Text>
+                        </View>
+
+                        <View style={styles.bottomRight}>
+                          <Ionicons name="star" size={14} color="#ffcc33" />
+                          <Text style={styles.cardBottomText}>
+                            {item.rating}
+                          </Text>
+                        </View>
+                      </View>
+                    </View>
                   </View>
                 </TouchableOpacity>
               ))}
-            </ScrollView>
-          </View>
+            </View>
+          ) : (
+            <Text style={{ color: "#777" }}>Kullanıcı aramak için yaz...</Text>
+          )
         ) : (
-          // -------------------------------------
-          // USER MODE → boşken popüler gösterme
-          // -------------------------------------
-          <Text style={{ marginTop: 20, color: "#777" }}>
-            Kullanıcı aramak için bir şey yazın...
-          </Text>
-        )
-      ) : (
-        // -------------------------------------
-        // SEARCH RESULTS (PLACE OR USER)
-        // -------------------------------------
-        <ScrollView showsVerticalScrollIndicator={false}>
-          <Text style={styles.sectionTitle}>{i18n.t("searchresult")}</Text>
+          /* SEARCH RESULTS */
+          <View>
+            <Text style={styles.sectionTitle}>{i18n.t("searchresult")}</Text>
 
-          {results.length === 0 && (
-            <Text style={{ marginTop: 15, color: "#777" }}>
-              {i18n.t("noresult")}
-            </Text>
-          )}
+            {results.length === 0 && (
+              <Text style={{ marginTop: 15, color: "#777" }}>
+                {i18n.t("noresult")}
+              </Text>
+            )}
 
-          {results.map((item) => (
-            <TouchableOpacity
-              key={item.id}
-              onPress={() => {
-                if (searchMode === "user") {
-                  router.push(`/profile/${item.id}`);
-                } else {
-                  router.push(`/LocationDetail?id=${item.id}`);
-                }
-              }}
-            >
-              <View style={styles.resultRow}>
-                <Image
-                  source={{
-                    uri:
-                      searchMode === "place"
-                        ? item.photos?.[0]
-                        : item.avatar ||
-                          item.image ||
-                          "https://i.imgur.com/0y8Ftya.png",
-                  }}
-                  style={styles.resultImg}
-                />
-                <View>
-                  <Text style={styles.resultName}>
-                    {searchMode === "place" ? item.name : item.name}
-                  </Text>
-                  <Text style={styles.resultCity}>
-                    {searchMode === "place" ? item.city : ""}
-                  </Text>
+            {results.map((item) => (
+              <TouchableOpacity
+                key={item.id}
+                onPress={() => {
+                  if (searchMode === "user") {
+                    router.push(`/profile/${item.id}`);
+                  } else {
+                    router.push(`/LocationDetail?id=${item.id}`);
+                  }
+                }}
+              >
+                <View style={styles.card}>
+                  <Image
+                    source={{
+                      uri:
+                        searchMode === "place"
+                          ? item.photos?.[0]
+                          : item.avatar ||
+                            item.image ||
+                            "https://i.imgur.com/0y8Ftya.png",
+                    }}
+                    style={styles.cardImage}
+                  />
+
+                  <View style={styles.cardOverlay}>
+                    <Text style={styles.cardTitle}>{item.name}</Text>
+
+                    <Text style={styles.cardDesc}>
+                      {searchMode === "place"
+                        ? item.description?.slice(0, 80)
+                        : "User profile"}
+                    </Text>
+
+                    <View style={styles.cardBottomRow}>
+                      <View style={styles.bottomLeft}>
+                        <Ionicons
+                          name="location-outline"
+                          size={14}
+                          color="#fff"
+                        />
+                        <Text style={styles.cardBottomText}>
+                          {searchMode === "place"
+                            ? item.city
+                            : "@" + item.username}
+                        </Text>
+                      </View>
+
+                      <View style={styles.bottomRight}>
+                        {searchMode === "place" && (
+                          <>
+                            <Ionicons name="star" size={14} color="#ffcc33" />
+                            <Text style={styles.cardBottomText}>
+                              {item.rating}
+                            </Text>
+                          </>
+                        )}
+                      </View>
+                    </View>
+                  </View>
                 </View>
-              </View>
-            </TouchableOpacity>
-          ))}
-        </ScrollView>
-      )}
+              </TouchableOpacity>
+            ))}
+          </View>
+        )}
+      </ScrollView>
     </View>
   );
 }
 
-/* -------------------- STYLES ---------------------- */
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fff",
-    paddingHorizontal: 20,
+    backgroundColor: "#FFFFFF",
+    paddingHorizontal: 18,
     paddingTop: 20,
   },
 
-  modeRow: {
-    flexDirection: "row",
-    justifyContent: "flex-start",
-    marginBottom: 15,
-  },
-  modeBtn: {
-    paddingVertical: 8,
-    paddingHorizontal: 16,
-    borderRadius: 12,
-    marginRight: 10,
-  },
-
-  searchBox: {
+  /* SEARCH BAR */
+  searchWrapper: {
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: "#F4F4F4",
-    borderRadius: 14,
-    paddingHorizontal: 15,
+    paddingHorizontal: 16,
     paddingVertical: 12,
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: "#E3E3E3",
   },
   searchInput: {
     flex: 1,
+    marginLeft: 10,
+    color: "#333",
     fontSize: 16,
   },
 
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: "bold",
-    marginTop: 25,
+  /* CATEGORY TABS */
+  categoryRow: {
+    flexDirection: "row",
+    marginTop: 18,
+    marginBottom: 10,
   },
 
-  popularCard: {
-    width: 160,
-    backgroundColor: "#F8F8F8",
-    borderRadius: 16,
-    marginRight: 15,
-    paddingBottom: 12,
-  },
-  popularImage: {
-    width: "100%",
-    height: 120,
-    borderTopLeftRadius: 16,
-    borderTopRightRadius: 16,
-  },
-  popularName: {
-    fontSize: 16,
-    fontWeight: "600",
-    marginTop: 10,
-    marginLeft: 10,
-  },
-  popularCity: {
-    color: "#777",
-    marginLeft: 10,
-  },
-
-  resultRow: {
+  categoryChip: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#F4F4F4",
-    borderRadius: 12,
-    padding: 10,
-    marginTop: 15,
+    backgroundColor: "#F2F2F2",
+    paddingVertical: 8,
+    paddingHorizontal: 18,
+    borderRadius: 20,
+    marginRight: 10,
+    borderWidth: 1,
+    borderColor: "#E3E3E3",
   },
-  resultImg: {
-    width: 55,
-    height: 55,
-    borderRadius: 12,
-    marginRight: 12,
+
+  categoryChipActive: {
+    backgroundColor: "#7CC540",
+    borderColor: "#7CC540",
   },
-  resultName: {
-    fontSize: 16,
+
+  categoryText: {
+    color: "#666",
+    fontSize: 15,
     fontWeight: "600",
   },
-  resultCity: {
-    color: "#777",
+  categoryTextActive: {
+    color: "#fff",
+  },
+
+  /* TITLES */
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: "700",
+    marginBottom: 14,
+    color: "#333",
+  },
+
+  /* CARD (LIGHT PREMIUM STYLE) */
+  card: {
+    width: "100%",
+    height: 240,
+    borderRadius: 18,
+    overflow: "hidden",
+    marginBottom: 22,
+    backgroundColor: "#FFF",
+    shadowColor: "#000",
+    shadowOpacity: 0.08,
+    shadowOffset: { width: 0, height: 2 },
+    shadowRadius: 6,
+    elevation: 3,
+  },
+
+  cardImage: {
+    width: "100%",
+    height: "100%",
+    position: "absolute",
+  },
+
+  cardOverlay: {
+    position: "absolute",
+    bottom: 0,
+    width: "100%",
+    padding: 16,
+    backgroundColor: "rgba(0,0,0,0.25)",
+  },
+
+  cardTitle: {
+    fontSize: 20,
+    fontWeight: "700",
+    color: "#fff",
+  },
+
+  cardDesc: {
     fontSize: 14,
+    color: "#EEE",
+    marginTop: 4,
+  },
+
+  /* CARD BOTTOM ROW */
+  cardBottomRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginTop: 12,
+  },
+
+  bottomLeft: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  bottomRight: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  cardBottomText: {
+    color: "#fff",
+    marginLeft: 4,
+    fontSize: 13,
   },
 });

@@ -39,6 +39,8 @@ export default function Profile() {
   const unreadCount = useSelector((state) => state.user.notificationCount);
   const dispatch = useDispatch();
 
+  console.log("vis", visits);
+
   useFocusEffect(
     useCallback(() => {
       fetchUser();
@@ -186,21 +188,50 @@ export default function Profile() {
         <Text style={styles.empty}>No items</Text>
       ) : (
         list.map((item, i) => {
-          const image =
+          let cover = null;
+
+          if (selectedTab === "gallery") {
+            const firstPhoto = item.medias?.find((m) => m.type === "image");
+            const firstVideo = item.medias?.find((m) => m.type === "video");
+
+            if (firstPhoto) cover = firstPhoto.url;
+            else if (firstVideo) cover = firstVideo.url;
+            else cover = null;
+          }
+          if (selectedTab === "visited") {
+            cover = item.placePhotos?.[0] || item.photos?.[0];
+          } else {
+            cover = item.photos?.[0];
+          }
+
+          // 🔥 Gerçek index’i buluyoruz
+          const postIndex =
             selectedTab === "gallery"
-              ? item.medias?.[0]?.url
-              : item.photos?.[0];
+              ? posts.findIndex((p) => p.id === item.id)
+              : i;
 
           return (
             <TouchableOpacity
-              key={i}
-              onPress={() =>
-                selectedTab === "gallery"
-                  ? router.push(`/post/${userId}/${i}`)
-                  : router.push(`/LocationDetail?id=${item.id}`)
-              }
+              key={item.id}
+              onPress={() => {
+                if (selectedTab === "gallery") {
+                  router.push(`/post/${userId}/${postIndex}`);
+                } else if (selectedTab === "visited") {
+                  router.push(`/LocationDetail?id=${item.placeId}`);
+                } else {
+                  // added & favorites
+                  router.push(`/LocationDetail?id=${item.id}`);
+                }
+              }}
             >
-              <Image source={{ uri: image }} style={styles.gridImg} />
+              <Image
+                source={
+                  cover
+                    ? { uri: cover }
+                    : require("../../src/assets/images/icon.png")
+                }
+                style={styles.gridImg}
+              />
             </TouchableOpacity>
           );
         })

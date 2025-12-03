@@ -1,75 +1,70 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import {
-  View,
-  Text,
-  TouchableOpacity,
-  TextInput,
-  StyleSheet,
-  ScrollView,
-  FlatList,
   Dimensions,
-  Image,
-  ActivityIndicator,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
 
-import * as ImagePicker from "expo-image-picker";
-import { useVideoPlayer, VideoView } from "expo-video";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import axios from "axios";
+import * as ImagePicker from "expo-image-picker";
 import { useRouter } from "expo-router";
+import DraggableFlatList from "react-native-draggable-flatlist";
 import { useSelector } from "react-redux";
+
+import MediaItem from "../components/media/MediaItem";
+import UploadProgress from "../components/media/UploadProgress";
 
 const SCREEN_WIDTH = Dimensions.get("window").width;
 
-// -------------------------------------------------------------
-// 🔥 Her video için ayrı player component
-// -------------------------------------------------------------
-function RenderVideo({ url }) {
-  const player = useVideoPlayer(url, (player) => {
-    player.loop = true;
-    player.play();
-  });
-
-  return (
-    <VideoView
-      style={styles.media}
-      player={player}
-      fullscreenOptions={{ enabled: true }}
-      pictureInPictureOptions={{ enabled: true }}
-    />
-  );
-}
-
 export default function NewPost() {
-  const router = useRouter();
   const myUser = useSelector((state) => state.user?.userInfo);
+  const router = useRouter();
 
   const [caption, setCaption] = useState("");
   const [medias, setMedias] = useState([]);
-  const [loading, setLoading] = useState(false);
 
-  // ---------------------------------------------------------
-  // Media Picker
-  // ---------------------------------------------------------
+  // UPLOAD PROGRESS
+  const [uploading, setUploading] = useState(false);
+  const [uploadTotal, setUploadTotal] = useState(0);
+  const [uploadCurrent, setUploadCurrent] = useState(0);
+  const [showOrder, setShowOrder] = useState(false);
+
+  const [saving, setSaving] = useState(false);
+
+  /* -----------------------------
+     MEDIA PICKER → MULTI
+  ----------------------------- */
   const pickMedia = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ["images", "livePhotos", "videos"],
+      mediaTypes: ["images", "videos"],
       allowsMultipleSelection: true,
-      selectionLimit: 10,
       quality: 0.8,
     });
 
     if (result.canceled) return;
 
     const selected = result.assets;
+    setUploadTotal(selected.length);
+    setUploadCurrent(0);
+    setUploading(true);
+
     for (const file of selected) {
       await uploadMedia(file);
     }
+
+    setUploading(false);
   };
 
-  // ---------------------------------------------------------
-  // Upload to Backend
-  // ---------------------------------------------------------
+  const openOrderModal = () => {
+    setShowOrder(true);
+  };
+  /* -----------------------------
+     UPLOAD BINARY TO BACKEND
+  ----------------------------- */
   const uploadMedia = async (file) => {
     try {
       let formData = new FormData();
@@ -93,26 +88,28 @@ export default function NewPost() {
         ...prev,
         { url: res.data.url, type: file.type === "video" ? "video" : "image" },
       ]);
+
+      setUploadCurrent((prev) => prev + 1);
     } catch (err) {
       console.log("UPLOAD ERR:", err);
       alert("Upload error");
     }
   };
 
-  // ---------------------------------------------------------
-  // Remove Media
-  // ---------------------------------------------------------
+  /* -----------------------------
+     DELETE
+  ----------------------------- */
   const removeMedia = (index) => {
     setMedias((prev) => prev.filter((_, i) => i !== index));
   };
 
-  // ---------------------------------------------------------
-  // Create Post
-  // ---------------------------------------------------------
+  /* -----------------------------
+     CREATE POST
+  ----------------------------- */
   const handleShare = async () => {
-    if (medias.length === 0) return alert("Please select media.");
+    if (medias.length === 0) return alert("Please select at least 1 media.");
 
-    setLoading(true);
+    setSaving(true);
 
     try {
       await axios.post(`${process.env.EXPO_PUBLIC_API_URL}/post/new`, {
@@ -124,17 +121,17 @@ export default function NewPost() {
       router.back();
     } catch (err) {
       console.log("POST ERROR:", err);
-      alert("Post error");
+      alert("Post create failed");
     } finally {
-      setLoading(false);
+      setSaving(false);
     }
   };
 
-  // ---------------------------------------------------------
-  // RENDER
-  // ---------------------------------------------------------
+  /* -----------------------------
+     RENDER
+  ----------------------------- */
   return (
-    <ScrollView style={styles.container}>
+    <View style={styles.container}>
       {/* HEADER */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()}>
@@ -143,34 +140,26 @@ export default function NewPost() {
 
         <Text style={styles.title}>New Post</Text>
 
-        <TouchableOpacity onPress={handleShare} disabled={loading}>
-          <Text style={[styles.share, loading && { opacity: 0.4 }]}>Share</Text>
+        <TouchableOpacity disabled={saving} onPress={handleShare}>
+          <Text style={[styles.share, saving && { opacity: 0.4 }]}>Share</Text>
         </TouchableOpacity>
       </View>
 
-      {/* MEDIA CAROUSEL */}
-      <FlatList
+      {/* LIST */}
+      <DraggableFlatList
+        data={medias}
         horizontal
         pagingEnabled
-        data={medias}
         keyExtractor={(_, i) => i.toString()}
-        showsHorizontalScrollIndicator={false}
-        renderItem={({ item, index }) => (
-          <View style={styles.mediaBox}>
-            {item.type === "image" ? (
-              <Image source={{ uri: item.url }} style={styles.media} />
-            ) : (
-              <RenderVideo url={item.url} />
-            )}
-
-            {/* DELETE BUTTON */}
-            <TouchableOpacity
-              style={styles.deleteBtn}
-              onPress={() => removeMedia(index)}
-            >
-              <Ionicons name="trash" color="#fff" size={22} />
-            </TouchableOpacity>
-          </View>
+        onDragEnd={({ data }) => setMedias(data)}
+        renderItem={({ item, index, drag }) => (
+          <MediaItem
+            item={item}
+            index={index}
+            drag={drag}
+            onDelete={removeMedia}
+            onOpenOrder={openOrderModal}
+          />
         )}
         ListEmptyComponent={
           <TouchableOpacity style={styles.emptyBox} onPress={pickMedia}>
@@ -199,20 +188,22 @@ export default function NewPost() {
         onChangeText={setCaption}
       />
 
-      {loading && (
-        <View style={styles.loading}>
-          <ActivityIndicator size="large" color="#007AFF" />
-        </View>
-      )}
-    </ScrollView>
+      {/* UPLOAD PROGRESS OVERLAY */}
+      <UploadProgress
+        visible={uploading}
+        current={uploadCurrent}
+        total={uploadTotal}
+      />
+    </View>
   );
 }
 
-// -------------------------------------------------------------
-// STYLES
-// -------------------------------------------------------------
+/* -----------------------------
+   STYLES
+----------------------------- */
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#fff" },
+
   header: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -232,15 +223,15 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
 
-  mediaBox: {
+  mediaBox: { width: SCREEN_WIDTH, height: 360 },
+
+  mediaImg: {
     width: SCREEN_WIDTH,
     height: 360,
-  },
-  media: {
-    width: "100%",
-    height: "100%",
     backgroundColor: "#000",
+    resizeMode: "cover",
   },
+
   deleteBtn: {
     position: "absolute",
     right: 15,
@@ -250,11 +241,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
 
-  addMore: {
-    flexDirection: "row",
-    padding: 15,
-    alignItems: "center",
-  },
+  addMore: { flexDirection: "row", padding: 15, alignItems: "center" },
   addMoreText: { marginLeft: 6, fontSize: 16, color: "#007AFF" },
 
   caption: {
@@ -262,6 +249,4 @@ const styles = StyleSheet.create({
     fontSize: 16,
     minHeight: 120,
   },
-
-  loading: { marginTop: 20, alignItems: "center" },
 });

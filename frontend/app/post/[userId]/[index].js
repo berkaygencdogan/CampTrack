@@ -26,7 +26,7 @@ import PostVideo from "../../components/PostVideo";
 const SCREEN_WIDTH = Dimensions.get("window").width;
 
 export default function PostDetail() {
-  const { userId, index, highlight } = useLocalSearchParams();
+  const { userId, index, highlight, refresh } = useLocalSearchParams();
   const router = useRouter();
 
   const myUser = useSelector((state) => state.user?.userInfo);
@@ -41,9 +41,6 @@ export default function PostDetail() {
   const scrollRef = useRef();
   const flatRef = useRef();
 
-  // -----------------------------------------------------
-  // FETCH POST
-  // -----------------------------------------------------
   useEffect(() => {
     const load = async () => {
       try {
@@ -70,7 +67,7 @@ export default function PostDetail() {
       }
     };
     load();
-  }, []);
+  }, [refresh]);
 
   // -----------------------------------------------------
   // SCROLL TO COMMENT
@@ -173,7 +170,11 @@ export default function PostDetail() {
 
         {isMine ? (
           <TouchableOpacity
-            onPress={() => router.push(`/post/edit/${post.id}?owner=${userId}`)}
+            onPress={() =>
+              router.push(
+                `/post/edit/${post.id}?owner=${userId}&index=${activeIndex}`
+              )
+            }
           >
             <Text style={styles.editText}>Edit</Text>
           </TouchableOpacity>

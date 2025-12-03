@@ -9,10 +9,14 @@ import {
 } from "react-native";
 import { useEffect, useState } from "react";
 import { useRouter } from "expo-router";
+import { setNotificationCount } from "../../redux/userSlice";
+import { useDispatch, useSelector } from "react-redux";
 
 export default function NotificationsScreen({ onClose, data }) {
   const [list, setList] = useState([]);
+  const myUser = useSelector((state) => state.user.userInfo);
   const router = useRouter();
+  const dispatch = useDispatch();
 
   useEffect(() => {
     setList(data);
@@ -34,14 +38,23 @@ export default function NotificationsScreen({ onClose, data }) {
     }
   };
 
-  // 🔥 Bildirimi sil
   const deleteNotification = async (notifId) => {
     await fetch(`${process.env.EXPO_PUBLIC_API_URL}/notifications/delete`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ notifId }),
     });
+
     setList((prev) => prev.filter((n) => n.id !== notifId));
+
+    // 🔥 GERÇEK SAYIYI TEKRAR ÇEK — doğru userId ile
+    const res = await fetch(
+      `${process.env.EXPO_PUBLIC_API_URL}/notifications/${myUser.id}`
+    );
+
+    const json = await res.json();
+
+    dispatch(setNotificationCount(json.notifications.length));
   };
 
   // 🔥 COMMENT → POST DETAYA GİT
@@ -66,25 +79,29 @@ export default function NotificationsScreen({ onClose, data }) {
     >
       {/* HEADER */}
       <View style={styles.headerRow}>
-        <Image source={{ uri: item.fromAvatar }} style={styles.avatar} />
+        <Image
+          style={styles.avatar}
+          source={{
+            uri:
+              item.fromAvatar && item.fromAvatar.trim() !== ""
+                ? item.fromAvatar
+                : `https://ui-avatars.com/api/?name=${item.fromName || "User"}`,
+          }}
+        />
         <Text style={styles.fromName}>{item.fromName}</Text>
       </View>
 
       {/* MESSAGE */}
       <Text style={styles.message}>
         {item.type === "comment" && item.text}
-
         {item.type === "team_invite" &&
           `${item.fromName}, seni "${item.teamName}" takımına davet etti.`}
-
         {item.type === "team_invite_accept" &&
           `${item.fromName}, "${item.teamName}" davetini kabul etti! 🎉`}
-
         {item.type === "team_invite_reject" &&
           `${item.fromName}, "${item.teamName}" davetini reddetti.`}
       </Text>
 
-      {/* 🔥 TEAM INVITE → Accept & Reject */}
       {item.type === "team_invite" && (
         <View style={styles.btnRow}>
           <TouchableOpacity
@@ -103,7 +120,6 @@ export default function NotificationsScreen({ onClose, data }) {
         </View>
       )}
 
-      {/* Normal bildirimlerde silme butonu */}
       {item.type !== "team_invite" && (
         <TouchableOpacity
           style={styles.deleteBtn}

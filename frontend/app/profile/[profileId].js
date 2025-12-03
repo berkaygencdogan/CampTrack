@@ -158,21 +158,49 @@ export default function OtherUserProfile() {
       {list.length === 0 ? (
         <Text style={styles.empty}>No items</Text>
       ) : (
-        list.map((item, i) => (
-          <TouchableOpacity
-            key={i}
-            onPress={() =>
-              selectedTab === "gallery"
-                ? router.push(`/post/${profileId}/${i}`)
-                : router.push(`/LocationDetail?id=${item.id}`)
-            }
-          >
-            <Image
-              source={{ uri: item.mediaUrl || item.photos?.[0] }}
-              style={styles.gridItem}
-            />
-          </TouchableOpacity>
-        ))
+        list.map((item, i) => {
+          let cover = null;
+
+          // GALLERY -------------------------
+          if (selectedTab === "gallery") {
+            const firstImage = item.medias?.find((m) => m.type === "image");
+            const firstMedia = firstImage || item.medias?.[0];
+
+            cover = firstMedia?.url || null;
+          }
+          if (selectedTab === "visited") {
+            cover = item.placePhotos?.[0] || item.photos?.[0];
+          }
+          // ADDED / FAVORITES / VISITED -----
+          else {
+            cover = item.photos?.[0] || null;
+          }
+
+          return (
+            <TouchableOpacity
+              key={i}
+              onPress={() => {
+                if (selectedTab === "gallery") {
+                  router.push(`/post/${profileId}/${i}`);
+                } else if (selectedTab === "visited") {
+                  router.push(`/LocationDetail?id=${item.placeId}`);
+                } else {
+                  // added & favorites
+                  router.push(`/LocationDetail?id=${item.id}`);
+                }
+              }}
+            >
+              <Image
+                source={
+                  cover
+                    ? { uri: cover }
+                    : require("../../src/assets/images/icon.png")
+                }
+                style={styles.gridItem}
+              />
+            </TouchableOpacity>
+          );
+        })
       )}
     </View>
   );
