@@ -187,7 +187,7 @@ export default function Search() {
               key={item.id}
               onPress={() => {
                 if (searchMode === "user") {
-                  router.push(`/UserProfile?id=${item.id}`);
+                  router.push(`/profile/${item.id}`);
                 } else {
                   router.push(`/LocationDetail?id=${item.id}`);
                 }

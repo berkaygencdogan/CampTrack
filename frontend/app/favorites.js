@@ -16,17 +16,13 @@ export default function Favorites() {
   const router = useRouter();
   const [favorites, setFavorites] = useState([]);
   const user = useSelector((state) => state.user);
+  console.log(user);
 
   useFocusEffect(
     useCallback(() => {
       const fetchFavs = async () => {
         const res = await fetch(
-          `${process.env.EXPO_PUBLIC_API_URL}/favorites?userId=${user.userInfo.id}`,
-          {
-            headers: {
-              Authorization: `Bearer ${user.token}`,
-            },
-          }
+          `${process.env.EXPO_PUBLIC_API_URL}/favorites?userId=${user.userInfo.id}`
         );
 
         const data = await res.json();

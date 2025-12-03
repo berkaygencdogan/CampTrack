@@ -51,7 +51,6 @@ export default function Login() {
 
       const token = res.data.token;
 
-      // 2) AUTH.ME → kullanıcı bilgisi + role
       const me = await axios.get(`${process.env.EXPO_PUBLIC_API_URL}/auth/me`, {
         headers: { Authorization: "Bearer " + token },
       });

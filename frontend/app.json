@@ -8,11 +8,9 @@
     "scheme": "frontend",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
-
     "ios": {
       "supportsTablet": true
     },
-
     "android": {
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE"
@@ -27,12 +25,10 @@
       "googleServicesFile": "./google-services.json",
       "package": "com.berkay_gencdogan.camptrack"
     },
-
     "web": {
       "output": "static",
       "favicon": "./src/assets/images/favicon.png"
     },
-
     "plugins": [
       "expo-router",
       [
@@ -52,14 +48,19 @@
         {
           "requestLocationPermission": true
         }
+      ],
+      [
+        "expo-video",
+        {
+          "supportsBackgroundPlayback": true,
+          "supportsPictureInPicture": true
+        }
       ]
     ],
-
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
     },
-
     "extra": {
       "router": {},
       "eas": {

@@ -8,14 +8,17 @@ import {
   Image,
 } from "react-native";
 import { useEffect, useState } from "react";
+import { useRouter } from "expo-router";
 
 export default function NotificationsScreen({ onClose, data }) {
   const [list, setList] = useState([]);
+  const router = useRouter();
 
   useEffect(() => {
     setList(data);
   }, [data]);
 
+  // 🔥 Daveti kabul et
   const acceptRequest = async (notifId, userId) => {
     const res = await fetch(
       `${process.env.EXPO_PUBLIC_API_URL}/notifications/accept`,
@@ -25,58 +28,52 @@ export default function NotificationsScreen({ onClose, data }) {
         body: JSON.stringify({ notifId, userId }),
       }
     );
-
     const json = await res.json();
-    if (json.success) setList((prev) => prev.filter((n) => n.id !== notifId));
-  };
-
-  const deleteNotification = async (notifId) => {
-    const res = await fetch(
-      `${process.env.EXPO_PUBLIC_API_URL}/notifications/reject`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ notifId }),
-      }
-    );
-
-    const json = await res.json();
-    if (json.success) setList((prev) => prev.filter((n) => n.id !== notifId));
-  };
-
-  // 🔥 TÜM DAVET DIŞI BİLDİRİMLERİ SİL
-  const deleteAllNonInvite = async () => {
-    const nonInvite = list.filter((item) => item.type !== "team_invite");
-
-    for (let item of nonInvite) {
-      await deleteNotification(item.id);
+    if (json.success) {
+      setList((prev) => prev.filter((n) => n.id !== notifId));
     }
   };
 
-  // ------------------------------------------
-  // RENDER NOTIFICATION
-  // ------------------------------------------
+  // 🔥 Bildirimi sil
+  const deleteNotification = async (notifId) => {
+    await fetch(`${process.env.EXPO_PUBLIC_API_URL}/notifications/delete`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ notifId }),
+    });
+    setList((prev) => prev.filter((n) => n.id !== notifId));
+  };
+
+  // 🔥 COMMENT → POST DETAYA GİT
+  const handlePress = (item) => {
+    if (item.type === "comment") {
+      if (item.postOwnerId != null && item.postIndex != null) {
+        router.push(
+          `/post/${item.postOwnerId}/${item.postIndex}?highlight=${item.commentId}`
+        );
+        onClose();
+      }
+      return;
+    }
+  };
+
+  // 🔥 TEK BİLDİRİM KARTI
   const renderItem = ({ item }) => (
-    <View style={styles.card}>
+    <TouchableOpacity
+      activeOpacity={0.85}
+      onPress={() => handlePress(item)}
+      style={styles.card}
+    >
+      {/* HEADER */}
       <View style={styles.headerRow}>
-        {/* Avatar */}
-        <Image
-          source={{
-            uri: item.fromAvatar || "https://i.imgur.com/0y8Ftya.png",
-          }}
-          style={styles.avatar}
-        />
-
+        <Image source={{ uri: item.fromAvatar }} style={styles.avatar} />
         <Text style={styles.fromName}>{item.fromName}</Text>
-
-        {/* Takım Logosu */}
-        {item.teamLogo ? (
-          <Image source={{ uri: item.teamLogo }} style={styles.teamLogo} />
-        ) : null}
       </View>
 
-      {/* Mesaj */}
+      {/* MESSAGE */}
       <Text style={styles.message}>
+        {item.type === "comment" && item.text}
+
         {item.type === "team_invite" &&
           `${item.fromName}, seni "${item.teamName}" takımına davet etti.`}
 
@@ -87,7 +84,7 @@ export default function NotificationsScreen({ onClose, data }) {
           `${item.fromName}, "${item.teamName}" davetini reddetti.`}
       </Text>
 
-      {/* Eğer davet ise -> Kabul / Reddet butonları */}
+      {/* 🔥 TEAM INVITE → Accept & Reject */}
       {item.type === "team_invite" && (
         <View style={styles.btnRow}>
           <TouchableOpacity
@@ -106,7 +103,7 @@ export default function NotificationsScreen({ onClose, data }) {
         </View>
       )}
 
-      {/* Eğer davet değilse -> Bildirim Sil */}
+      {/* Normal bildirimlerde silme butonu */}
       {item.type !== "team_invite" && (
         <TouchableOpacity
           style={styles.deleteBtn}
@@ -115,7 +112,7 @@ export default function NotificationsScreen({ onClose, data }) {
           <Text style={styles.deleteText}>Bildirimi Sil</Text>
         </TouchableOpacity>
       )}
-    </View>
+    </TouchableOpacity>
   );
 
   return (
@@ -126,17 +123,11 @@ export default function NotificationsScreen({ onClose, data }) {
 
           <FlatList
             data={list}
-            keyExtractor={(i) => i.id.toString()}
+            keyExtractor={(item, index) =>
+              item.id ? item.id.toString() : index.toString()
+            }
             renderItem={renderItem}
           />
-
-          {/* 🔥 TÜM DAVET DIŞI BİLDİRİMLERİ SİL */}
-          <TouchableOpacity
-            style={styles.deleteAllBtn}
-            onPress={deleteAllNonInvite}
-          >
-            <Text style={styles.deleteAllText}>Tüm Bildirimleri Sil</Text>
-          </TouchableOpacity>
 
           <TouchableOpacity style={styles.closeBtn} onPress={onClose}>
             <Text style={styles.closeText}>Kapat</Text>
@@ -189,13 +180,6 @@ const styles = StyleSheet.create({
     fontWeight: "700",
     color: "#333",
   },
-  teamLogo: {
-    width: 34,
-    height: 34,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: "#ddd",
-  },
   message: {
     fontSize: 14,
     color: "#555",
@@ -204,6 +188,7 @@ const styles = StyleSheet.create({
   btnRow: {
     flexDirection: "row",
     gap: 10,
+    marginBottom: 10,
   },
   btn: {
     flex: 1,
@@ -218,7 +203,6 @@ const styles = StyleSheet.create({
     fontWeight: "700",
   },
   deleteBtn: {
-    marginTop: 10,
     backgroundColor: "#eee",
     paddingVertical: 8,
     borderRadius: 8,
@@ -229,21 +213,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: "600",
   },
-
-  // 🔥 TÜM BİLDİRİMLERİ SİL BUTONU
-  deleteAllBtn: {
-    marginTop: 10,
-    paddingVertical: 14,
-    backgroundColor: "#ffbbbb",
-    borderRadius: 12,
-  },
-  deleteAllText: {
-    textAlign: "center",
-    color: "#900",
-    fontSize: 15,
-    fontWeight: "700",
-  },
-
   closeBtn: {
     marginTop: 20,
     paddingVertical: 12,
