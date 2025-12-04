@@ -7,11 +7,12 @@
     "icon": "./src/assets/images/icon.png",
     "scheme": "frontend",
     "userInterfaceStyle": "automatic",
-    "newArchEnabled": true,
+    "newArchEnabled": false,
     "ios": {
       "supportsTablet": true
     },
     "android": {
+      "minSdkVersion": 23,
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE"
       },

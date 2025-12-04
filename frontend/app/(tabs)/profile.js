@@ -39,8 +39,6 @@ export default function Profile() {
   const unreadCount = useSelector((state) => state.user.notificationCount);
   const dispatch = useDispatch();
 
-  console.log("vis", visits);
-
   useFocusEffect(
     useCallback(() => {
       fetchUser();
