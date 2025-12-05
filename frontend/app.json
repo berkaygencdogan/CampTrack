@@ -7,7 +7,6 @@
     "icon": "./src/assets/images/icon.png",
     "scheme": "frontend",
     "userInterfaceStyle": "automatic",
-    "newArchEnabled": false,
     "ios": {
       "supportsTablet": true
     },
@@ -23,8 +22,7 @@
       },
       "predictiveBackGestureEnabled": false,
       "googleServicesFile": "./google-services.json",
-      "package": "com.berkay_gencdogan.camptrack",
-      "versionCode": 1
+      "package": "com.berkay_gencdogan.camptrack"
     },
     "web": {
       "output": "static",
@@ -59,8 +57,7 @@
       ]
     ],
     "experiments": {
-      "typedRoutes": true,
-      "reactCompiler": true
+      "typedRoutes": true
     },
     "extra": {
       "router": {},
