@@ -6,16 +6,19 @@ import {
   FlatList,
   TouchableOpacity,
   Image,
+  Alert,
 } from "react-native";
 import { useRouter } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useSelector } from "react-redux";
 import NoTeams from "./no-teams";
 import { useFocusEffect } from "@react-navigation/native";
+import Ionicons from "@expo/vector-icons/Ionicons";
 
 export default function TeamsIndex() {
   const router = useRouter();
   const [teams, setTeams] = useState([]);
+  const [editMode, setEditMode] = useState(false);
   const userId = useSelector((state) => state.user.userInfo.id);
 
   useFocusEffect(
@@ -42,30 +45,69 @@ export default function TeamsIndex() {
     }
   };
 
+  // ===================================
+  // DELETE TEAM
+  // ===================================
+  const deleteTeam = async (teamId) => {
+    Alert.alert("Delete Team", "Are you sure you want to delete this team?", [
+      { text: "Cancel" },
+      {
+        text: "Delete",
+        style: "destructive",
+        onPress: async () => {
+          try {
+            const token = await AsyncStorage.getItem("token");
+
+            const res = await fetch(
+              `${process.env.EXPO_PUBLIC_API_URL}/teams/delete`,
+              {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                  Authorization: `Bearer ${token}`,
+                },
+                body: JSON.stringify({ teamId, userId }),
+              }
+            );
+
+            const data = await res.json();
+            if (data.success) {
+              setTeams((prev) => prev.filter((t) => t.id !== teamId));
+              setEditMode(false);
+            }
+          } catch (err) {
+            console.log("DELETE_TEAM_ERROR:", err);
+          }
+        },
+      },
+    ]);
+  };
+
   // ========= TEAM CARD =========
   const renderTeam = ({ item }) => {
     const members = item.members || [];
-    const avatarsToShow = members.slice(0, 5); // max 5 kişinin resmi
+    const avatarsToShow = members.slice(0, 5);
 
     return (
       <TouchableOpacity
         style={styles.teamCard}
-        onPress={() => router.push(`/teams/${item.id}`)}
+        onPress={() => {
+          if (!editMode) router.push(`/teams/${item.id}`);
+        }}
+        activeOpacity={editMode ? 1 : 0.7}
       >
         {/* SOL LOGO */}
         <Image
           source={{
-            uri: item.logo || "https://via.placeholder.com/100",
+            uri: `${item.logo}?t=${Date.now()}`,
           }}
           style={styles.logo}
         />
 
         {/* SAĞ BİLGİLER */}
         <View style={{ flex: 1, marginLeft: 12 }}>
-          {/* Takım adı */}
           <Text style={styles.teamName}>{item.teamName}</Text>
 
-          {/* Üye avatarları */}
           <View style={styles.avatarRow}>
             {avatarsToShow.map((uid) => (
               <Image
@@ -81,22 +123,40 @@ export default function TeamsIndex() {
               />
             ))}
 
-            {/* Fazla kişi varsa ... */}
             {members.length > 5 && (
               <Text style={styles.moreText}>+{members.length - 5}</Text>
             )}
           </View>
 
-          {/* Sağ altta kişi sayısı */}
           <Text style={styles.memberCount}>{members.length} members</Text>
         </View>
+
+        {/* DELETE ICON (only in edit mode) */}
+        {editMode && (
+          <TouchableOpacity
+            style={styles.deleteIcon}
+            onPress={() => deleteTeam(item.id)}
+          >
+            <Ionicons name="trash" size={26} color="#FF4444" />
+          </TouchableOpacity>
+        )}
       </TouchableOpacity>
     );
   };
 
   return (
     <View style={styles.container}>
-      <Text style={styles.header}>My Teams</Text>
+      {/* HEADER + EDIT BUTTON */}
+      <View style={styles.headerRow}>
+        <Text style={styles.header}>My Teams</Text>
+
+        <TouchableOpacity
+          onPress={() => setEditMode(!editMode)}
+          style={styles.editBtn}
+        >
+          <Text style={styles.editText}>{editMode ? "Done" : "Edit"}</Text>
+        </TouchableOpacity>
+      </View>
 
       {teams.length > 0 ? (
         <FlatList
@@ -110,12 +170,14 @@ export default function TeamsIndex() {
       )}
 
       {/* ADD TEAM BUTTON */}
-      <TouchableOpacity
-        style={styles.addBtn}
-        onPress={() => router.push("/teams/create")}
-      >
-        <Text style={styles.plus}>+</Text>
-      </TouchableOpacity>
+      {!editMode && (
+        <TouchableOpacity
+          style={styles.addBtn}
+          onPress={() => router.push("/teams/create")}
+        >
+          <Text style={styles.plus}>+</Text>
+        </TouchableOpacity>
+      )}
     </View>
   );
 }
@@ -130,11 +192,28 @@ const styles = StyleSheet.create({
     paddingTop: 60,
   },
 
+  headerRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 20,
+  },
+
   header: {
     fontSize: 28,
     fontWeight: "700",
-    marginBottom: 20,
-    textAlign: "center",
+  },
+
+  editBtn: {
+    paddingHorizontal: 14,
+    paddingVertical: 6,
+    backgroundColor: "#7CC540",
+    borderRadius: 8,
+  },
+  editText: {
+    color: "#fff",
+    fontWeight: "700",
+    fontSize: 16,
   },
 
   teamCard: {
@@ -143,6 +222,7 @@ const styles = StyleSheet.create({
     padding: 12,
     borderRadius: 12,
     marginBottom: 15,
+    alignItems: "center",
   },
 
   logo: {
@@ -154,12 +234,6 @@ const styles = StyleSheet.create({
   teamName: {
     fontSize: 18,
     fontWeight: "700",
-  },
-
-  memberCount: {
-    fontSize: 13,
-    color: "#777",
-    marginTop: 8,
   },
 
   avatarRow: {
@@ -180,6 +254,16 @@ const styles = StyleSheet.create({
     fontWeight: "700",
     color: "#555",
     marginLeft: 4,
+  },
+
+  memberCount: {
+    fontSize: 13,
+    color: "#777",
+    marginTop: 8,
+  },
+
+  deleteIcon: {
+    padding: 6,
   },
 
   addBtn: {

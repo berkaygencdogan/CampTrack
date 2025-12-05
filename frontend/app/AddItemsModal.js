@@ -7,10 +7,10 @@ import {
   StyleSheet,
 } from "react-native";
 import { Image } from "expo-image";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import itemsData from "../src/assets/items.json";
 import { useDispatch, useSelector } from "react-redux";
-import { syncAddItem } from "../api/backpackApi";
+import { syncAddItem, syncRemoveItem } from "../api/backpackApi";
 import i18n from "./language/index";
 
 export default function AddItemsModal({ visible, onClose }) {
@@ -18,6 +18,16 @@ export default function AddItemsModal({ visible, onClose }) {
   const user = useSelector((state) => state.user.userInfo);
 
   const [selected, setSelected] = useState([]);
+  const [initialSelected, setInitialSelected] = useState([]);
+
+  const backpackItems = useSelector((state) => state.backpack.items);
+
+  useEffect(() => {
+    if (visible) {
+      setSelected(backpackItems);
+      setInitialSelected(backpackItems);
+    }
+  }, [visible]);
 
   const toggleSelect = (item) => {
     if (selected.some((x) => x.id === item.id)) {
@@ -28,11 +38,22 @@ export default function AddItemsModal({ visible, onClose }) {
   };
 
   const confirmAdd = () => {
-    selected.forEach(
-      (item) => dispatch(syncAddItem(user.id, item)) // backend + redux
+    // 1) EKLENECEK itemlar (modalda seçili ama çantada olmayan)
+    const itemsToAdd = selected.filter(
+      (item) => !initialSelected.some((x) => x.id === item.id)
     );
 
-    setSelected([]);
+    // 2) SİLİNECEK itemlar (çanta’da vardı ama modalda seçili değil)
+    const itemsToRemove = initialSelected.filter(
+      (item) => !selected.some((x) => x.id === item.id)
+    );
+
+    // 3) ADD işlemleri
+    itemsToAdd.forEach((item) => dispatch(syncAddItem(user.id, item)));
+
+    // 4) REMOVE işlemleri
+    itemsToRemove.forEach((item) => dispatch(syncRemoveItem(user.id, item.id)));
+
     onClose();
   };
 

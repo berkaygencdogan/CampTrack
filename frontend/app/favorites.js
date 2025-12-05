@@ -16,7 +16,6 @@ export default function Favorites() {
   const router = useRouter();
   const [favorites, setFavorites] = useState([]);
   const user = useSelector((state) => state.user);
-  console.log(user);
 
   useFocusEffect(
     useCallback(() => {

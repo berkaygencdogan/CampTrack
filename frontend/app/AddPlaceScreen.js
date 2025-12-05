@@ -8,6 +8,7 @@ import {
   Image,
   ScrollView,
   Modal,
+  ActivityIndicator,
 } from "react-native";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import * as ImagePicker from "expo-image-picker";
@@ -27,6 +28,8 @@ export default function AddPlaceScreen() {
   const user = useSelector((state) => state.user.userInfo);
   const [mapVisible, setMapVisible] = useState(false);
   const [selectedMarker, setSelectedMarker] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   // ---------------------------------------
   // PHOTO PICKER
   // ---------------------------------------
@@ -73,27 +76,36 @@ export default function AddPlaceScreen() {
       return;
     }
 
-    const res = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/places/add`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        userId: user.id,
-        name,
-        city,
-        description,
-        photos,
-        location,
-      }),
-    });
+    try {
+      setIsSubmitting(true);
 
-    const data = await res.json();
-    if (data) {
-      alert("Place submitted!");
-      router.push("/home");
-    } else {
-      alert("hata var");
+      const res = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/places/add`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          userId: user.id,
+          name,
+          city,
+          description,
+          photos,
+          location,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (data) {
+        alert("Place submitted!");
+        router.push("/home");
+      } else {
+        alert("hata var");
+      }
+    } catch (e) {
+      alert("Error occured");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -159,8 +171,16 @@ export default function AddPlaceScreen() {
         )}
 
         {/* SUBMIT */}
-        <TouchableOpacity style={styles.saveBtn} onPress={submitPlace}>
-          <Text style={styles.saveText}>{i18n.t("submit")}</Text>
+        <TouchableOpacity
+          style={styles.saveBtn}
+          onPress={submitPlace}
+          disabled={isSubmitting}
+        >
+          {isSubmitting ? (
+            <ActivityIndicator />
+          ) : (
+            <Text style={styles.saveText}>{i18n.t("submit")}</Text>
+          )}
         </TouchableOpacity>
       </ScrollView>
 

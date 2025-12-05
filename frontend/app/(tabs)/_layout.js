@@ -15,7 +15,6 @@ export default function Layout() {
   const user = useSelector((state) => state.user.userInfo);
   const unreadCount = useSelector((state) => state.user.notificationCount);
 
-  // 🔥 Uygulama açıkken sürekli bildirim kontrolü
   useEffect(() => {
     if (!user) return;
 

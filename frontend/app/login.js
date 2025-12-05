@@ -3,6 +3,7 @@ import axios from "axios";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import {
+  ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
   StyleSheet,
@@ -20,6 +21,8 @@ export default function Login() {
   const [email, setEmail] = useState("");
   const [pass, setPass] = useState("");
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+
   const dispatch = useDispatch();
   const seenOnboarding = useSelector(
     (state) => state.onboard.showOnboardScreen
@@ -28,6 +31,7 @@ export default function Login() {
   if (!seenOnboarding) {
     dispatch(setOnboardScreen(true));
   }
+
   const loginWithEmail = async () => {
     setError("");
 
@@ -38,7 +42,8 @@ export default function Login() {
     }
 
     try {
-      // 1) LOGIN
+      setLoading(true);
+
       const res = await axios.post(`${process.env.EXPO_PUBLIC_API_URL}/login`, {
         email: cleanEmail,
         password: pass,
@@ -46,6 +51,7 @@ export default function Login() {
 
       if (!res.data.success) {
         setError("Login failed");
+        setLoading(false);
         return;
       }
 
@@ -55,25 +61,19 @@ export default function Login() {
         headers: { Authorization: "Bearer " + token },
       });
 
-      const user = me.data.user;
-
-      // 3) REDUX’A TAM VERİYİ KAYDET
       dispatch(
         setAuthData({
           token,
-          email: user.email,
-          userId: user.id,
-          user, // role dahil tüm bilgiler
+          email: me.data.user.email,
+          userId: me.data.user.id,
+          user: me.data.user,
         })
       );
 
-      // 4) LOCAL STORAGE
       await AsyncStorage.setItem("token", token);
 
-      // 5) ANA SAYFAYA YÖNLENDİR
       router.replace("/home");
     } catch (err) {
-      console.log(err);
       const code = err.response?.data?.error;
 
       if (code === "INVALID_CREDENTIALS") {
@@ -81,6 +81,8 @@ export default function Login() {
       } else {
         setError("Login failed");
       }
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -118,8 +120,16 @@ export default function Login() {
 
       {error ? <Text style={styles.errorText}>! {error}</Text> : null}
 
-      <TouchableOpacity style={styles.loginBtn} onPress={loginWithEmail}>
-        <Text style={styles.loginText}>{i18n.t("login")}</Text>
+      <TouchableOpacity
+        style={[styles.loginBtn, loading && { opacity: 0.6 }]}
+        onPress={loginWithEmail}
+        disabled={loading}
+      >
+        {loading ? (
+          <ActivityIndicator size="small" color="#fff" />
+        ) : (
+          <Text style={styles.loginText}>{i18n.t("login")}</Text>
+        )}
       </TouchableOpacity>
 
       <TouchableOpacity onPress={() => router.push("/register")}>
@@ -145,14 +155,8 @@ const styles = StyleSheet.create({
     alignSelf: "center",
     marginBottom: 40,
   },
-  logoTent: {
-    color: "#7CC540",
-  },
-  label: {
-    fontSize: 15,
-    color: "#555",
-    marginTop: 10,
-  },
+  logoTent: { color: "#7CC540" },
+  label: { fontSize: 15, color: "#555", marginTop: 10 },
   input: {
     backgroundColor: "#F8F8F8",
     borderRadius: 10,
@@ -161,33 +165,16 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#eee",
   },
-  inputError: {
-    borderColor: "red",
-  },
-  errorText: {
-    color: "red",
-    marginTop: 5,
-    marginLeft: 3,
-  },
+  inputError: { borderColor: "red" },
+  errorText: { color: "red", marginTop: 5, marginLeft: 3 },
   loginBtn: {
     backgroundColor: "#7CC540",
     padding: 15,
     borderRadius: 10,
     marginTop: 25,
+    alignItems: "center",
   },
-  loginText: {
-    color: "#fff",
-    fontWeight: "600",
-    fontSize: 16,
-    textAlign: "center",
-  },
-  registerText: {
-    textAlign: "center",
-    marginTop: 20,
-    color: "#444",
-  },
-  registerLink: {
-    color: "#7CC540",
-    fontWeight: "bold",
-  },
+  loginText: { color: "#fff", fontWeight: "600", fontSize: 16 },
+  registerText: { textAlign: "center", marginTop: 20, color: "#444" },
+  registerLink: { color: "#7CC540", fontWeight: "bold" },
 });

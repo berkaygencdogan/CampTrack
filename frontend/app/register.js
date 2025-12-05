@@ -1,5 +1,6 @@
 import { useState } from "react";
 import {
+  ActivityIndicator,
   View,
   Text,
   TextInput,
@@ -23,6 +24,8 @@ export default function Register() {
   const [pass, setPass] = useState("");
   const [emailError, setEmailError] = useState("");
   const [generalError, setGeneralError] = useState("");
+  const [loading, setLoading] = useState(false);
+
   const dispatch = useDispatch();
   const seenOnboarding = useSelector(
     (state) => state.onboard.showOnboardScreen
@@ -31,6 +34,7 @@ export default function Register() {
   if (!seenOnboarding) {
     dispatch(setOnboardScreen(true));
   }
+
   const handleRegister = async () => {
     setGeneralError("");
     setEmailError("");
@@ -41,14 +45,11 @@ export default function Register() {
     }
 
     try {
+      setLoading(true);
+
       const response = await axios.post(
         `${process.env.EXPO_PUBLIC_API_URL}/register`,
-        {
-          name,
-          email,
-          phone,
-          password: pass,
-        }
+        { name, email, phone, password: pass }
       );
 
       if (response.data.success) {
@@ -65,6 +66,8 @@ export default function Register() {
       } else {
         setGeneralError("Registration failed. Try again.");
       }
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -127,8 +130,16 @@ export default function Register() {
         <Text style={[styles.errorText, { marginTop: 5 }]}>{generalError}</Text>
       ) : null}
 
-      <TouchableOpacity style={styles.registerBtn} onPress={handleRegister}>
-        <Text style={styles.registerText}>{i18n.t("register")}</Text>
+      <TouchableOpacity
+        style={[styles.registerBtn, loading && { opacity: 0.6 }]}
+        onPress={handleRegister}
+        disabled={loading}
+      >
+        {loading ? (
+          <ActivityIndicator size="small" color="#fff" />
+        ) : (
+          <Text style={styles.registerText}>{i18n.t("register")}</Text>
+        )}
       </TouchableOpacity>
 
       <TouchableOpacity onPress={() => router.replace("/login")}>
@@ -151,10 +162,7 @@ const styles = StyleSheet.create({
     alignSelf: "center",
     marginBottom: 35,
   },
-  logoTent: {
-    color: "#7CC540",
-  },
-
+  logoTent: { color: "#7CC540" },
   input: {
     backgroundColor: "#F7F7F7",
     borderRadius: 10,
@@ -164,29 +172,16 @@ const styles = StyleSheet.create({
     marginBottom: 12,
     fontSize: 15,
   },
-  inputError: {
-    borderColor: "red",
-  },
-  errorText: {
-    color: "red",
-    marginTop: -6,
-    marginBottom: 10,
-    marginLeft: 4,
-  },
-
+  inputError: { borderColor: "red" },
+  errorText: { color: "red", marginTop: -6, marginBottom: 10, marginLeft: 4 },
   registerBtn: {
     backgroundColor: "#7CC540",
     paddingVertical: 15,
     borderRadius: 10,
     marginTop: 15,
+    alignItems: "center",
   },
-  registerText: {
-    color: "#fff",
-    textAlign: "center",
-    fontWeight: "600",
-    fontSize: 16,
-  },
-
+  registerText: { color: "#fff", fontWeight: "600", fontSize: 16 },
   loginLink: {
     textAlign: "center",
     marginTop: 18,

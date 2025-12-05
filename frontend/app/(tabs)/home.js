@@ -1,6 +1,7 @@
 import { useFocusEffect, useRouter } from "expo-router";
 import { useCallback, useState } from "react";
 import {
+  ActivityIndicator,
   FlatList,
   ScrollView,
   StyleSheet,
@@ -17,12 +18,11 @@ export default function Home() {
   const [popular, setPopular] = useState([]);
   const [recent, setRecent] = useState([]);
   const [allPlaces, setAllPlaces] = useState([]);
+  const [popularLoading, setPopularLoading] = useState(true);
+  const [recentLoading, setRecentLoading] = useState(true);
+  const [allLoading, setAllLoading] = useState(true);
 
   const API = process.env.EXPO_PUBLIC_API_URL;
-
-  // -----------------------------------------------------------
-  // FETCH POPULAR
-  // -----------------------------------------------------------
   const fetchPopular = async () => {
     try {
       const res = await fetch(`${API}/places/popular`);
@@ -30,6 +30,8 @@ export default function Home() {
       setPopular(data.places || []);
     } catch (err) {
       console.log("Popular Fetch Err:", err);
+    } finally {
+      setPopularLoading(false);
     }
   };
 
@@ -43,6 +45,8 @@ export default function Home() {
       setRecent(data.places || []);
     } catch (err) {
       console.log("New Fetch Err:", err);
+    } finally {
+      setRecentLoading(false);
     }
   };
 
@@ -56,52 +60,79 @@ export default function Home() {
       setAllPlaces(data.places || []);
     } catch (err) {
       console.log("All Fetch Err:", err);
+    } finally {
+      setAllLoading(false);
     }
   };
 
   useFocusEffect(
     useCallback(() => {
+      setPopularLoading(true);
+      setRecentLoading(true);
+      setAllLoading(true);
+
       fetchPopular();
       fetchNew();
       fetchAll();
     }, [])
   );
 
-  // -----------------------------------------------------------
-  // CARD COMPONENT
-  // -----------------------------------------------------------
-
   return (
     <View>
       <ScrollView contentContainerStyle={{ paddingBottom: 80 }}>
+        {/* POPULAR */}
         <Text style={styles.sectionTitle}>⭐ {i18n.t("populerplaces")}</Text>
 
-        <FlatList
-          data={popular}
-          keyExtractor={(item) => item.id}
-          renderItem={({ item }) => <PlaceCard item={item} small />}
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={{ paddingLeft: 15 }}
-        />
+        {popularLoading ? (
+          <ActivityIndicator
+            size="large"
+            color="#7CC540"
+            style={{ marginTop: 10 }}
+          />
+        ) : (
+          <FlatList
+            data={popular}
+            keyExtractor={(item) => item.id}
+            renderItem={({ item }) => <PlaceCard item={item} small />}
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={{ paddingLeft: 15 }}
+          />
+        )}
 
+        {/* NEW */}
         <Text style={styles.sectionTitle}>🔥 {i18n.t("newaddedplaces")}</Text>
 
-        <FlatList
-          data={recent}
-          keyExtractor={(item) => item.id}
-          renderItem={({ item }) => <PlaceCard item={item} small />}
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={{ paddingLeft: 15 }}
-        />
+        {recentLoading ? (
+          <ActivityIndicator
+            size="large"
+            color="#7CC540"
+            style={{ marginTop: 10 }}
+          />
+        ) : (
+          <FlatList
+            data={recent}
+            keyExtractor={(item) => item.id}
+            renderItem={({ item }) => <PlaceCard item={item} small />}
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={{ paddingLeft: 15 }}
+          />
+        )}
 
+        {/* ALL PLACES */}
         <Text style={styles.sectionTitle}>📍 {i18n.t("allplaces")}</Text>
 
         <View style={{ paddingHorizontal: 15 }}>
-          {allPlaces.map((item) => (
-            <PlaceCard key={item.id} item={item} />
-          ))}
+          {allLoading ? (
+            <ActivityIndicator
+              size="large"
+              color="#7CC540"
+              style={{ marginTop: 10 }}
+            />
+          ) : (
+            allPlaces.map((item) => <PlaceCard key={item.id} item={item} />)
+          )}
         </View>
       </ScrollView>
       <TouchableOpacity
