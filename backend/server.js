@@ -951,55 +951,143 @@ app.get("/places/new", async (req, res) => {
   }
 });
 
+const uploadBase64Image = async (base64, path) => {
+  const buffer = Buffer.from(base64, "base64");
+  const bucket = admin.storage().bucket(process.env.FIREBASE_STORAGE_BUCKET);
+  const file = bucket.file(path);
+
+  await file.save(buffer, {
+    metadata: { contentType: "image/jpeg" },
+  });
+
+  await file.makePublic();
+
+  return `https://storage.googleapis.com/${process.env.FIREBASE_STORAGE_BUCKET}/${path}`;
+};
+
 app.post("/places/add", async (req, res) => {
   try {
     const { userId, name, city, description, photos, location } = req.body;
-    // --- VALIDATION ---
-    if (
-      !userId ||
-      !name ||
-      !city ||
-      !photos ||
-      !Array.isArray(photos) ||
-      photos.length === 0 ||
-      !location?.latitude ||
-      !location?.longitude
-    ) {
+
+    if (!userId || !name || !city || !photos?.length || !location) {
       return res.status(400).json({ error: "MISSING_FIELDS" });
     }
 
-    // --- USER CHECK ---
-    const userSnap = await db.collection("users").doc(userId).get();
+    // LOCATION → Firestore GeoPoint
+    const geoPoint = new admin.firestore.GeoPoint(
+      location.latitude,
+      location.longitude
+    );
 
-    if (!userSnap.exists) {
-      return res.status(404).json({ error: "USER_NOT_FOUND" });
+    // Photos → Storage upload
+    const uploadedPhotos = [];
+
+    for (let i = 0; i < photos.length; i++) {
+      const url = await uploadBase64Image(
+        photos[i].replace(/^data:image\/\w+;base64,/, ""),
+        `places/${userId}_${Date.now()}_${i}.jpg`
+      );
+      uploadedPhotos.push(url);
     }
-
-    const user = userSnap.data();
-
-    // --- ADMIN / USER ---
-    const addedBy = user.role === "admin" ? "admin" : userId;
 
     // --- SAVE PLACE ---
     const placeRef = await db.collection("places").add({
       name,
       city,
       description: description || "",
-      photos, // Array of base64 strings or URLs
+      photos,
       createdAt: Date.now(),
       addedBy,
       latitude: location.latitude,
       longitude: location.longitude,
+
+      // 🔥 NEW → GeoPoint
+      geopoint: new admin.firestore.GeoPoint(
+        location.latitude,
+        location.longitude
+      ),
     });
 
-    return res.json({
-      success: true,
-      id: placeRef.id,
-      addedBy,
-    });
+    return res.json({ success: true, id: placeRef.id });
   } catch (err) {
-    console.log("❌ PLACE_ADD_ERROR:", err);
-    return res.status(500).json({ error: "PLACE_ADD_FAILED" });
+    console.log("ADD_PLACE_ERROR:", err);
+    res.status(500).json({ error: "PLACE_ADD_FAILED" });
+  }
+});
+
+app.get("/places/all", async (req, res) => {
+  try {
+    const snap = await db.collection("places").get();
+
+    const places = snap.docs.map((doc) => {
+      const d = doc.data();
+      return {
+        id: doc.id,
+        name: d.name,
+        city: d.city,
+        latitude: d.latitude, // 🔥 doğru format
+        longitude: d.longitude, // 🔥 doğru format
+        photo: d.photos?.[0] || null,
+      };
+    });
+
+    return res.json({ success: true, places });
+  } catch (err) {
+    console.log("PLACES_ALL_ERROR:", err);
+    return res.status(500).json({ success: false });
+  }
+});
+
+app.get("/places/nearby", async (req, res) => {
+  try {
+    const { lat, lng, radius = 25 } = req.query;
+
+    if (!lat || !lng) {
+      return res
+        .status(400)
+        .json({ success: false, error: "Missing location" });
+    }
+
+    const userLat = parseFloat(lat);
+    const userLng = parseFloat(lng);
+    const rad = parseFloat(radius);
+
+    // Yaklaşık derece hesapları
+    const latDeg = rad / 110.574;
+    const lngDeg = rad / (111.32 * Math.cos((userLat * Math.PI) / 180));
+
+    const minLat = userLat - latDeg;
+    const maxLat = userLat + latDeg;
+    const minLng = userLng - lngDeg;
+    const maxLng = userLng + lngDeg;
+
+    const snap = await db.collection("places").get();
+    const places = [];
+
+    snap.forEach((doc) => {
+      const d = doc.data();
+
+      if (
+        d.latitude >= minLat &&
+        d.latitude <= maxLat &&
+        d.longitude >= minLng &&
+        d.longitude <= maxLng
+      ) {
+        places.push({
+          id: doc.id,
+          name: d.name,
+          city: d.city,
+          lat: d.latitude,
+          lng: d.longitude,
+          photo: d.photos?.[0] || null,
+        });
+      }
+    });
+
+    return res.json({ success: true, places });
+  } catch (err) {
+    console.log("NEARBY_ERROR:", err);
+    return res.status(500).json({ success: false });
   }
 });
 

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -7,28 +7,36 @@ import {
   TouchableOpacity,
   Image,
   ScrollView,
-  Modal,
   ActivityIndicator,
 } from "react-native";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import * as ImagePicker from "expo-image-picker";
-import { useRouter } from "expo-router";
-import { GoogleMaps } from "expo-maps";
+import { useRouter, useLocalSearchParams } from "expo-router";
 import { useSelector } from "react-redux";
 import i18n from "./language/index";
 
 export default function AddPlaceScreen() {
   const router = useRouter();
+  const params = useLocalSearchParams();
 
   const [name, setName] = useState("");
   const [city, setCity] = useState("");
   const [description, setDescription] = useState("");
   const [photos, setPhotos] = useState([]);
   const [location, setLocation] = useState(null);
-  const user = useSelector((state) => state.user.userInfo);
-  const [mapVisible, setMapVisible] = useState(false);
-  const [selectedMarker, setSelectedMarker] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const user = useSelector((state) => state.user.userInfo);
+
+  // 🔥 MapSelectScreen’den gelen koordinatı yakala
+  useEffect(() => {
+    if (params.lat && params.lng) {
+      setLocation({
+        latitude: Number(params.lat),
+        longitude: Number(params.lng),
+      });
+    }
+  }, [params]);
 
   // ---------------------------------------
   // PHOTO PICKER
@@ -49,20 +57,6 @@ export default function AddPlaceScreen() {
   };
 
   // ---------------------------------------
-  // KONUM SEÇME
-  // ---------------------------------------
-  const openMap = () => {
-    setMapVisible(true);
-  };
-
-  const selectLocation = () => {
-    if (selectedMarker) {
-      setLocation(selectedMarker);
-      setMapVisible(false);
-    }
-  };
-
-  // ---------------------------------------
   // SUBMIT PLACE
   // ---------------------------------------
   const submitPlace = async () => {
@@ -70,7 +64,6 @@ export default function AddPlaceScreen() {
       alert("Name, city and at least one photo are required.");
       return;
     }
-
     if (!location) {
       alert("Please select a location.");
       return;
@@ -81,9 +74,7 @@ export default function AddPlaceScreen() {
 
       const res = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/places/add`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           userId: user.id,
           name,
@@ -100,10 +91,10 @@ export default function AddPlaceScreen() {
         alert("Place submitted!");
         router.push("/home");
       } else {
-        alert("hata var");
+        alert("Error occurred.");
       }
     } catch (e) {
-      alert("Error occured");
+      alert("Error occurred");
     } finally {
       setIsSubmitting(false);
     }
@@ -112,7 +103,29 @@ export default function AddPlaceScreen() {
   return (
     <View style={{ flex: 1 }}>
       <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
-        <Text style={styles.header}>{i18n.t("addnewplace")}</Text>
+        {/* HEADER */}
+        <TouchableOpacity
+          style={{
+            width: "100%",
+            flexDirection: "row",
+            justifyContent: "center",
+            top: 20,
+          }}
+          onPress={() => router.back()}
+        >
+          <Ionicons
+            name="arrow-back"
+            size={24}
+            color="black"
+            style={{
+              position: "absolute",
+              left: 20,
+              top: 5,
+              zIndex: 999,
+            }}
+          />
+          <Text style={styles.header}>{i18n.t("addnewplace")}</Text>
+        </TouchableOpacity>
 
         {/* NAME */}
         <Text style={styles.label}>{i18n.t("name")}</Text>
@@ -145,7 +158,10 @@ export default function AddPlaceScreen() {
         {/* LOCATION */}
         <Text style={styles.label}>{i18n.t("location")}</Text>
 
-        <TouchableOpacity style={styles.outlineBtn} onPress={openMap}>
+        <TouchableOpacity
+          style={styles.outlineBtn}
+          onPress={() => router.push("/MapSelectScreen")}
+        >
           <Text style={styles.outlineText}>
             {location ? "Location Selected ✓" : "Select Location (Map)"}
           </Text>
@@ -183,46 +199,9 @@ export default function AddPlaceScreen() {
           )}
         </TouchableOpacity>
       </ScrollView>
-
-      {/* ************************************************ */}
-      {/* **************  MAP MODAL  ********************** */}
-      {/* ************************************************ */}
-
-      <Modal visible={mapVisible} animationType="slide">
-        <View style={{ flex: 1 }}>
-          <GoogleMaps.View
-            style={{ flex: 1 }}
-            onMapClick={(e) => {
-              const c = e.coordinates;
-              setSelectedMarker(c);
-            }}
-            markers={selectedMarker ? [{ coordinates: selectedMarker }] : []}
-          />
-
-          <View style={styles.mapFooter}>
-            <TouchableOpacity
-              style={[styles.mapBtn, { backgroundColor: "#ccc" }]}
-              onPress={() => setMapVisible(false)}
-            >
-              <Text style={styles.mapBtnText}>{i18n.t("cancel")}</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={[styles.mapBtn, { backgroundColor: "#7CC540" }]}
-              onPress={selectLocation}
-            >
-              <Text style={styles.mapBtnText}>{i18n.t("select")}</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
     </View>
   );
 }
-
-/* ----------------------------------------- */
-/* STYLES */
-/* ----------------------------------------- */
 
 const styles = StyleSheet.create({
   container: { padding: 20, backgroundColor: "#fff", flex: 1 },
@@ -272,19 +251,4 @@ const styles = StyleSheet.create({
   },
 
   saveText: { color: "white", fontSize: 17, fontWeight: "bold" },
-
-  mapFooter: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    padding: 20,
-    backgroundColor: "#fff",
-  },
-
-  mapBtn: {
-    paddingVertical: 12,
-    paddingHorizontal: 25,
-    borderRadius: 10,
-  },
-
-  mapBtnText: { color: "#fff", fontSize: 16 },
 });
