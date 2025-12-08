@@ -141,9 +141,6 @@ function createNotification({
   };
 }
 
-// --------------------------------------------------
-// ROOT
-// --------------------------------------------------
 app.get("/", (req, res) => {
   res.send("CampTrack API Running ✔️");
 });
@@ -166,17 +163,6 @@ app.get("/places", async (req, res) => {
     return res.status(500).json({ error: "PLACES_FETCH_FAILED" });
   }
 });
-
-function normalize(str) {
-  return str
-    .toLowerCase()
-    .replace(/ı/g, "i")
-    .replace(/ğ/g, "g")
-    .replace(/ü/g, "u")
-    .replace(/ş/g, "s")
-    .replace(/ö/g, "o")
-    .replace(/ç/g, "c");
-}
 
 const generateKeywords = (name) => {
   const low = name.toLowerCase();
@@ -967,48 +953,69 @@ const uploadBase64Image = async (base64, path) => {
 
 app.post("/places/add", async (req, res) => {
   try {
-    const { userId, name, city, description, photos, location } = req.body;
+    const {
+      userId,
+      name,
+      country,
+      city,
+      district,
+      description,
+      properties = [],
+      photos,
+      location,
+    } = req.body;
 
-    if (!userId || !name || !city || !photos?.length || !location) {
+    if (
+      !userId ||
+      !name ||
+      !country ||
+      !city ||
+      !district ||
+      !photos?.length ||
+      !location
+    ) {
       return res.status(400).json({ error: "MISSING_FIELDS" });
     }
 
-    // LOCATION → Firestore GeoPoint
-    const geoPoint = new admin.firestore.GeoPoint(
-      location.latitude,
-      location.longitude
-    );
-
-    // Photos → Storage upload
+    // -------------------------
+    // FOTOĞRAFLARI YÜKLE
+    // -------------------------
     const uploadedPhotos = [];
 
     for (let i = 0; i < photos.length; i++) {
+      const base64 = photos[i].replace(/^data:image\/\w+;base64,/, "");
+
       const url = await uploadBase64Image(
-        photos[i].replace(/^data:image\/\w+;base64,/, ""),
+        base64,
         `places/${userId}_${Date.now()}_${i}.jpg`
       );
+
       uploadedPhotos.push(url);
     }
 
-    // --- SAVE PLACE ---
-    const placeRef = await db.collection("places").add({
+    // -------------------------
+    // FIRESTORE'A KAYDET
+    // -------------------------
+    const ref = await db.collection("places").add({
       name,
+      country,
       city,
+      district,
       description: description || "",
-      photos,
+      properties, // 🔥 yeni
+      photos: uploadedPhotos,
+      addedBy: userId,
       createdAt: Date.now(),
-      addedBy,
       latitude: location.latitude,
       longitude: location.longitude,
-
-      // 🔥 NEW → GeoPoint
       geopoint: new admin.firestore.GeoPoint(
         location.latitude,
         location.longitude
       ),
+      isPopular: false,
     });
 
-    return res.json({ success: true, id: placeRef.id });
+    return res.json({ success: true, id: ref.id });
   } catch (err) {
     console.log("ADD_PLACE_ERROR:", err);
     res.status(500).json({ error: "PLACE_ADD_FAILED" });
@@ -1024,10 +1031,13 @@ app.get("/places/all", async (req, res) => {
       return {
         id: doc.id,
         name: d.name,
+        country: d.country,
         city: d.city,
-        latitude: d.latitude, // 🔥 doğru format
-        longitude: d.longitude, // 🔥 doğru format
-        photo: d.photos?.[0] || null,
+        district: d.district,
+        latitude: d.latitude,
+        longitude: d.longitude,
+        properties: d.properties || [],
+        photo: d.photos?.[0] || null, // sadece ilk foto
       };
     });
 
@@ -1035,6 +1045,41 @@ app.get("/places/all", async (req, res) => {
   } catch (err) {
     console.log("PLACES_ALL_ERROR:", err);
     return res.status(500).json({ success: false });
+  }
+});
+
+app.get("/google/autocomplete", async (req, res) => {
+  try {
+    const input = req.query.input;
+    if (!input) return res.json({ predictions: [] });
+
+    const url = `https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${encodeURIComponent(
+      input
+    )}&key=${process.env.GOOGLE_API_KEY}`;
+
+    const response = await fetch(url);
+    const data = await response.json();
+
+    res.json(data);
+  } catch (err) {
+    console.log("GOOGLE_AUTOCOMPLETE_ERROR:", err);
+    res.json({ predictions: [] });
+  }
+});
+
+app.get("/google/details", async (req, res) => {
+  try {
+    const placeId = req.query.place_id;
+
+    const url = `https://maps.googleapis.com/maps/api/place/details/json?place_id=${placeId}&key=${process.env.GOOGLE_API_KEY}`;
+
+    const response = await fetch(url);
+    const data = await response.json();
+
+    res.json(data);
+  } catch (err) {
+    console.log("GOOGLE_DETAILS_ERROR:", err);
+    res.json({});
   }
 });
 

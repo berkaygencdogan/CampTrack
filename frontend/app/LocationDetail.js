@@ -1,4 +1,5 @@
 import Ionicons from "@expo/vector-icons/Ionicons";
+import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import {
@@ -8,11 +9,13 @@ import {
   TouchableOpacity,
   View,
   Modal,
+  Linking,
+  Platform,
 } from "react-native";
 import { useSelector } from "react-redux";
 import i18n from "./language/index";
 import VisitsModal from "./VisitsModal";
-import CommentsModal from "./CommentsModal"; // 🔥 YORUM MODAL
+import CommentsModal from "./CommentsModal";
 
 export default function LocationDetail() {
   const router = useRouter();
@@ -25,14 +28,11 @@ export default function LocationDetail() {
   const [isFav, setIsFav] = useState(false);
 
   const [commentsVisible, setCommentsVisible] = useState(false);
-
   const [visitModalVisible, setVisitModalVisible] = useState(false);
 
   const user = useSelector((state) => state.user.userInfo);
 
-  // ------------------------------------------------
-  // FOTO SLIDER
-  // ------------------------------------------------
+  // ------------------------------ FOTO SLIDER ------------------------------
   const nextPhoto = () => {
     if (currentIndex < place.photos.length - 1) {
       setCurrentIndex(currentIndex + 1);
@@ -45,9 +45,7 @@ export default function LocationDetail() {
     }
   };
 
-  // ------------------------------------------------
-  // FAVORİ
-  // ------------------------------------------------
+  // ------------------------------ FAVORİ ------------------------------
   const toggleFavorite = async () => {
     if (!user) return;
 
@@ -74,9 +72,18 @@ export default function LocationDetail() {
     }
   };
 
-  // ------------------------------------------------
-  // PLACE DETAILS GETİR
-  // ------------------------------------------------
+  // ------------------------------ HARİTA AÇ ------------------------------
+  const openMap = (lat, lng) => {
+    const label = place.name;
+    const url = Platform.select({
+      ios: `http://maps.apple.com/?ll=${lat},${lng}&q=${label}`,
+      android: `geo:${lat},${lng}?q=${lat},${lng}(${label})`,
+    });
+
+    Linking.openURL(url);
+  };
+
+  // ------------------------------ PLACE DETAILS ------------------------------
   const fetchData = async () => {
     try {
       const res = await fetch(
@@ -100,9 +107,7 @@ export default function LocationDetail() {
     fetchData();
   }, [id]);
 
-  // ------------------------------------------------
-  // LOADING
-  // ------------------------------------------------
+  // ------------------------------ LOADING ------------------------------
   if (loading) {
     return (
       <View style={styles.loading}>
@@ -121,9 +126,7 @@ export default function LocationDetail() {
     );
   }
 
-  // ------------------------------------------------
-  // UI
-  // ------------------------------------------------
+  // ------------------------------ UI ------------------------------
   return (
     <View style={styles.container}>
       {/* BACK BUTTON */}
@@ -131,13 +134,21 @@ export default function LocationDetail() {
         <Ionicons name="chevron-back" size={26} color="#fff" />
       </TouchableOpacity>
 
-      {/* FAVORITE HEART */}
+      {/* FAVORITE BUTTON */}
       <TouchableOpacity style={styles.favBtn} onPress={toggleFavorite}>
         <Ionicons
           name={isFav ? "heart" : "heart-outline"}
           size={28}
           color={isFav ? "#ff3b30" : "#fff"}
         />
+      </TouchableOpacity>
+
+      {/* MAP BUTTON */}
+      <TouchableOpacity
+        style={styles.mapBtn}
+        onPress={() => openMap(place.latitude, place.longitude)}
+      >
+        <FontAwesome name="map-marker" size={28} color="#fff" />
       </TouchableOpacity>
 
       {/* SLIDER */}
@@ -160,14 +171,13 @@ export default function LocationDetail() {
         )}
       </View>
 
-      {/* WHITE BOTTOM PANEL */}
+      {/* WHITE PANEL */}
       <View style={styles.bottomPanel}>
         <Text style={styles.placeName}>{place.name}</Text>
 
         <View style={styles.locationRow}>
           <Text style={styles.location}>{place.city}</Text>
 
-          {/* VISIT BUTTON */}
           <TouchableOpacity
             style={styles.visitBtn}
             onPress={() => setVisitModalVisible(true)}
@@ -187,13 +197,14 @@ export default function LocationDetail() {
         </TouchableOpacity>
       </View>
 
-      {/* 🔥 COMMENTS MODAL */}
+      {/* COMMENTS MODAL */}
       <CommentsModal
         visible={commentsVisible}
         onClose={() => setCommentsVisible(false)}
         placeId={id}
       />
 
+      {/* VISITS MODAL */}
       <VisitsModal
         visible={visitModalVisible}
         onClose={() => setVisitModalVisible(false)}
@@ -232,59 +243,28 @@ const styles = StyleSheet.create({
     zIndex: 20,
     top: 50,
     right: 20,
-    backgroundColor: "rgba(0,0,0,0.4)",
+    backgroundColor: "rgba(0,0,0,0.8)",
     padding: 8,
     borderRadius: 30,
+  },
+
+  mapBtn: {
+    position: "absolute",
+    width: 45,
+    height: 45,
+    borderRadius: 30,
+    zIndex: 20,
+    top: 100,
+    right: 20,
+    backgroundColor: "rgba(0,0,0,0.8)",
+    padding: 8,
+    alignItems: "center",
   },
 
   headerImage: {
     width: "100%",
     height: 430,
     resizeMode: "cover",
-  },
-
-  bottomPanel: {
-    marginTop: -35,
-    backgroundColor: "#fff",
-    borderTopLeftRadius: 35,
-    borderTopRightRadius: 35,
-    padding: 25,
-    minHeight: 500,
-  },
-  placeName: {
-    fontSize: 30,
-    fontWeight: "bold",
-    marginBottom: 6,
-  },
-  location: {
-    fontSize: 17,
-    color: "#777",
-  },
-  description: {
-    fontSize: 15,
-    color: "#666",
-    lineHeight: 22,
-    marginTop: 10,
-  },
-
-  selectBtn: {
-    backgroundColor: "#7CC540",
-    borderRadius: 14,
-    paddingVertical: 8,
-    paddingHorizontal: 15,
-    marginVertical: 10,
-  },
-
-  visitBtn: {
-    backgroundColor: "#7CC540",
-    borderRadius: 14,
-    paddingVertical: 8,
-    paddingHorizontal: 15,
-  },
-  selectText: {
-    color: "#fff",
-    fontWeight: "600",
-    textAlign: "center",
   },
 
   sliderContainer: {
@@ -313,6 +293,33 @@ const styles = StyleSheet.create({
     borderRadius: 30,
   },
 
+  bottomPanel: {
+    marginTop: -35,
+    backgroundColor: "#fff",
+    borderTopLeftRadius: 35,
+    borderTopRightRadius: 35,
+    padding: 25,
+    minHeight: 500,
+  },
+
+  placeName: {
+    fontSize: 30,
+    fontWeight: "bold",
+    marginBottom: 6,
+  },
+
+  location: {
+    fontSize: 17,
+    color: "#777",
+  },
+
+  description: {
+    fontSize: 15,
+    color: "#666",
+    lineHeight: 22,
+    marginTop: 10,
+  },
+
   locationRow: {
     width: "100%",
     flexDirection: "row",
@@ -320,10 +327,24 @@ const styles = StyleSheet.create({
     marginVertical: 10,
   },
 
-  visitModal: {
-    flex: 1,
-    backgroundColor: "#fff",
-    padding: 20,
-    paddingTop: 60,
+  selectBtn: {
+    backgroundColor: "#7CC540",
+    borderRadius: 14,
+    paddingVertical: 8,
+    paddingHorizontal: 15,
+    marginVertical: 10,
+  },
+
+  visitBtn: {
+    backgroundColor: "#7CC540",
+    borderRadius: 14,
+    paddingVertical: 8,
+    paddingHorizontal: 15,
+  },
+
+  selectText: {
+    color: "#fff",
+    fontWeight: "600",
+    textAlign: "center",
   },
 });
