@@ -1,35 +1,77 @@
-# Ignore Android build caches
-android/.gradle
-android/app/build
-android/build
+###############################
+# NPM & Yarn
+###############################
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
 
-# Ignore iOS build caches
-ios/Pods
-ios/build
-
-# Ignore node & caches
-node_modules
-npm-debug.log
-yarn-debug.log
-yarn-error.log
-
-# Expo local state
+###############################
+# Expo
+###############################
 .expo/
 .expo-shared/
-
-# Dist / Output folders
-dist/
+.expo-source/
+.web/
 web-build/
 
-# Environment
-.env
-*.keystore
-*.jks
+###############################
+# Android
+###############################
+android/.gradle/
+android/app/build/
+android/build/
+android/local.properties
+*.apk
+*.aar
 
-# Cache / temp
+###############################
+# iOS
+###############################
+ios/build/
+ios/Pods/
+ios/*.xcworkspace
+ios/*.xcodeproj
+ios/Podfile.lock
+
+###############################
+# Temp / Cache / OS Files
+###############################
+*.iml
 *.psd
 *.ai
 *.zip
 *.rar
-*.iml
-*.gradle
+*.tar
+*.gz
+*.log
+*.tmp
+*.temp
+.DS_Store
+Thumbs.db
+
+###############################
+# Environment keys
+###############################
+.env
+*.jks
+*.keystore
+
+###############################
+# EAS Build Internal Junk
+###############################
+.eastmp/
+build/
+cache/
+
+###############################
+# Git
+###############################
+.git/
+.gitignore
+
+###############################
+# Metro & Babel
+###############################
+.cache/
+babel-cache/
