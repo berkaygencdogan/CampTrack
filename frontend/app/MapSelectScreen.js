@@ -1,22 +1,21 @@
-import React, { useState, useEffect } from "react";
+import Ionicons from "@expo/vector-icons/Ionicons";
+import * as Location from "expo-location";
+import { AppleMaps, GoogleMaps } from "expo-maps";
+import { useRouter } from "expo-router";
+import { useEffect, useState } from "react";
 import {
-  View,
+  ActivityIndicator,
+  FlatList,
+  Platform,
+  StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
-  FlatList,
-  ActivityIndicator,
-  StyleSheet,
-  Image,
+  View,
 } from "react-native";
-import MapView, { Marker, PROVIDER_GOOGLE } from "react-native-maps";
-import * as Location from "expo-location";
-import Ionicons from "@expo/vector-icons/Ionicons";
-import { useRouter } from "expo-router";
 
 export default function MapSelectScreen() {
   const router = useRouter();
-
   const [userLocation, setUserLocation] = useState(null);
   const [selectedLocation, setSelectedLocation] = useState(null);
   const [allPlaces, setAllPlaces] = useState([]);
@@ -26,12 +25,12 @@ export default function MapSelectScreen() {
   const [loadingResults, setLoadingResults] = useState(false);
 
   // ---------------------------------------------------------
-  // 📌 Konum izni + kullanıcı konumu
+  // 📌 1) Kullanıcı Konumu Alma
   // ---------------------------------------------------------
   useEffect(() => {
     (async () => {
       const { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== "granted") return alert("Konum izni gerekiyor.");
+      if (status !== "granted") return;
 
       const loc = await Location.getCurrentPositionAsync({});
       setUserLocation({
@@ -42,7 +41,7 @@ export default function MapSelectScreen() {
   }, []);
 
   // ---------------------------------------------------------
-  // 📌 Backend'den kamp yerleri çek
+  // 📌 2) Backend'den kamp yerleri çek
   // ---------------------------------------------------------
   useEffect(() => {
     fetch(`${process.env.EXPO_PUBLIC_API_URL}/places/all`)
@@ -51,8 +50,10 @@ export default function MapSelectScreen() {
       .catch((err) => console.log("ALL_PLACES_ERR:", err));
   }, []);
 
+  console.log("harita", allPlaces);
+
   // ---------------------------------------------------------
-  // 📌 Google autocomplete
+  // 📌 3) Google Places Autocomplete
   // ---------------------------------------------------------
   useEffect(() => {
     if (searchText.length < 2) {
@@ -65,6 +66,7 @@ export default function MapSelectScreen() {
         setLoadingResults(true);
 
         const url = `https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${searchText}&key=${process.env.EXPO_PUBLIC_GOOGLE_API}`;
+
         const res = await fetch(url);
         const json = await res.json();
 
@@ -80,27 +82,33 @@ export default function MapSelectScreen() {
   }, [searchText]);
 
   // ---------------------------------------------------------
-  // 📌 Place Details → koordinat al
+  // 📌 4) Google place ID → koordinat
   // ---------------------------------------------------------
   const fetchPlaceDetails = async (placeId) => {
     const url = `https://maps.googleapis.com/maps/api/place/details/json?place_id=${placeId}&key=${process.env.EXPO_PUBLIC_GOOGLE_API}`;
+
     const res = await fetch(url);
     const json = await res.json();
 
     const loc = json?.result?.geometry?.location;
     if (!loc) return;
 
-    setSelectedLocation({
+    const coords = {
       latitude: loc.lat,
       longitude: loc.lng,
-    });
+    };
+
+    setSelectedLocation(coords);
   };
 
   // ---------------------------------------------------------
-  // 📌 Konumu AddPlaceScreen'e gönder
+  // 📌 5) Konumu AddPlaceScreen'e geri gönder
   // ---------------------------------------------------------
   const confirmLocation = () => {
-    if (!selectedLocation) return alert("Konum seç.");
+    if (!selectedLocation) {
+      alert("Lütfen bir konum seç.");
+      return;
+    }
 
     router.push({
       pathname: "/add-place",
@@ -111,9 +119,6 @@ export default function MapSelectScreen() {
     });
   };
 
-  // ---------------------------------------------------------
-  // 📌 Kullanıcı konumu yoksa loading
-  // ---------------------------------------------------------
   if (!userLocation)
     return (
       <View style={styles.center}>
@@ -122,10 +127,13 @@ export default function MapSelectScreen() {
       </View>
     );
 
+  const MapComponent =
+    Platform.OS === "android" ? GoogleMaps.View : AppleMaps.View;
+
   return (
     <View style={{ flex: 1 }}>
       {/* ------------------------------------------------- */}
-      {/* 🔍 Arama Barı */}
+      {/* 🔍 Arama Barı (Floating Top) */}
       {/* ------------------------------------------------- */}
       <View style={styles.searchBar}>
         <Ionicons name="search" size={20} color="#888" />
@@ -138,58 +146,42 @@ export default function MapSelectScreen() {
       </View>
 
       {/* ------------------------------------------------- */}
-      {/* 🗺️ HARİTA */}
+      {/* 🗺️ Harita */}
       {/* ------------------------------------------------- */}
-      <MapView
-        provider={PROVIDER_GOOGLE}
+      <MapComponent
         style={{ flex: 1 }}
-        initialRegion={{
-          latitude: userLocation.latitude,
-          longitude: userLocation.longitude,
-          latitudeDelta: 0.05,
-          longitudeDelta: 0.05,
+        cameraPosition={{
+          coordinates: selectedLocation || userLocation,
+          zoom: selectedLocation ? 15 : 13,
         }}
-        onPress={(e) => setSelectedLocation(e.nativeEvent.coordinate)}
-      >
-        {/* Kullanıcı Konumu */}
-        <Marker
-          coordinate={userLocation}
-          title="Konumum"
-          anchor={{ x: 0.5, y: 1 }}
-        >
-          <Image
-            source={require("../src/assets/images/human.png")}
-            style={{ width: 35, height: 35 }}
-          />
-        </Marker>
+        onMapClick={(e) => setSelectedLocation(e.coordinates)}
+        markers={[
+          // Kullanıcı konumu
+          {
+            coordinates: userLocation,
+            title: "Konumum",
+          },
+          // Seçilen konum
+          ...(selectedLocation
+            ? [
+                {
+                  coordinates: selectedLocation,
+                  title: "Seçilen Konum",
+                },
+              ]
+            : []),
 
-        {/* Seçilen Konum */}
-        {selectedLocation && (
-          <Marker
-            coordinate={selectedLocation}
-            title="Seçilen Konum"
-            pinColor="#7CC540"
-          />
-        )}
-
-        {/* Kamp Yerleri */}
-        {allPlaces.map((p) => (
-          <Marker
-            key={p.id}
-            coordinate={{ latitude: p.lat, longitude: p.lng }}
-            title={p.name}
-            anchor={{ x: 0.5, y: 1 }}
-          >
-            <Image
-              source={require("../src/assets/images/tent.png")}
-              style={{ width: 32, height: 32 }}
-            />
-          </Marker>
-        ))}
-      </MapView>
+          // Kamp yerleri
+          ...allPlaces.map((p) => ({
+            id: p.id,
+            coordinates: { latitude: p.latitude, longitude: p.longitude },
+            title: p.name,
+          })),
+        ]}
+      />
 
       {/* ------------------------------------------------- */}
-      {/* 📜 Arama Sonuçları */}
+      {/* 📄 Google Search Result List */}
       {/* ------------------------------------------------- */}
       {searchText.length > 1 && (
         <View style={styles.resultPanel}>
@@ -198,7 +190,6 @@ export default function MapSelectScreen() {
           ) : (
             <FlatList
               data={googleResults}
-              keyExtractor={(item) => item.place_id}
               renderItem={({ item }) => (
                 <TouchableOpacity
                   style={styles.resultItem}
@@ -208,13 +199,14 @@ export default function MapSelectScreen() {
                   <Text style={styles.resultText}>{item.description}</Text>
                 </TouchableOpacity>
               )}
+              keyExtractor={(item) => item.place_id}
             />
           )}
         </View>
       )}
 
       {/* ------------------------------------------------- */}
-      {/* ✔ KONUMU ONAYLA */}
+      {/* ✔ CONFIRM BUTTON */}
       {/* ------------------------------------------------- */}
       <TouchableOpacity style={styles.confirmBtn} onPress={confirmLocation}>
         <Text style={styles.confirmText}>Konumu Onayla</Text>
@@ -238,8 +230,12 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     elevation: 5,
+    shadowColor: "#000",
   },
-  searchInput: { marginLeft: 10, fontSize: 16 },
+  searchInput: {
+    marginLeft: 10,
+    fontSize: 16,
+  },
 
   resultPanel: {
     position: "absolute",
@@ -253,6 +249,7 @@ const styles = StyleSheet.create({
     elevation: 5,
     zIndex: 15,
   },
+
   resultItem: {
     flexDirection: "row",
     alignItems: "center",
