@@ -13,6 +13,7 @@ import * as ImagePicker from "expo-image-picker";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useRouter } from "expo-router";
 import { useSelector } from "react-redux";
+import adManager from "../../utils/admob/AdManager";
 
 export default function CreateTeam() {
   const API = process.env.EXPO_PUBLIC_API_URL;
@@ -83,6 +84,7 @@ export default function CreateTeam() {
 
       if (data.success) {
         alert("Takım başarıyla oluşturuldu!");
+        adManager.onTeamCreate();
         router.back();
       }
     } catch (err) {

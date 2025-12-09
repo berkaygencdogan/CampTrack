@@ -14,6 +14,7 @@ import axios from "axios";
 import { useDispatch, useSelector } from "react-redux";
 import { setOnboardScreen } from "../redux/onboardSlice";
 import i18n from "./language";
+import AdBanner from "../utils/admob/AdManager";
 
 export default function Register() {
   const router = useRouter();
@@ -145,6 +146,15 @@ export default function Register() {
       <TouchableOpacity onPress={() => router.replace("/login")}>
         <Text style={styles.loginLink}>{i18n.t("login")}</Text>
       </TouchableOpacity>
+      <View style={styles.banner}>
+        <AdBanner />
+      </View>
+      <View style={styles.banner}>
+        <AdBanner />
+      </View>
+      <View style={styles.banner}>
+        <AdBanner />
+      </View>
     </KeyboardAvoidingView>
   );
 }
@@ -155,6 +165,13 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     paddingHorizontal: 25,
     paddingTop: 60,
+  },
+  banner: {
+    marginTop: 20,
+    width: "100%",
+    height: "10%",
+    justifyContent: "center",
+    alignItems: "center",
   },
   logo: {
     fontSize: 36,

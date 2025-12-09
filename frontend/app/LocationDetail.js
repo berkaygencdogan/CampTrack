@@ -16,6 +16,7 @@ import { useSelector } from "react-redux";
 import i18n from "./language/index";
 import VisitsModal from "./VisitsModal";
 import CommentsModal from "./CommentsModal";
+import adManager from "../utils/admob/AdManager";
 
 export default function LocationDetail() {
   const router = useRouter();
@@ -72,7 +73,10 @@ export default function LocationDetail() {
     }
   };
 
-  // ------------------------------ HARİTA AÇ ------------------------------
+  useEffect(() => {
+    adManager.onLocationDetailOpen();
+  }, []);
+
   const openMap = (lat, lng) => {
     const label = place.name;
     const url = Platform.select({

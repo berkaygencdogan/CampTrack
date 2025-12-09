@@ -10,11 +10,13 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
+  View,
 } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
 import { setAuthData } from "../redux/userSlice";
 import { setOnboardScreen } from "../redux/onboardSlice";
 import i18n from "./language";
+import AdBanner from "../utils/admob/AdManager";
 
 export default function Login() {
   const router = useRouter();
@@ -138,6 +140,18 @@ export default function Login() {
           <Text style={styles.registerLink}>{i18n.t("register")}</Text>
         </Text>
       </TouchableOpacity>
+      <View style={styles.banner}>
+        <AdBanner />
+      </View>
+      <View style={styles.banner}>
+        <AdBanner />
+      </View>
+      <View style={styles.banner}>
+        <AdBanner />
+      </View>
+      <View style={styles.banner}>
+        <AdBanner />
+      </View>
     </KeyboardAvoidingView>
   );
 }
@@ -148,6 +162,13 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     paddingHorizontal: 25,
     paddingTop: 60,
+  },
+  banner: {
+    marginTop: 20,
+    width: "100%",
+    height: "10%",
+    justifyContent: "center",
+    alignItems: "center",
   },
   logo: {
     fontSize: 36,

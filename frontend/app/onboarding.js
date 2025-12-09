@@ -12,6 +12,7 @@ import {
 } from "react-native";
 import LeftImage from "../src/assets/images/arrow-left.png";
 import I18n from "./language/index";
+import AdBanner from "../utils/admob/AdManager";
 
 const { width } = Dimensions.get("window");
 
@@ -111,6 +112,7 @@ export default function Onboarding() {
           </View>
         )}
       />
+      <AdBanner />
       <View style={{ flex: 3 }}>
         <View style={styles.buttons}>
           <TouchableOpacity style={styles.navBtn} onPress={prev}>

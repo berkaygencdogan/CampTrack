@@ -10,6 +10,7 @@ import {
 } from "react-native";
 import { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
+import adManager from "../utils/admob/AdManager";
 
 export default function CommentsModal({ visible, onClose, placeId }) {
   const user = useSelector((state) => state.user.userInfo);
@@ -67,6 +68,7 @@ export default function CommentsModal({ visible, onClose, placeId }) {
       const data = await res.json();
 
       if (data.success) {
+        adManager.onCommentSend();
         setComments([data.comment, ...comments]); // en üste ekle
         setNewComment("");
       }

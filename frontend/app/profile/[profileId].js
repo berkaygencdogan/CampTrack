@@ -13,6 +13,7 @@ import React, { useEffect, useCallback, useState } from "react";
 import axios from "axios";
 import { LinearGradient } from "expo-linear-gradient";
 import Ionicons from "@expo/vector-icons/Ionicons";
+import adManager from "../../utils/admob/AdManager";
 
 const { width } = Dimensions.get("window");
 
@@ -40,6 +41,10 @@ export default function OtherUserProfile() {
       fetchVisitIds();
     }, [])
   );
+
+  useEffect(() => {
+    adManager.onProfileVisit();
+  }, []);
 
   const fetchProfile = async () => {
     try {
