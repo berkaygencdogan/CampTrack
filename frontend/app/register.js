@@ -149,12 +149,6 @@ export default function Register() {
       <View style={styles.banner}>
         <AdBanner />
       </View>
-      <View style={styles.banner}>
-        <AdBanner />
-      </View>
-      <View style={styles.banner}>
-        <AdBanner />
-      </View>
     </KeyboardAvoidingView>
   );
 }

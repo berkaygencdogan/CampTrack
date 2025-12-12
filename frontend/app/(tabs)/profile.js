@@ -2,7 +2,7 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { LinearGradient } from "expo-linear-gradient";
 import { useFocusEffect, useRouter } from "expo-router";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import {
   ActivityIndicator,
   Dimensions,
@@ -16,8 +16,7 @@ import {
 import { useDispatch, useSelector } from "react-redux";
 import { setNotificationCount } from "../../redux/userSlice";
 import NotificationButton from "../NotificationButton";
-import NotificationsScreen from "../notifications";
-import { useCallback } from "react";
+import NotificationsScreen from "../notifications/index.js";
 
 const { width } = Dimensions.get("window");
 
@@ -62,6 +61,7 @@ export default function Profile() {
 
       if (!json.success) {
         console.log("AUTH ERROR:", json);
+        await AsyncStorage.removeItem("token");
         router.replace("/login");
         return;
       }

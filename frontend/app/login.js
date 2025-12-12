@@ -58,7 +58,7 @@ export default function Login() {
       }
 
       const token = res.data.token;
-
+      console.log("tokken", token);
       const me = await axios.get(`${process.env.EXPO_PUBLIC_API_URL}/auth/me`, {
         headers: { Authorization: "Bearer " + token },
       });
@@ -140,15 +140,6 @@ export default function Login() {
           <Text style={styles.registerLink}>{i18n.t("register")}</Text>
         </Text>
       </TouchableOpacity>
-      <View style={styles.banner}>
-        <AdBanner />
-      </View>
-      <View style={styles.banner}>
-        <AdBanner />
-      </View>
-      <View style={styles.banner}>
-        <AdBanner />
-      </View>
       <View style={styles.banner}>
         <AdBanner />
       </View>

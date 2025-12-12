@@ -97,11 +97,11 @@ export default function CreateTeam() {
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
+      <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
+        <Ionicons name="chevron-back" size={26} color="black" />
+      </TouchableOpacity>
       <Text style={styles.title}>Yeni Takım Oluştur</Text>
 
-      {/* ------------------------ */}
-      {/* TEAM NAME */}
-      {/* ------------------------ */}
       <Text style={styles.label}>Takım Adı</Text>
       <TextInput
         style={styles.input}
@@ -143,13 +143,21 @@ export default function CreateTeam() {
 
 const styles = StyleSheet.create({
   container: {
+    flex: 1,
     padding: 25,
+    paddingTop: 100,
     backgroundColor: "#fff",
+  },
+  backBtn: {
+    position: "absolute",
+    top: 100,
+    left: 20,
+    zIndex: 999,
   },
   title: {
     fontSize: 24,
     fontWeight: "700",
-    marginBottom: 20,
+    textAlign: "center",
   },
   label: {
     fontSize: 16,

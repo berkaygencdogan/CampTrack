@@ -1,10 +1,19 @@
-// components/AdBanner.js
-import { BannerAd, BannerAdSize } from "react-native-google-mobile-ads";
+import { View } from "react-native";
+import {
+  BannerAd,
+  BannerAdSize,
+  TestIds,
+} from "react-native-google-mobile-ads";
+import Constants from "expo-constants";
 
 export default function AdBanner() {
-  const adUnitId = __DEV__
-    ? "ca-app-pub-3940256099942544/6300978111"
-    : process.env.EXPO_ADMOB_BANNER;
+  const bannerId = Constants.expoConfig?.extra?.admobBanner || TestIds.BANNER; // fallback
 
-  return <BannerAd unitId={adUnitId} size={BannerAdSize.ADAPTIVE_BANNER} />;
+  const adUnitId = __DEV__ ? TestIds.BANNER : bannerId;
+
+  return (
+    <View style={{ width: "100%", alignItems: "center", marginVertical: 10 }}>
+      <BannerAd unitId={adUnitId} size={BannerAdSize.BANNER} />
+    </View>
+  );
 }
