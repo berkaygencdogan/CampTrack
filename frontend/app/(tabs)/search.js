@@ -63,7 +63,6 @@ export default function Search() {
 
   return (
     <View style={styles.container}>
-      {/* SEARCH BAR (PREMIUM STYLE) */}
       <View style={styles.searchWrapper}>
         <Ionicons name="search-outline" size={20} color="#bbb" />
         <TextInput
@@ -285,6 +284,7 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     borderWidth: 1,
     borderColor: "#E3E3E3",
+    marginTop: 20,
   },
   searchInput: {
     flex: 1,

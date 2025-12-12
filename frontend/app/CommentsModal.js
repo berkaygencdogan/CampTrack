@@ -266,7 +266,7 @@ export default function CommentsModal({ visible, onClose, placeId }) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#fff", padding: 20 },
+  container: { flex: 1, backgroundColor: "#fff", padding: 20, marginTop: 50 },
   closeBtn: { alignSelf: "flex-end" },
   closeText: { color: "red", fontSize: 16 },
 

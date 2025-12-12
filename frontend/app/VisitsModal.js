@@ -313,6 +313,7 @@ export default function VisitModal({
 const styles = StyleSheet.create({
   container: {
     padding: 25,
+    marginTop: 20,
     backgroundColor: "#fff",
   },
   title: {
@@ -431,5 +432,5 @@ const styles = StyleSheet.create({
     zIndex: 20,
   },
 
-  closeBtn: { alignItems: "center", marginTop: 15 },
+  closeBtn: { alignItems: "center", marginVertical: 25 },
 });

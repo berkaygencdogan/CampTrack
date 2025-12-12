@@ -14,7 +14,7 @@ import axios from "axios";
 import { useDispatch, useSelector } from "react-redux";
 import { setOnboardScreen } from "../redux/onboardSlice";
 import i18n from "./language";
-import AdBanner from "../utils/admob/AdManager";
+import AdBanner from "../utils/admob/AdBanner";
 
 export default function Register() {
   const router = useRouter();

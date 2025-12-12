@@ -1,19 +1,42 @@
-import { View } from "react-native";
+import React from "react";
+import { StyleSheet, View, Platform } from "react-native";
 import {
   BannerAd,
   BannerAdSize,
   TestIds,
 } from "react-native-google-mobile-ads";
-import Constants from "expo-constants";
 
-export default function AdBanner() {
-  const bannerId = Constants.expoConfig?.extra?.admobBanner || TestIds.BANNER; // fallback
+const isDev = __DEV__;
 
-  const adUnitId = __DEV__ ? TestIds.BANNER : bannerId;
+const BANNER_AD_UNIT_ID = isDev
+  ? TestIds.BANNER
+  : Platform.select({
+      ios: "ca-app-pub-6790689850057549/8519536699",
+      android: "ca-app-pub-6790689850057549/3115893126",
+      default: TestIds.BANNER,
+    });
 
+const AdBanner = () => {
   return (
-    <View style={{ width: "100%", alignItems: "center", marginVertical: 10 }}>
-      <BannerAd unitId={adUnitId} size={BannerAdSize.BANNER} />
+    <View style={styles.container}>
+      <BannerAd
+        unitId={BANNER_AD_UNIT_ID}
+        size={BannerAdSize.BANNER}
+        requestOptions={{
+          requestNonPersonalizedAdsOnly: true,
+        }}
+      />
     </View>
   );
-}
+};
+
+export default AdBanner;
+
+const styles = StyleSheet.create({
+  container: {
+    marginVertical: 20,
+    width: "100%",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+});

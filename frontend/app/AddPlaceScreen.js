@@ -38,9 +38,6 @@ export default function AddPlaceScreen() {
 
   const GOOGLE_GEOCODE_KEY = process.env.EXPO_PUBLIC_GOOGLE_API_KEY;
 
-  // -------------------------------------------
-  // REVERSE GEOCODE AFTER LOCATION SELECTED
-  // -------------------------------------------
   useEffect(() => {
     if (!location) return;
 

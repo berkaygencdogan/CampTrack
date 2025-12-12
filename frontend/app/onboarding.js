@@ -12,7 +12,7 @@ import {
 } from "react-native";
 import LeftImage from "../src/assets/images/arrow-left.png";
 import I18n from "./language/index";
-import AdBanner from "../utils/admob/AdManager";
+import AdBanner from "../utils/admob/AdBanner";
 
 const { width } = Dimensions.get("window");
 
