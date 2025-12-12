@@ -38,12 +38,10 @@ export default function AddItemsModal({ visible, onClose }) {
   };
 
   const confirmAdd = () => {
-    // 1) EKLENECEK itemlar (modalda seçili ama çantada olmayan)
     const itemsToAdd = selected.filter(
       (item) => !initialSelected.some((x) => x.id === item.id)
     );
 
-    // 2) SİLİNECEK itemlar (çanta’da vardı ama modalda seçili değil)
     const itemsToRemove = initialSelected.filter(
       (item) => !selected.some((x) => x.id === item.id)
     );
