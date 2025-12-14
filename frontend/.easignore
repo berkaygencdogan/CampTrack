@@ -1,77 +1,36 @@
-###############################
-# NPM & Yarn
-###############################
-node_modules/
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
+node_modules
+npm-debug.log
+yarn-error.log
+pnpm-debug.log
 
-###############################
-# Expo
-###############################
-.expo/
-.expo-shared/
-.expo-source/
-.web/
-web-build/
+.expo
+.expo-shared
+dist
+web-build
 
-###############################
-# Android
-###############################
-android/.gradle/
-android/app/build/
-android/build/
-android/local.properties
-*.apk
-*.aar
+android/.gradle
+android/build
+android/app/build
+android/.cxx
 
-###############################
-# iOS
-###############################
-ios/build/
-ios/Pods/
-ios/*.xcworkspace
-ios/*.xcodeproj
-ios/Podfile.lock
+ios/build
+ios/Pods
 
-###############################
-# Temp / Cache / OS Files
-###############################
-*.iml
-*.psd
-*.ai
-*.zip
-*.rar
-*.tar
-*.gz
-*.log
-*.tmp
-*.temp
-.DS_Store
-Thumbs.db
-
-###############################
-# Environment keys
-###############################
-.env
-*.jks
-*.keystore
-
-###############################
-# EAS Build Internal Junk
-###############################
-.eastmp/
-build/
-cache/
-
-###############################
-# Git
-###############################
-.git/
+.git
 .gitignore
 
-###############################
-# Metro & Babel
-###############################
-.cache/
-babel-cache/
+.env
+.env.*
+*.keystore
+*.jks
+
+*.gradle
+*.iml
+*.lock
+
+*.zip
+*.rar
+*.7z
+
+*.psd
+*.ai
