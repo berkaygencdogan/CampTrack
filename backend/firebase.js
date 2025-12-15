@@ -4,12 +4,16 @@ import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
 
-// ESM __dirname fix
+const jsonPath =
+  process.env.NODE_ENV === "production"
+    ? "/etc/secrets/serviceAccountKey.json"
+    : "./serviceAccountKey.json";
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 // service account yolu
-const serviceAccountPath = path.join(__dirname, "./serviceAccountKey.json");
+const serviceAccountPath = path.join(__dirname, jsonPath);
 const serviceAccount = JSON.parse(fs.readFileSync(serviceAccountPath, "utf8"));
 
 // Firebase Admin başlat
