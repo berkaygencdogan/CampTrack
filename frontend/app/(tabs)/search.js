@@ -201,6 +201,7 @@ export default function Search() {
               <TouchableOpacity
                 key={item.id}
                 onPress={() => {
+                  if (item?.id) return null;
                   if (searchMode === "user") {
                     router.push(`/profile/${item.id}`);
                   } else {

@@ -20,8 +20,8 @@ import adManager from "../utils/admob/AdManager";
 
 export default function LocationDetail() {
   const router = useRouter();
-  const { id } = useLocalSearchParams();
-
+  const { id: rawId } = useLocalSearchParams();
+  const id = Array.isArray(rawId) ? rawId[0] : rawId;
   const [place, setPlace] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -87,6 +87,11 @@ export default function LocationDetail() {
     Linking.openURL(url);
   };
 
+  useEffect(() => {
+    if (!id || !user?.id) return;
+    fetchData();
+  }, [id, user]);
+
   // ------------------------------ PLACE DETAILS ------------------------------
   const fetchData = async () => {
     try {
@@ -105,11 +110,6 @@ export default function LocationDetail() {
       setLoading(false);
     }
   };
-
-  useEffect(() => {
-    if (!id) return;
-    fetchData();
-  }, [id]);
 
   // ------------------------------ LOADING ------------------------------
   if (loading) {

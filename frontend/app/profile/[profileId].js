@@ -18,7 +18,11 @@ import adManager from "../../utils/admob/AdManager";
 const { width } = Dimensions.get("window");
 
 export default function OtherUserProfile() {
-  const { profileId } = useLocalSearchParams();
+  const rawProfileId = useLocalSearchParams().profileId;
+  const profileId = Array.isArray(rawProfileId)
+    ? rawProfileId[0]
+    : rawProfileId;
+
   const router = useRouter();
   const [userData, setUserData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -34,12 +38,13 @@ export default function OtherUserProfile() {
   // ------------------------------------------------------
   useFocusEffect(
     useCallback(() => {
+      if (!profileId) return;
       fetchProfile();
       fetchPost();
       fetchMyPlaces();
       fetchFavs();
       fetchVisitIds();
-    }, [])
+    }, [profileId])
   );
 
   useEffect(() => {
@@ -185,6 +190,8 @@ export default function OtherUserProfile() {
             <TouchableOpacity
               key={i}
               onPress={() => {
+                const locationId = item.placeId || item.id;
+                if (!locationId) return;
                 if (selectedTab === "gallery") {
                   router.push(`/post/${profileId}/${i}`);
                 } else if (selectedTab === "visited") {
@@ -209,6 +216,14 @@ export default function OtherUserProfile() {
       )}
     </View>
   );
+
+  if (loading || !userData) {
+    return (
+      <View style={styles.loadingScreen}>
+        <ActivityIndicator size="large" />
+      </View>
+    );
+  }
 
   return (
     <ScrollView style={styles.container}>

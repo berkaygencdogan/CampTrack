@@ -19,12 +19,14 @@ export default function TeamsIndex() {
   const router = useRouter();
   const [teams, setTeams] = useState([]);
   const [editMode, setEditMode] = useState(false);
-  const userId = useSelector((state) => state.user.userInfo.id);
+  const user = useSelector((state) => state.user.userInfo);
+  const userId = user?.id;
 
   useFocusEffect(
     React.useCallback(() => {
+      if (!userId) return;
       loadMyTeams();
-    }, [])
+    }, [userId])
   );
 
   const loadMyTeams = async () => {
@@ -169,11 +171,15 @@ export default function TeamsIndex() {
         <NoTeams />
       )}
 
-      {/* ADD TEAM BUTTON */}
       {!editMode && (
         <TouchableOpacity
           style={styles.addBtn}
-          onPress={() => router.push("/teams/create")}
+          onPress={() => {
+            if (!userId) {
+              return;
+            }
+            router.push("/teams/create");
+          }}
         >
           <Text style={styles.plus}>+</Text>
         </TouchableOpacity>

@@ -1,17 +1,16 @@
+import Ionicons from "@expo/vector-icons/Ionicons";
+import * as ImagePicker from "expo-image-picker";
+import { useRouter } from "expo-router";
+import { useState } from "react";
 import {
-  View,
+  ActivityIndicator,
+  Image,
+  ScrollView,
+  StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
-  StyleSheet,
-  Image,
-  ScrollView,
-  ActivityIndicator,
 } from "react-native";
-import { useState } from "react";
-import * as ImagePicker from "expo-image-picker";
-import Ionicons from "@expo/vector-icons/Ionicons";
-import { useRouter } from "expo-router";
 import { useSelector } from "react-redux";
 import adManager from "../../utils/admob/AdManager";
 
@@ -24,14 +23,6 @@ export default function CreateTeam() {
   const [logo, setLogo] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  const [search, setSearch] = useState("");
-  const [searchResults, setSearchResults] = useState([]);
-
-  const [members, setMembers] = useState([user]); // kendi kullanıcı her zaman ilk
-
-  // ---------------------------------------------
-  // LOGO PICKER
-  // ---------------------------------------------
   const pickLogo = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
       base64: true,
@@ -42,23 +33,6 @@ export default function CreateTeam() {
 
     if (!result.canceled) {
       setLogo(result.assets[0]);
-    }
-  };
-
-  // ---------------------------------------------
-  // SEARCH USER
-  // ---------------------------------------------
-  const searchUser = async (text) => {
-    setSearch(text);
-
-    if (text.length < 2) return;
-
-    try {
-      const res = await fetch(`${API}/users/search?username=${text}`);
-      const data = await res.json();
-      setSearchResults(data.users);
-    } catch (err) {
-      console.log("Search error:", err);
     }
   };
 
@@ -95,6 +69,16 @@ export default function CreateTeam() {
     }
   };
 
+  if (!user) {
+    return (
+      <ScrollView
+        contentContainerStyle={[styles.container, { justifyContent: "center" }]}
+      >
+        <ActivityIndicator size="large" color="#7CC540" />
+      </ScrollView>
+    );
+  }
+
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
@@ -110,9 +94,6 @@ export default function CreateTeam() {
         onChangeText={setTeamName}
       />
 
-      {/* ------------------------ */}
-      {/* LOGO PICKER */}
-      {/* ------------------------ */}
       <Text style={styles.label}>Takım Logosu</Text>
 
       <TouchableOpacity style={styles.logoBox} onPress={pickLogo}>
@@ -123,9 +104,6 @@ export default function CreateTeam() {
         )}
       </TouchableOpacity>
 
-      {/* ------------------------ */}
-      {/* CREATE BUTTON */}
-      {/* ------------------------ */}
       <TouchableOpacity
         style={[styles.btn, loading && { opacity: 0.7 }]}
         onPress={createTeam}
