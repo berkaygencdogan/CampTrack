@@ -20,8 +20,8 @@ import adManager from "../utils/admob/AdManager";
 
 export default function LocationDetail() {
   const router = useRouter();
-  const { id: rawId } = useLocalSearchParams();
-  const id = Array.isArray(rawId) ? rawId[0] : rawId;
+  const params = useLocalSearchParams();
+  const id = params?.id;
   const [place, setPlace] = useState(null);
   const [loading, setLoading] = useState(true);
 

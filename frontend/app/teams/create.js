@@ -81,7 +81,10 @@ export default function CreateTeam() {
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
+      <TouchableOpacity
+        onPress={() => router.replace("/teammates")}
+        style={styles.backBtn}
+      >
         <Ionicons name="chevron-back" size={26} color="black" />
       </TouchableOpacity>
       <Text style={styles.title}>Yeni Takım Oluştur</Text>

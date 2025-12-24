@@ -18,11 +18,8 @@ import adManager from "../../utils/admob/AdManager";
 const { width } = Dimensions.get("window");
 
 export default function OtherUserProfile() {
-  const rawProfileId = useLocalSearchParams().profileId;
-  const profileId = Array.isArray(rawProfileId)
-    ? rawProfileId[0]
-    : rawProfileId;
-
+  const params = useLocalSearchParams();
+  const profileId = params?.profileId;
   const router = useRouter();
   const [userData, setUserData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -192,13 +189,25 @@ export default function OtherUserProfile() {
               onPress={() => {
                 const locationId = item.placeId || item.id;
                 if (!locationId) return;
-                if (selectedTab === "gallery") {
-                  router.push(`/post/${profileId}/${i}`);
+                if (selectedTab === "gallery" && i !== undefined) {
+                  router.push({
+                    pathname: "/post/[userId]/[postIndex]",
+                    params: {
+                      userId: profileId.toString(),
+                      postIndex: i.toString(),
+                    },
+                  });
                 } else if (selectedTab === "visited") {
-                  router.push(`/LocationDetail?id=${item.placeId}`);
+                  router.push({
+                    pathname: "/LocationDetail",
+                    params: { id: item.placeId },
+                  });
                 } else {
                   // added & favorites
-                  router.push(`/LocationDetail?id=${item.id}`);
+                  router.push({
+                    pathname: "/LocationDetail",
+                    params: { id: item.id },
+                  });
                 }
               }}
             >

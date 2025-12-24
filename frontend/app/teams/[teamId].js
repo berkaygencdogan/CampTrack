@@ -138,7 +138,14 @@ export default function TeamDetail() {
         {/* EDIT - SADECE OWNER */}
         {isOwner ? (
           <TouchableOpacity
-            onPress={() => router.push(`/teams/edit?teamId=${teamId}`)}
+            onPress={() => {
+              if (!teamId) return;
+
+              router.push({
+                pathname: "/teams/edit",
+                params: { teamId: teamId.toString() },
+              });
+            }}
             style={styles.editBtn}
           >
             <Text style={styles.editText}>Edit</Text>
@@ -159,7 +166,14 @@ export default function TeamDetail() {
       {/* INVITE BUTTON (+) - HERKESTE GÖRÜNÜR */}
       <TouchableOpacity
         style={styles.inviteFab}
-        onPress={() => router.push(`/teams/invite?teamId=${teamId}`)}
+        onPress={() => {
+          if (!teamId) return;
+
+          router.push({
+            pathname: "/teams/invite",
+            params: { teamId: teamId.toString() },
+          });
+        }}
       >
         <Ionicons name="add" size={34} color="#fff" />
       </TouchableOpacity>

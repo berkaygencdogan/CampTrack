@@ -8,10 +8,19 @@ const PlaceCard = ({ item, small }) => {
     <TouchableOpacity
       style={[styles.card, small && { width: 200 }]}
       onPress={() => {
-        router.push(`../LocationDetail?id=${item.id}`);
+        if (!item?.id) return;
+
+        router.push({
+          pathname: "/LocationDetail",
+          params: { id: item.id },
+        });
       }}
     >
-      <Image source={{ uri: item.photos[0] }} style={styles.cardImg} />
+      <Image
+        source={{ uri: item?.photos?.[0] ?? "https://picsum.photos/200" }}
+        style={styles.cardImg}
+      />
+
       <Text style={styles.cardTitle} numberOfLines={1}>
         {item.name}
       </Text>

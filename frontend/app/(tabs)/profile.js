@@ -212,13 +212,25 @@ export default function Profile() {
             <TouchableOpacity
               key={item.id}
               onPress={() => {
-                if (selectedTab === "gallery") {
-                  router.push(`/post/${userId}/${postIndex}`);
+                if (selectedTab === "gallery" && postIndex !== undefined) {
+                  router.push({
+                    pathname: "/post/[userId]/[postIndex]",
+                    params: {
+                      userId: userId.toString(),
+                      postIndex: postIndex.toString(),
+                    },
+                  });
                 } else if (selectedTab === "visited") {
-                  router.push(`/LocationDetail?id=${item.placeId}`);
+                  router.push({
+                    pathname: "/LocationDetail",
+                    params: { id: item.placeId },
+                  });
                 } else {
                   // added & favorites
-                  router.push(`/LocationDetail?id=${item.id}`);
+                  router.push({
+                    pathname: "/LocationDetail",
+                    params: { id: item.id },
+                  });
                 }
               }}
             >

@@ -171,9 +171,14 @@ export default function PostDetail() {
         {isMine ? (
           <TouchableOpacity
             onPress={() =>
-              router.push(
-                `/post/edit/${post.id}?owner=${userId}&index=${activeIndex}`
-              )
+              router.push({
+                pathname: "/post/edit/[postId]",
+                params: {
+                  postId: post.id.toString(),
+                  owner: userId.toString(),
+                  index: activeIndex.toString(),
+                },
+              })
             }
           >
             <Text style={styles.editText}>Edit</Text>

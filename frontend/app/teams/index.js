@@ -24,8 +24,16 @@ export default function TeamsIndex() {
 
   useFocusEffect(
     React.useCallback(() => {
+      let active = true;
       if (!userId) return;
-      loadMyTeams();
+
+      loadMyTeams().then(() => {
+        if (!active) return;
+      });
+
+      return () => {
+        active = false;
+      };
     }, [userId])
   );
 
@@ -94,14 +102,22 @@ export default function TeamsIndex() {
       <TouchableOpacity
         style={styles.teamCard}
         onPress={() => {
-          if (!editMode) router.push(`/teams/${item.id}`);
+          if (editMode) return;
+          if (!item?.id) return;
+
+          router.push({
+            pathname: "/teams/[teamId]",
+            params: { teamId: item.id },
+          });
         }}
         activeOpacity={editMode ? 1 : 0.7}
       >
         {/* SOL LOGO */}
         <Image
           source={{
-            uri: `${item.logo}?t=${Date.now()}`,
+            uri: item?.logo
+              ? `${item.logo}?t=${Date.now()}`
+              : "https://picsum.photos/200",
           }}
           style={styles.logo}
         />
@@ -116,9 +132,9 @@ export default function TeamsIndex() {
                 key={uid}
                 source={{
                   uri:
-                    item.userMap?.[uid]?.avatar ||
+                    item?.userMap?.[uid]?.avatar ??
                     `https://ui-avatars.com/api/?name=${
-                      item.userMap?.[uid]?.name || "U"
+                      item?.userMap?.[uid]?.name ?? "U"
                     }`,
                 }}
                 style={styles.avatar}
@@ -163,7 +179,9 @@ export default function TeamsIndex() {
       {teams.length > 0 ? (
         <FlatList
           data={teams}
-          keyExtractor={(item) => item.id}
+          keyExtractor={(item, index) =>
+            item?.id?.toString() ?? index.toString()
+          }
           renderItem={renderTeam}
           contentContainerStyle={{ paddingBottom: 100 }}
         />
@@ -178,7 +196,9 @@ export default function TeamsIndex() {
             if (!userId) {
               return;
             }
-            router.push("/teams/create");
+            router.push({
+              pathname: "/teams/create",
+            });
           }}
         >
           <Text style={styles.plus}>+</Text>

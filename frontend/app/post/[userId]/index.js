@@ -57,7 +57,17 @@ export default function UserGallery() {
           gallery.map((post, index) => (
             <TouchableOpacity
               key={index}
-              onPress={() => router.push(`/post/${userId}/${index}`)}
+              onPress={() => {
+                if (!userId || index === undefined) return;
+
+                router.push({
+                  pathname: "/post/[userId]/[postIndex]",
+                  params: {
+                    userId: userId.toString(),
+                    postIndex: index.toString(),
+                  },
+                });
+              }}
             >
               <Image source={{ uri: post.imageUrl }} style={styles.gridItem} />
             </TouchableOpacity>

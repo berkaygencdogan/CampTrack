@@ -64,7 +64,9 @@ export default function AdminSidebar({ active, setActive, closeMenu }) {
         style={styles.exitBtn}
         onPress={() => {
           closeMenu();
-          router.push("/(tabs)/profile");
+          router.push({
+            pathname: "/(tabs)/profile",
+          });
         }}
       >
         <MaterialIcons name="logout" size={20} color="#ff5555" />

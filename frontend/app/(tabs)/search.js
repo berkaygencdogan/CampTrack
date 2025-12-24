@@ -146,7 +146,12 @@ export default function Search() {
               {popular.map((item) => (
                 <TouchableOpacity
                   key={item.id}
-                  onPress={() => router.push(`/LocationDetail?id=${item.id}`)}
+                  onPress={() =>
+                    router.push({
+                      pathname: "/LocationDetail",
+                      params: { id: item.id },
+                    })
+                  }
                 >
                   <View style={styles.card}>
                     <Image
@@ -201,11 +206,17 @@ export default function Search() {
               <TouchableOpacity
                 key={item.id}
                 onPress={() => {
-                  if (item?.id) return null;
+                  if (!item?.id) return null;
                   if (searchMode === "user") {
-                    router.push(`/profile/${item.id}`);
+                    router.push({
+                      pathname: "/profile/[profileId]",
+                      params: { profileId: item.id },
+                    });
                   } else {
-                    router.push(`/LocationDetail?id=${item.id}`);
+                    router.push({
+                      pathname: "/LocationDetail",
+                      params: { id: item.id },
+                    });
                   }
                 }}
               >

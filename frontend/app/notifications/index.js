@@ -61,9 +61,14 @@ export default function NotificationsScreen({ onClose, data }) {
   const handlePress = (item) => {
     if (item.type === "comment") {
       if (item.postOwnerId != null && item.postIndex != null) {
-        router.push(
-          `/post/${item.postOwnerId}/${item.postIndex}?highlight=${item.commentId}`
-        );
+        router.push({
+          pathname: "/post/[userId]/[postIndex]",
+          params: {
+            userId: item.postOwnerId.toString(),
+            postIndex: item.postIndex.toString(),
+            highlight: item?.commentId?.toString(),
+          },
+        });
         onClose();
       }
       return;
