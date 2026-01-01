@@ -72,9 +72,7 @@
       "router": {},
       "eas": {
         "projectId": "f564e905-dc1b-49fa-a27a-ebcaa5fe7b47"
-      },
-      "admobBanner": "ca-app-pub-6790689850057549/3115893126",
-      "admobVideo": "ca-app-pub-6790689850057549/3103558483"
+      }
     }
   }
 }
